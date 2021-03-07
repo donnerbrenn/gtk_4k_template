@@ -1,10 +1,11 @@
-SHADER=competition.frag
+SHADER=slimebox.frag
 WIDTH=2560
 HEIGHT=1440
 CC=gcc-8
 USELTO=false
 #dlfixup or dnload
 SMOLLOADER=dlfixup
+ALIGNSTACK=false
 
 
 OBJDIR := obj
@@ -28,7 +29,7 @@ COPTFLAGS+= -fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 	-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 	-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 	-fwhole-program -fno-exceptions -fvisibility=hidden \
-      -mpreferred-stack-boundary=4 -mno-fancy-math-387 -mno-ieee-fp #-flto
+      -mpreferred-stack-boundary=4 -mno-fancy-math-387 -mno-ieee-fp#-flto
 
 CFLAGS = -std=gnu11 -nodefaultlibs -fno-PIC $(COPTFLAGS) -m$(BITS)
 CFLAGS += -Wall -Wextra #-Wpedantic
@@ -82,7 +83,12 @@ endif
 
 VNDH_FLAGS :=-l -v --vndh vondehi #--vndh_unibin
 $(BINDIR)/%.dbg $(BINDIR)/%.smol: $(OBJDIR)/%.o $(BINDIR)/
-	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
+ifeq ($(ALIGNSTACK),true)
+	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) -falign-stack --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
+else
+	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) -fno-align-stack --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
+endif
+
 	$(PYTHON3) ./smol/smoltrunc.py "$@" "$(OBJDIR)/$(notdir $@)" && mv "$(OBJDIR)/$(notdir $@)" "$@" && chmod +x "$@"
 	wc -c $@
 

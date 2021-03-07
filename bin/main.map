@@ -15,112 +15,124 @@ Name             Origin             Length             Attributes
 Linker script and memory map
 
 LOAD obj/main.o
-LOAD /tmp/smolout1lyjpt63.o
+LOAD /tmp/smolout53sav67c.o
                 0x0000000000010000                . = 0x10000
                 0x0000000000010000                _smol_origin = .
 
 .header         0x0000000000010000       0xe0
  *(.header)
- .header        0x0000000000010000       0xe0 /tmp/smolout1lyjpt63.o
+ .header        0x0000000000010000       0xe0 /tmp/smolout53sav67c.o
                 0x0000000000010000                _EHDR
                 0x0000000000010038                _PHDR
                 0x0000000000010088                _INTERP
 
-.dynamic        0x00000000000100e0      0x237
+.dynamic        0x00000000000100e0      0x317
  *(.dynamic .rodata.dynamic .interp)
- .dynamic       0x00000000000100e0       0x70 /tmp/smolout1lyjpt63.o
+ .dynamic       0x00000000000100e0       0x80 /tmp/smolout53sav67c.o
                 0x00000000000100e0                _DYNAMIC
  *(.dynsym .dynstr)
- .dynsym        0x0000000000010150        0x5 /tmp/smolout1lyjpt63.o
-                0x0000000000010150                _dynsym
- .dynstr        0x0000000000010155      0x1b2 /tmp/smolout1lyjpt63.o
-                0x0000000000010155                _dynstr
+ .dynsym        0x0000000000010160        0x5 /tmp/smolout53sav67c.o
+                0x0000000000010160                _dynsym
+ .dynstr        0x0000000000010165      0x282 /tmp/smolout53sav67c.o
+                0x0000000000010165                _dynstr
  *(.rela.plt)
- .rela.plt      0x0000000000010307       0x10 /tmp/smolout1lyjpt63.o
-                0x0000000000010307                _rela_plt
-                0x0000000000010317                _smol_data_start = .
-                0x0000000000000317                _smol_data_off = (_smol_data_start - _smol_origin)
+ .rela.plt      0x00000000000103e7       0x10 /tmp/smolout53sav67c.o
+                0x00000000000103e7                _rela_plt
+                0x00000000000103f7                _smol_data_start = .
+                0x00000000000003f7                _smol_data_off = (_smol_data_start - _smol_origin)
 
-.data           0x0000000000010317       0x10
+.data           0x00000000000103f7       0x10
  *(.data.smolgot .data.got.plt)
  *(.data.got.plt.start)
  *(.data.got.plt)
  *(.data .data.* .tdata .tdata.*)
- .data          0x0000000000010317        0x0 obj/main.o
+ .data          0x00000000000103f7        0x0 obj/main.o
  .data.vshader_vert
-                0x0000000000010317        0x8 obj/main.o
+                0x00000000000103f7        0x8 obj/main.o
  .data.shader_frag
-                0x000000000001031f        0x8 obj/main.o
-                0x0000000000010327                _smol_data_end = .
+                0x00000000000103ff        0x8 obj/main.o
+                0x0000000000010407                _smol_data_end = .
                 0x0000000000000010                _smol_data_size = (_smol_data_end - _smol_data_start)
-                0x0000000000000327                _smol_dataandheader_size = (_smol_data_end - _smol_origin)
-                0x00000000000003f7                _smol_dataandheaderandbss_size = (_smol_dataandheader_size + _smol_bss_size)
-                0x0000000000010327                _smol_text_start = .
-                0x0000000000000327                _smol_text_off = (_smol_text_start - _smol_origin)
+                0x0000000000000407                _smol_dataandheader_size = (_smol_data_end - _smol_origin)
+                0x0000000000000527                _smol_dataandheaderandbss_size = (_smol_dataandheader_size + _smol_bss_size)
+                0x0000000000010407                _smol_text_start = .
+                0x0000000000000407                _smol_text_off = (_smol_text_start - _smol_origin)
 
-.text           0x0000000000010327      0xec0
+.text           0x0000000000010407      0x988
  *(.rdata .rdata.* .rodata .rodata.*)
+ .rodata.on_render.str1.1
+                0x0000000000010407        0x2 obj/main.o
  .rodata.startup._start.str1.1
-                0x0000000000010327       0x17 obj/main.o
+                0x0000000000010409       0x1e obj/main.o
  .rodata.str1.1
-                0x000000000001033e      0xce3 obj/main.o
+                0x0000000000010427      0x710 obj/main.o
  *(.text.startup.smol)
  .text.startup.smol
-                0x0000000000011021       0x4f /tmp/smolout1lyjpt63.o
-                0x0000000000011026                _smol_start
-                0x0000000000011070                _smol_rt_end
+                0x0000000000010b37       0x4e /tmp/smolout53sav67c.o
+                0x0000000000010b3c                _smol_start
+                0x0000000000010b85                _smol_rt_end
  *(.text.startup._start)
  .text.startup._start
-                0x0000000000011070      0x12c obj/main.o
-                0x0000000000011070                _start
+                0x0000000000010b85      0x181 obj/main.o
+                0x0000000000010b85                _start
  *(.text .text.*)
- .text          0x000000000001119c        0x0 obj/main.o
+ .text          0x0000000000010d06        0x0 obj/main.o
  .text.on_render
-                0x000000000001119c       0x37 obj/main.o
+                0x0000000000010d06       0x75 obj/main.o
  .text.check_escape
-                0x00000000000111d3       0x14 obj/main.o
-                0x00000000000111e7                _smol_text_end = .
-                0x0000000000000ec0                _smol_text_size = (_smol_text_end - _smol_text_start)
-                0x00000000000011e7                _smol_total_filesize = (. - _smol_origin)
-                0x00000000000111e7                _smol_bss_start = .
-                0x00000000000011e7                _smol_bss_off = (_smol_bss_start - _smol_origin)
+                0x0000000000010d7b       0x14 obj/main.o
+                0x0000000000010d8f                _smol_text_end = .
+                0x0000000000000988                _smol_text_size = (_smol_text_end - _smol_text_start)
+                0x0000000000000d8f                _smol_total_filesize = (. - _smol_origin)
+                0x0000000000010d8f                _smol_bss_start = .
+                0x0000000000000d8f                _smol_bss_off = (_smol_bss_start - _smol_origin)
 
-.bss            0x00000000000111e7       0xd0
+.bss            0x0000000000010d8f      0x120
  *(.bss.got.plt)
- .bss.got.plt   0x00000000000111e7       0xb0 /tmp/smolout1lyjpt63.o
-                0x00000000000111e7                g_signal_connect_data
-                0x00000000000111ef                g_type_check_instance_cast
-                0x00000000000111f7                gtk_init
-                0x00000000000111ff                gtk_window_new
-                0x0000000000011207                gtk_gl_area_new
-                0x000000000001120f                gtk_container_get_type
-                0x0000000000011217                gtk_container_add
-                0x000000000001121f                gtk_widget_show_all
-                0x0000000000011227                gtk_window_fullscreen
-                0x000000000001122f                gtk_gl_area_make_current
-                0x0000000000011237                gtk_main
-                0x000000000001123f                glUseProgram
-                0x0000000000011247                glBindVertexArray
-                0x000000000001124f                glVertexAttrib1f
-                0x0000000000011257                glDrawArrays
-                0x000000000001125f                glCreateProgram
-                0x0000000000011267                glCreateShader
-                0x000000000001126f                glShaderSource
-                0x0000000000011277                glCompileShader
-                0x000000000001127f                glAttachShader
-                0x0000000000011287                glLinkProgram
-                0x000000000001128f                glGenVertexArrays
-                0x0000000000011297                _smolplt
+ .bss.got.plt   0x0000000000010d8f       0xf8 /tmp/smolout53sav67c.o
+                0x0000000000010d8f                g_signal_connect_data
+                0x0000000000010d97                g_type_check_instance_cast
+                0x0000000000010d9f                g_timer_elapsed
+                0x0000000000010da7                gtk_init
+                0x0000000000010daf                gtk_window_new
+                0x0000000000010db7                gtk_gl_area_new
+                0x0000000000010dbf                gtk_container_get_type
+                0x0000000000010dc7                gtk_container_add
+                0x0000000000010dcf                gtk_widget_show_all
+                0x0000000000010dd7                gtk_window_fullscreen
+                0x0000000000010ddf                g_timer_new
+                0x0000000000010de7                gtk_gl_area_make_current
+                0x0000000000010def                gtk_gl_area_get_context
+                0x0000000000010df7                gtk_gl_area_queue_render
+                0x0000000000010dff                gtk_main
+                0x0000000000010e07                gdk_window_get_frame_clock
+                0x0000000000010e0f                gdk_frame_clock_begin_updating
+                0x0000000000010e17                gdk_gl_context_get_window
+                0x0000000000010e1f                glUseProgram
+                0x0000000000010e27                glBindVertexArray
+                0x0000000000010e2f                glVertexAttrib1f
+                0x0000000000010e37                glGetUniformLocation
+                0x0000000000010e3f                glUniform1f
+                0x0000000000010e47                glDrawArrays
+                0x0000000000010e4f                glCreateProgram
+                0x0000000000010e57                glCreateShader
+                0x0000000000010e5f                glShaderSource
+                0x0000000000010e67                glCompileShader
+                0x0000000000010e6f                glAttachShader
+                0x0000000000010e77                glLinkProgram
+                0x0000000000010e7f                glGenVertexArrays
+                0x0000000000010e87                _smolplt
  *(.bss .bss.* .tbss .tbss.* .sbss .sbss.*)
- .bss           0x0000000000011297        0x0 obj/main.o
- .bss.p         0x0000000000011297        0x4 obj/main.o
- .bss.vao       0x000000000001129b        0x4 obj/main.o
+ .bss           0x0000000000010e87        0x0 obj/main.o
+ .bss.gtimer    0x0000000000010e87        0x8 obj/main.o
+ .bss.p         0x0000000000010e8f        0x4 obj/main.o
+ .bss.vao       0x0000000000010e93        0x4 obj/main.o
  .bss.got.plt.start
-                0x000000000001129f       0x18 /tmp/smolout1lyjpt63.o
-                0x000000000001129f                _GLOBAL_OFFSET_TABLE_
-                0x00000000000112b7                _smol_bss_end = .
-                0x00000000000000d0                _smol_bss_size = (_smol_bss_end - _smol_bss_start)
-                0x00000000000012b7                _smol_total_memsize = (. - _smol_origin)
+                0x0000000000010e97       0x18 /tmp/smolout53sav67c.o
+                0x0000000000010e97                _GLOBAL_OFFSET_TABLE_
+                0x0000000000010eaf                _smol_bss_end = .
+                0x0000000000000120                _smol_bss_size = (_smol_bss_end - _smol_bss_start)
+                0x0000000000000eaf                _smol_total_memsize = (. - _smol_origin)
 
 .stab
  *(.stab)
