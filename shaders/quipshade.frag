@@ -1,0 +1,82 @@
+
+uniform float iTime;
+out vec3 fragColor;
+vec3 p;
+
+vec3 rotate(vec3 p,vec3 t)
+{
+      float c=cos(t.x),s=sin(t.x);
+      mat3 m=mat3(vec3(1,0,0),vec3(0,c,-s),vec3(0,s,c));
+
+      c=cos(t.y);s=sin(t.y);
+      m*=mat3(vec3(c,0,s),vec3(0,1,0),vec3(-s,0,c));
+
+      c=cos(t.z);s=sin(t.z);
+      m*=mat3(vec3(c,-s,0),vec3(s,c,0),vec3(0,0,1));
+      return m*p;
+}
+
+float sdTorus( vec3 p, vec2 t )
+{
+  vec2 q = vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
+}
+
+float map(vec3 p)
+{
+    p.z+=1.9;
+
+    p=rotate(p,vec3(.1,.0,.0));
+    return -sdTorus(p,vec2(1.1,.7));
+}
+
+
+float march(vec3 ro, vec3 rd)
+{
+    p=ro;
+    float d=1.;
+    while(d>.001&&distance(ro,p)<20.)
+    {
+        p+=rd*d;
+        d=map(p);
+    }
+    return d;
+}
+
+vec3 normal(vec3 p) 
+{
+    mat3 k = mat3(p,p,p) - mat3(0.01);
+    return normalize(map(p) - vec3( map(k[0]),map(k[1]),map(k[2])) );
+}
+
+float lightRender(vec3 n,vec3 l, vec3 v, float strength)
+{
+    float ambient=abs(dot(n,normalize(l)));
+    float specular=abs(pow(max(dot(v,reflect(normalize(l),n)),0),1.))*.5;
+    return(ambient+specular)*strength;
+
+}
+
+void main(void)
+{
+    vec2 uv=((gl_FragCoord.xy/iResolution)*2-1.)*vec2(1,iResolution.y/iResolution.x);
+    vec3 ro=vec3(.0,0,-4);
+    vec3 rd=normalize(vec3(uv,1.));
+    float d=march(ro,rd);
+    vec3 n=normal(p);
+    float l=lightRender(n,vec3(1,0,-1),p.xyz,.125);
+    float x=atan(-p.x,p.z);
+    float y=atan(length(p.xz),-p.y);
+
+    //float bands=mod(8.0 * (x + y + iTime) / 3.14, 1.0);
+    
+    float bands=sin(y*70.+x*45.+iTime*2);
+    float b1=smoothstep(-.025,.025,bands)*.125+.125;
+    
+    
+    vec3 col=(b1+vec3(.125,.5,1.))*.5;
+
+
+   fragColor=col-l;
+   //fragColor=sqrt(fragColor);
+}
