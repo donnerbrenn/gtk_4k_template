@@ -1,12 +1,11 @@
-SHADER=slimebox.frag
+SHADER=blackle.frag
 WIDTH=2560
 HEIGHT=1440
 CC=gcc-8
 USELTO=false
 #dlfixup or dnload
 SMOLLOADER=dlfixup
-ALIGNSTACK=false
-
+ALIGNSTACK=true
 
 OBJDIR := obj
 BINDIR := bin
@@ -29,13 +28,13 @@ COPTFLAGS+= -fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 	-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 	-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 	-fwhole-program -fno-exceptions -fvisibility=hidden \
-      -mpreferred-stack-boundary=4 -mno-fancy-math-387 -mno-ieee-fp#-flto
+      -mpreferred-stack-boundary=4 -mno-fancy-math-387 -mno-ieee-fp
 
 CFLAGS = -std=gnu11 -nodefaultlibs -fno-PIC $(COPTFLAGS) -m$(BITS)
 CFLAGS += -Wall -Wextra #-Wpedantic
 CFLAGS += `pkg-config --cflags gtk+-3.0`
 
-LIBS = -lGL -lgtk-3 -lgdk-3 -lgobject-2.0
+LIBS =  -lGL `pkg-config --libs gtk+-3.0`
 
 PWD ?= .
 

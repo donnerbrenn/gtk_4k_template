@@ -74,8 +74,7 @@ float softshadow( in vec3 ro, in vec3 rd, float mint, float maxt, float k )
     for( float t=mint; t<maxt; )
     {
         float h = map(ro + rd*t);
-        if( h<0.0001 )
-            return .0;
+        if( h<0.0001 )return .0;
         float y = h*h/(2.0*ph);
         float d = sqrt(h*h-y*y);
         res = min( res, k*d/max(0.0,t-y) );

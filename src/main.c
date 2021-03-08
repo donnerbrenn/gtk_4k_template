@@ -43,16 +43,16 @@ static void check_shader_status(GLuint shader_id)
 }
 #endif
 
-static void compile_shader(GLenum type,const char* shader, GLuint p)
-{
-	GLuint s=glCreateShader(type);
-	glShaderSource(s, 1, &shader, NULL);
-	glCompileShader(s);
-	#ifdef DEBUG
-	check_shader_status(s);
-	#endif
-	glAttachShader(p,s);
-}
+// static void compile_shader(GLenum type,const char* shader, GLuint p)
+// {
+// 	GLuint s=glCreateShader(type);
+// 	glShaderSource(s, 1, &shader, NULL);
+// 	glCompileShader(s);
+// 	#ifdef DEBUG
+// 	check_shader_status(s);
+// 	#endif
+// 	glAttachShader(p,s);
+// }
 
 static void on_render()
 {
@@ -137,10 +137,11 @@ void _start()
 	// GdkCursor* Cursor = gdk_cursor_new_for_display(gdk_display_get_default(),GDK_BLANK_CURSOR);
 	// gdk_window_set_cursor(window, Cursor);
 
+
+	on_realize((GtkGLArea*)glarea);
 	#ifdef VAR_ITIME
 	gtimer = g_timer_new();
 	#endif
-	on_realize((GtkGLArea*)glarea);
 	gtk_main();
 	__builtin_unreachable();
 }
