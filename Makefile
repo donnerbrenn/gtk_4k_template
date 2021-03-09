@@ -1,9 +1,9 @@
 SHADER=pin.frag
 
 #setup
-WIDTH=2560
-HEIGHT=1440
-HIDECURSOR=false
+WIDTH=1920
+HEIGHT=1080
+HIDECURSOR=true
 
 #gcc
 CC=gcc

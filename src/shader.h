@@ -7,7 +7,7 @@
 
 const char *shader_frag =
  "#version 400\n"
- "vec2 v=vec2(2560,1440);\n"
+ "vec2 v=vec2(1920,1080);\n"
  "#define SAMPLES 100\n"
  "out vec4 f;"
  "vec3 n(vec3 v,vec3 s,float m)"

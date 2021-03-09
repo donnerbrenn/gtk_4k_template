@@ -2,10 +2,10 @@
 Discarded input sections
 
  .note.gnu.property
-                0x0000000000000000       0x30 /tmp/smolinx9rtn_is.o
- .comment       0x0000000000000000       0x13 /tmp/smolinx9rtn_is.o
+                0x0000000000000000       0x30 /tmp/smolin4g0x1r6w.o
+ .comment       0x0000000000000000       0x13 /tmp/smolin4g0x1r6w.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/smolinx9rtn_is.o
+                0x0000000000000000        0x0 /tmp/smolin4g0x1r6w.o
 
 Memory Configuration
 
@@ -14,105 +14,109 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD /tmp/smolinx9rtn_is.o
-LOAD /tmp/smoloutg9qypnnj.o
+LOAD /tmp/smolin4g0x1r6w.o
+LOAD /tmp/smolout06e7jxzj.o
                 0x0000000000010000                . = 0x10000
                 0x0000000000010000                _smol_origin = .
 
 .header         0x0000000000010000       0xe0
  *(.header)
- .header        0x0000000000010000       0xe0 /tmp/smoloutg9qypnnj.o
+ .header        0x0000000000010000       0xe0 /tmp/smolout06e7jxzj.o
                 0x0000000000010000                _EHDR
                 0x0000000000010038                _PHDR
                 0x0000000000010088                _INTERP
 
-.dynamic        0x00000000000100e0      0x237
+.dynamic        0x00000000000100e0      0x2b4
  *(.dynamic .rodata.dynamic .interp)
- .dynamic       0x00000000000100e0       0x70 /tmp/smoloutg9qypnnj.o
+ .dynamic       0x00000000000100e0       0x80 /tmp/smolout06e7jxzj.o
                 0x00000000000100e0                _DYNAMIC
  *(.dynsym .dynstr)
- .dynsym        0x0000000000010150        0x5 /tmp/smoloutg9qypnnj.o
-                0x0000000000010150                _dynsym
- .dynstr        0x0000000000010155      0x1b2 /tmp/smoloutg9qypnnj.o
-                0x0000000000010155                _dynstr
+ .dynsym        0x0000000000010160        0x5 /tmp/smolout06e7jxzj.o
+                0x0000000000010160                _dynsym
+ .dynstr        0x0000000000010165      0x21f /tmp/smolout06e7jxzj.o
+                0x0000000000010165                _dynstr
  *(.rela.plt)
- .rela.plt      0x0000000000010307       0x10 /tmp/smoloutg9qypnnj.o
-                0x0000000000010307                _rela_plt
-                0x0000000000010317                _smol_text_start = .
-                0x0000000000001670                _smol_text_off = (_smol_data_end - _smol_origin)
+ .rela.plt      0x0000000000010384       0x10 /tmp/smolout06e7jxzj.o
+                0x0000000000010384                _rela_plt
+                0x0000000000010394                _smol_text_start = .
+                0x0000000000001718                _smol_text_off = (_smol_data_end - _smol_origin)
 
-.text           0x0000000000010317     0x1344
+.text           0x0000000000010394     0x1370
  *(.text.startup.smol)
  .text.startup.smol
-                0x0000000000010317       0x4d /tmp/smoloutg9qypnnj.o
-                0x000000000001031c                _smol_start
-                0x0000000000010364                _smol_rt_end
+                0x0000000000010394       0x4d /tmp/smolout06e7jxzj.o
+                0x0000000000010399                _smol_start
+                0x00000000000103e1                _smol_rt_end
  *(.text.startup._start)
  .text.startup._start
-                0x0000000000010364      0x12d /tmp/smolinx9rtn_is.o
-                0x0000000000010364                _start
+                0x00000000000103e1      0x159 /tmp/smolin4g0x1r6w.o
+                0x00000000000103e1                _start
  *(.text .text.*)
- .text          0x0000000000010491       0x4b /tmp/smolinx9rtn_is.o
+ .text          0x000000000001053a       0x4b /tmp/smolin4g0x1r6w.o
  *(.rdata .rdata.* .rodata .rodata.*)
  .rodata.str1.1
-                0x00000000000104dc     0x117f /tmp/smolinx9rtn_is.o
-                0x000000000001165b                _smol_text_end = .
-                0x0000000000001344                _smol_text_size = (_smol_text_end - _smol_text_start)
-                0x000000000000165b                _smol_textandheader_size = (_smol_text_end - _smol_origin)
-                0x000000000001165b                _smol_data_start = .
-                0x000000000000165b                _smol_data_off = (_smol_data_start - _smol_origin)
+                0x0000000000010585     0x117f /tmp/smolin4g0x1r6w.o
+                0x0000000000011704                _smol_text_end = .
+                0x0000000000001370                _smol_text_size = (_smol_text_end - _smol_text_start)
+                0x0000000000001704                _smol_textandheader_size = (_smol_text_end - _smol_origin)
+                0x0000000000011704                _smol_data_start = .
+                0x0000000000001704                _smol_data_off = (_smol_data_start - _smol_origin)
 
-.data           0x0000000000011660       0x10
+.data           0x0000000000011708       0x10
  *(.data.smolgot .data.got.plt)
  *(.data.got.plt.start)
  *(.data.got.plt)
  *(.data .data.* .tdata .tdata.*)
- .data          0x0000000000011660       0x10 /tmp/smolinx9rtn_is.o
-                0x0000000000011660                shader_frag
-                0x0000000000011668                vshader_vert
-                0x0000000000011670                _smol_data_end = .
-                0x0000000000000015                _smol_data_size = (_smol_data_end - _smol_data_start)
-                0x0000000000001670                _smol_total_filesize = (. - _smol_origin)
-                0x0000000000011670                _smol_bss_start = .
-                0x0000000000001670                _smol_bss_off = (_smol_bss_start - _smol_origin)
+ .data          0x0000000000011708       0x10 /tmp/smolin4g0x1r6w.o
+                0x0000000000011708                shader_frag
+                0x0000000000011710                vshader_vert
+                0x0000000000011718                _smol_data_end = .
+                0x0000000000000014                _smol_data_size = (_smol_data_end - _smol_data_start)
+                0x0000000000001718                _smol_total_filesize = (. - _smol_origin)
+                0x0000000000011718                _smol_bss_start = .
+                0x0000000000001718                _smol_bss_off = (_smol_bss_start - _smol_origin)
 
-.bss            0x0000000000011670       0xd0
+.bss            0x0000000000011718       0xf0
  *(.bss.got.plt)
- .bss.got.plt   0x0000000000011670       0xb0 /tmp/smoloutg9qypnnj.o
-                0x0000000000011670                g_signal_connect_data
-                0x0000000000011678                g_type_check_instance_cast
-                0x0000000000011680                gtk_gl_area_make_current
-                0x0000000000011688                gtk_widget_show_all
-                0x0000000000011690                gtk_container_add
-                0x0000000000011698                gtk_window_fullscreen
-                0x00000000000116a0                gtk_window_new
-                0x00000000000116a8                gtk_init
-                0x00000000000116b0                gtk_main
-                0x00000000000116b8                gtk_gl_area_new
-                0x00000000000116c0                gtk_container_get_type
-                0x00000000000116c8                glVertexAttrib1f
-                0x00000000000116d0                glBindVertexArray
-                0x00000000000116d8                glCompileShader
-                0x00000000000116e0                glUseProgram
-                0x00000000000116e8                glShaderSource
-                0x00000000000116f0                glDrawArrays
-                0x00000000000116f8                glAttachShader
-                0x0000000000011700                glLinkProgram
-                0x0000000000011708                glCreateShader
-                0x0000000000011710                glCreateProgram
-                0x0000000000011718                glGenVertexArrays
-                0x0000000000011720                _smolplt
+ .bss.got.plt   0x0000000000011718       0xd0 /tmp/smolout06e7jxzj.o
+                0x0000000000011718                g_signal_connect_data
+                0x0000000000011720                g_type_check_instance_cast
+                0x0000000000011728                gtk_gl_area_make_current
+                0x0000000000011730                gtk_widget_show_all
+                0x0000000000011738                gtk_widget_get_window
+                0x0000000000011740                gtk_container_add
+                0x0000000000011748                gtk_window_fullscreen
+                0x0000000000011750                gtk_window_new
+                0x0000000000011758                gtk_init
+                0x0000000000011760                gtk_main
+                0x0000000000011768                gtk_gl_area_new
+                0x0000000000011770                gtk_container_get_type
+                0x0000000000011778                gdk_window_set_cursor
+                0x0000000000011780                gdk_cursor_new_for_display
+                0x0000000000011788                gdk_display_get_default
+                0x0000000000011790                glVertexAttrib1f
+                0x0000000000011798                glBindVertexArray
+                0x00000000000117a0                glCompileShader
+                0x00000000000117a8                glUseProgram
+                0x00000000000117b0                glShaderSource
+                0x00000000000117b8                glDrawArrays
+                0x00000000000117c0                glAttachShader
+                0x00000000000117c8                glLinkProgram
+                0x00000000000117d0                glCreateShader
+                0x00000000000117d8                glCreateProgram
+                0x00000000000117e0                glGenVertexArrays
+                0x00000000000117e8                _smolplt
  *(.bss .bss.* .tbss .tbss.* .sbss .sbss.*)
- .bss           0x0000000000011720        0x8 /tmp/smolinx9rtn_is.o
-                0x0000000000011720                vao
-                0x0000000000011724                p
+ .bss           0x00000000000117e8        0x8 /tmp/smolin4g0x1r6w.o
+                0x00000000000117e8                vao
+                0x00000000000117ec                p
  .bss.got.plt.start
-                0x0000000000011728       0x18 /tmp/smoloutg9qypnnj.o
-                0x0000000000011728                _GLOBAL_OFFSET_TABLE_
-                0x0000000000011740                _smol_bss_end = .
-                0x00000000000000d0                _smol_bss_size = (_smol_bss_end - _smol_bss_start)
-                0x00000000000000e5                _smol_dataandbss_size = (_smol_bss_end - _smol_data_start)
-                0x0000000000001740                _smol_total_memsize = (_smol_bss_end - _smol_origin)
+                0x00000000000117f0       0x18 /tmp/smolout06e7jxzj.o
+                0x00000000000117f0                _GLOBAL_OFFSET_TABLE_
+                0x0000000000011808                _smol_bss_end = .
+                0x00000000000000f0                _smol_bss_size = (_smol_bss_end - _smol_bss_start)
+                0x0000000000000104                _smol_dataandbss_size = (_smol_bss_end - _smol_data_start)
+                0x0000000000001808                _smol_total_memsize = (_smol_bss_end - _smol_origin)
 
 .stab
  *(.stab)
