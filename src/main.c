@@ -133,9 +133,12 @@ void _start()
 	g_signal_connect(win, "key_press_event", G_CALLBACK(check_escape), NULL);
 	gtk_widget_show_all (win);
 	gtk_window_fullscreen((GtkWindow*)win);
-	// GdkWindow* window = gtk_widget_get_window(win);
-	// GdkCursor* Cursor = gdk_cursor_new_for_display(gdk_display_get_default(),GDK_BLANK_CURSOR);
-	// gdk_window_set_cursor(window, Cursor);
+	#ifdef HIDECURSOR
+	GdkWindow* window = gtk_widget_get_window(win);
+	GdkCursor* Cursor = gdk_cursor_new_for_display(gdk_display_get_default(),GDK_BLANK_CURSOR);
+	gdk_window_set_cursor(window, Cursor);
+	#endif
+
 
 
 	on_realize((GtkGLArea*)glarea);

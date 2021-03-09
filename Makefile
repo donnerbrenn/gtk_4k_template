@@ -1,21 +1,30 @@
-SHADER=blackle.frag
+SHADER=pin.frag
+
+#setup
 WIDTH=2560
 HEIGHT=1440
-CC=gcc-8
-USELTO=false
-#dlfixup or dnload
+HIDECURSOR=false
+
+#gcc
+CC=gcc
+USELTO=true
+
+#smol
+#dlfixup, dnload or default:
 SMOLLOADER=dlfixup
 ALIGNSTACK=true
+DEBUG=false
 
 OBJDIR := obj
 BINDIR := bin
-RTDIR := rt
+RTDIR := smol/rt
+LDDIR := smol/ld
 SRCDIR:= src
 SCRIPTS:= scripts
+SECTIONORDER=td
 
 NASM ?= nasm
 OBJCOPY ?= objcopy
-
 
 SHADERPATH=shaders
 IRESOLUTION='vec2 iResolution=vec2($(WIDTH),$(HEIGHT));'
@@ -33,13 +42,34 @@ COPTFLAGS+= -fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 CFLAGS = -std=gnu11 -nodefaultlibs -fno-PIC $(COPTFLAGS) -m$(BITS)
 CFLAGS += -Wall -Wextra #-Wpedantic
 CFLAGS += `pkg-config --cflags gtk+-3.0`
+ifeq ($(HIDECURSOR),true)
+	CFLAGS+=-DHIDECURSOR
+endif
+ifeq ($(USELTO),true)
+	CFLAGS+=-flto
+endif
 
 LIBS =  -lGL `pkg-config --libs gtk+-3.0`
 
-PWD ?= .
+ifeq ($(DEBUG),true)
+	CFLAGS+=-DDEBUG
+	LIBS += -lc
+endif
 
-SMOLFLAGS = --smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
-	-c -fuse-$(SMOLLOADER)-loader -fno-start-arg -fno-ifunc-support -fuse-dt-debug -funsafe-dynamic  
+SMOLFLAGS = --smolrt $(RTDIR) --smolld $(LDDIR)  \
+	-fno-start-arg -fno-ifunc-support -fuse-dt-debug -funsafe-dynamic --section-order=$(SECTIONORDER)
+ifeq ($(ALIGNSTACK),true)
+	SMOLFLAGS+=-falign-stack
+else
+	SMOLFLAGS+=-fno-align-stack
+endif
+ifeq ($(SMOLLOADER),dlfixup)
+	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader
+endif
+ifeq ($(SMOLLOADER),dnload)
+	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader
+endif
+
 
 PYTHON3 ?= python3
 
@@ -71,23 +101,13 @@ $(SRCDIR)/shader.h: $(SHADERPATH)/$(SHADER)
 	rm shader.frag
 
 $(OBJDIR)/%.o: $(SRCDIR)/shader.h $(SRCDIR)/vshader.h $(SRCDIR)/%.c $(OBJDIR)/
-ifeq ($(USELTO),true)
-	$(CC) $(CFLAGS) -flto -c $(SRCDIR)/main.c -o "$@"
-else
 	$(CC) $(CFLAGS) -c $(SRCDIR)/main.c -o "$@"
-endif
-	
 	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
 	size $@
 
 VNDH_FLAGS :=-l -v --vndh vondehi #--vndh_unibin
 $(BINDIR)/%.dbg $(BINDIR)/%.smol: $(OBJDIR)/%.o $(BINDIR)/
-ifeq ($(ALIGNSTACK),true)
-	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) -falign-stack --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
-else
-	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) -fno-align-stack --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
-endif
-
+	$(PYTHON3) ./smol/smold.py --debugout "$@.dbg" $(SMOLFLAGS) --ldflags=-Wl,-Map=$(BINDIR)/$*.map $(LIBS) "$<" "$@"
 	$(PYTHON3) ./smol/smoltrunc.py "$@" "$(OBJDIR)/$(notdir $@)" && mv "$(OBJDIR)/$(notdir $@)" "$@" && chmod +x "$@"
 	wc -c $@
 
@@ -95,8 +115,9 @@ $(BINDIR)/%.lzma: $(BINDIR)/main.smol
 	./autovndh.py $(VNDH_FLAGS) --nostub  "$<" > "$@"
 	rm $<
 
-heatmap: $(BINDIR)/%.lzma
-	../LZMA-Vizualizer/LzmaSpec $<
+heatmap: $(BINDIR)/main.lzma
+	../LZMA-Vizualizer/LzmaSpec $< 
+	# ../LZMA-Vizualizer/contrib/parsemap.py bin/main.lzma $(BINDIR)/main.map
 	@stat --printf="$@: %s bytes\n" $<
 	rm $<
 
@@ -113,7 +134,6 @@ cmix: $(BINDIR)/main.cmix
 
 vndh: $(BINDIR)/main
 	wc -c $<
-	
 
 sh: $(BINDIR)/main.sh
 	wc -c $<
@@ -124,7 +144,6 @@ $(BINDIR)/main.cmix: $(BINDIR)/main.smol
 	rm $@.cm
 	chmod +x $@
 	@stat --printf="$@: %s bytes\n" $@
-
 
 .PHONY: all clean
 
