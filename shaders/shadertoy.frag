@@ -1,5 +1,6 @@
+#version 400
 uniform float iTime;
-vec2 uv = (gl_FragCoord-iResolution*0.5)/iResolution.x;
+vec2 uv = (gl_FragCoord-i_iResolution*0.5)/i_iResolution.x;
 vec3 ro=vec3(0,0,-4);
 vec3 rd=normalize(vec3(uv,1));
 float d=1;

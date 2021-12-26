@@ -1,4 +1,4 @@
-
+#version 400
 uniform float iTime;
 out vec3 fragColor;
 vec3 p;
@@ -7,10 +7,8 @@ vec3 rotate(vec3 p,vec3 t)
 {
       float c=cos(t.x),s=sin(t.x);
       mat3 m=mat3(vec3(1,0,0),vec3(0,c,-s),vec3(0,s,c));
-
       c=cos(t.y);s=sin(t.y);
       m*=mat3(vec3(c,0,s),vec3(0,1,0),vec3(-s,0,c));
-
       c=cos(t.z);s=sin(t.z);
       m*=mat3(vec3(c,-s,0),vec3(s,c,0),vec3(0,0,1));
       return m*p;
@@ -18,14 +16,13 @@ vec3 rotate(vec3 p,vec3 t)
 
 float sdTorus( vec3 p, vec2 t )
 {
-  vec2 q = vec2(length(p.xz)-t.x,p.y);
-  return length(q)-t.y;
+  vec2 i_q = vec2(length(p.xz)-t.x,p.y);
+  return length(i_q)-t.y;
 }
 
 float map(vec3 p)
 {
     p.z+=1.9;
-
     p=rotate(p,vec3(.1,.0,.0));
     return -sdTorus(p,vec2(1.1,.7));
 }
@@ -51,32 +48,19 @@ vec3 normal(vec3 p)
 
 float lightRender(vec3 n,vec3 l, vec3 v, float strength)
 {
-    float ambient=abs(dot(n,normalize(l)));
-    float specular=abs(pow(max(dot(v,reflect(normalize(l),n)),0),1.))*.5;
-    return(ambient+specular)*strength;
+    float i_ambient=abs(dot(n,normalize(l)));
+    float i_specular=abs(pow(max(dot(v,reflect(normalize(l),n)),0),1.))*.5;
+    return(i_ambient+i_specular)*strength;
 
 }
 
 void main(void)
 {
-    vec2 uv=((gl_FragCoord.xy/iResolution)*2-1.)*vec2(1,iResolution.y/iResolution.x);
-    vec3 ro=vec3(.0,0,-4);
-    vec3 rd=normalize(vec3(uv,1.));
-    float d=march(ro,rd);
-    vec3 n=normal(p);
-    float l=lightRender(n,vec3(1,0,-1),p.xyz,.125);
-    float x=atan(-p.x,p.z);
-    float y=atan(length(p.xz),-p.y);
-
-    //float bands=mod(8.0 * (x + y + iTime) / 3.14, 1.0);
-    
-    float bands=sin(y*70.+x*45.+iTime*2);
-    float b1=smoothstep(-.025,.025,bands)*.125+.125;
-    
-    
-    vec3 col=(b1+vec3(.125,.5,1.))*.5;
-
-
-   fragColor=col-l;
+    vec3 i_ro=vec3(.0,0,-4);
+    float d=march(i_ro,normalize(vec3(((gl_FragCoord.xy/i_iResolution)*2-1.)*vec2(1,i_iResolution.y/i_iResolution.x),1.)));
+    float i_l=lightRender(normal(p),vec3(1,0,-1),p.xyz,.125);
+    float i_x=atan(-p.x,p.z);
+    float i_y=atan(length(p.xz),-p.y);
+    fragColor=(smoothstep(-.025,.025,sin(i_y*70.+i_x*45.+iTime*2))*.125+.125+vec3(.125,.5,1.))*.5-i_l;
    //fragColor=sqrt(fragColor);
 }

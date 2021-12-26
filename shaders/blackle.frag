@@ -1,7 +1,5 @@
+#version 400
 void main()
 {
-    // Normalized pixel coordinates (from -1 to 1)
-    vec2 uv = (gl_FragCoord.xy/iResolution.xy)*2.0 - 1.0;
-    uv.y *= iResolution.y/iResolution.x;
-    gl_FragColor = abs(uv.yxyx);
+    gl_FragColor = abs((((gl_FragCoord.xy/vec2(i_X*.5,i_Y*.5)) - 1)*vec2(1,i_Y/i_X)).yxyx);
 }

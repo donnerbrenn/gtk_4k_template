@@ -1,4 +1,5 @@
 
+#version 400
 uniform float iTime;
 
 float rand(vec2 uv)
@@ -15,9 +16,9 @@ vec2 uv2tri(vec2 uv)
 
 void main(void)
 {
-    float res = iResolution.y / (5 + sin(iTime * 0.5));
+    float res = i_Y / (5 + sin(iTime * 0.5));
 
-    vec2 uv = (gl_FragCoord.xy - iResolution / 2) / res;
+    vec2 uv = (gl_FragCoord.xy - vec2(i_X,i_Y) / 2) / res;
 
     vec3 p = vec3(dot(uv, vec2(1, 0.5)), dot(uv, vec2(-1, 0.5)), uv.y);
     vec3 p1 = fract(+p);

@@ -1,4 +1,4 @@
-
+#version 400
 uniform float iTime;
 out vec3 fragColor;
 
@@ -84,7 +84,7 @@ float lightRender(vec3 n,vec3 l, vec3 v, float strength)
 
 void main(void)
 {
-    vec2 uv=((gl_FragCoord.xy/iResolution)*2-1.)*vec2(1,iResolution.y/iResolution.x);
+    vec2 uv=((gl_FragCoord.xy/i_iResolution)*2-1.)*vec2(1,i_iResolution.y/i_iResolution.x);
     vec3 ro=vec3(.0,0,-4);
     vec3 rd=normalize(vec3(uv,1.));
     float d=march(ro,rd);

@@ -1,7 +1,5 @@
-
+#version 400
 #define SAMPLES 100
-
-out vec4 fragCol;
 
 vec3 erot(vec3 p, vec3 ax, float ro) {
 	return mix(dot(p,ax)*ax,p,cos(ro))+sin(ro)*cross(ax,p);
@@ -170,13 +168,13 @@ float gabor(vec2 p, float u, float v, float r, float ph, float l, float t, float
 }
 
 void main() {
-	fragCol = vec4(0);
-	vec2 uv = ((gl_FragCoord.xy.xy/iResolution)*2-1)*vec2(1,iResolution.y/iResolution.x);
+	gl_FragColor = vec4(0);
+	vec2 uv = ((gl_FragCoord.xy/vec2(i_X,i_Y))*2-1)*vec2(1,i_Y/i_x);
 	float sd = hash(uv.x,uv.y);
 	for (int i = 0; i < SAMPLES; i++) {
 		vec2 h2 = tan(hash2(sd, float(i)));
 		vec2 uv2 = uv + h2/1080;
-		fragCol += vec4(pixel_color(uv2), 1);
+		gl_FragColor += vec4(pixel_color(uv2), 1);
 	}
 
 	float k = 0.0;
@@ -192,11 +190,11 @@ void main() {
 	k+=gabor(uv, 0.16, -0.05, 1.60, 6.28, 0.21, 0.05, 0.05, 0.18);
 	k+=gabor(uv, -0.42, 0.45, 5.45, 1.03, 0.76, 0.35, 0.35, 0.05);
 
-	fragCol/=fragCol.w;
+	gl_FragColor/=gl_FragColor.w;
 	float bloom = k*.9+.2;
 	vec4 bbright = vec4(0xaf,0x84,0x6a,0)/128.;
 	vec4 bmid = vec4(0x15,0x17,0x19,0)/60.;
-	fragCol = mix(fragCol,mix(bmid, bbright,(max(bloom,0.1)-.1)/.9)*sqrt(bloom),0.6) + sd*sd*.02;
-	fragCol *= (1.0 - dot(uv,uv)*0.30); //vingetting lol
-	fragCol = (smoothstep(vec4(-.34),vec4(1.), log(fragCol+1.0))-.2)/.8; //colour grading
+	gl_FragColor = mix(gl_FragColor,mix(bmid, bbright,(max(bloom,0.1)-.1)/.9)*sqrt(bloom),0.6) + sd*sd*.02;
+	gl_FragColor *= (1.0 - dot(uv,uv)*0.30); //vingetting lol
+	gl_FragColor = (smoothstep(vec4(-.34),vec4(1.), log(gl_FragColor+1.0))-.2)/.8; //colour grading
 }

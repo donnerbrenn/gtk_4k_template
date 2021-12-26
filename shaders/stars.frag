@@ -1,3 +1,4 @@
+#version 400
 uniform float iTime;
 vec3 color;
  
@@ -14,7 +15,7 @@ mat2 rotate(float a)
 
 void main(void) 
 {
-  vec2 uv = (2 * gl_FragCoord.xy - iResolution) / iResolution.y + vec2(1. + 2 * cos(iTime / 2), 2 * sin(iTime / 10)) * .5 *rotate(iTime / 10);
+  vec2 uv = (2 * gl_FragCoord.xy - i_iResolution) / i_iResolution.y + vec2(1. + 2 * cos(iTime / 2), 2 * sin(iTime / 10)) * .5 *rotate(iTime / 10);
   for (int i = 0; i < 5; i ++) 
   {
     float z = fract((i*.2) + iTime / 10);

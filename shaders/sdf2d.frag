@@ -1,5 +1,5 @@
 uniform float iTime;
-vec2 uv= gl_FragCoord.xy/iResolution.xy-.5;
+vec2 uv= gl_FragCoord.xy/i_iResolution.xy-.5;
 
 
 out vec3 color;
@@ -18,7 +18,7 @@ float sdCircle(vec2 p, float r)
 void main()
 {
       float time=25+iTime;
-      uv.x/=iResolution.y/iResolution.x;
+      uv.x/=i_iResolution.y/i_iResolution.x;
 
       for (int i=0;i<10;i++)
       {

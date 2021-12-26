@@ -1,4 +1,5 @@
+#version 400
 void main()
 {
-  gl_FragColor=vec4(vec3(float(((int(gl_FragCoord.x)^int(gl_FragCoord.y))&0xFF)/255.0)),1.);
+  gl_FragColor=vec4(vec3(((int(gl_FragCoord.x)^int(gl_FragCoord.y))&255)*.004),1);
 }
