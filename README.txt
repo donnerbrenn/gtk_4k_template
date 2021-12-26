@@ -26,8 +26,8 @@ Build LZMA-packed target with vondehi as dropper
 Build oneKpaq target:
   make okp
   
-  Build all three targets:
-    make all
+Build all three targets:
+  make all
     
 ## Create your own shaders:
 Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use i_X and i_Y for screendimensions. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save somebytes, because we don't need to use a uniform update in the C-Code. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
