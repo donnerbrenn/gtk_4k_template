@@ -33,10 +33,13 @@ Build all three targets:
     
 ## Create your own shaders:
 <<<<<<< HEAD
+<<<<<<< HEAD
 Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use i_X and i_Y for screendimensions. Edit I_X and I_Y in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
 
 ## Have fun!
 =======
+=======
+>>>>>>> 1ab3e53 (Update Preoject desctions, credits and so on)
 Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use WIDTH and HEIGHT for screendimensions. Edit I_X and I_Y in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
 
 ## Screenshots:
@@ -49,5 +52,9 @@ Slimebox - Animated - Shortest version: 1545 Bytes (shelldropper)
 Quipshade - Animated - Shortest version: 1314 Bytes (shelldropper)
 ![quipshade.png](screenshots/quipshade.png)
 
+<<<<<<< HEAD
+## Have fun!
+>>>>>>> 1ab3e53 (Update Preoject desctions, credits and so on)
+=======
 ## Have fun!
 >>>>>>> 1ab3e53 (Update Preoject desctions, credits and so on)
