@@ -1,5 +1,3 @@
-
-#version 400
 uniform float iTime;
 
 float rand(vec2 uv)

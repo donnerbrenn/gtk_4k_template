@@ -1,4 +1,3 @@
-#version 400
 uniform float iTime;
 vec3 color;
  

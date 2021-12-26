@@ -1,4 +1,3 @@
-#version 400
 float bounce;
 uniform float iTime;
 

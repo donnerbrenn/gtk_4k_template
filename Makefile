@@ -1,9 +1,10 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		blackle.frag
+SHADER			=		competition.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
+GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
 DEBUG			=		false
@@ -15,11 +16,12 @@ SRCDIR			:=		src
 
 NASM 			?=		nasm
 OBJCOPY 		?=		objcopy
-PYTHON3 		?= 		python3
+PYTHON 			?= 		python3
 CC				=		gcc
-USELTO			=		false
+MINIFY			= 		mono ./tools/shader_minifier.exe -v
+USELTO			=		true
 ALIGNSTACK		=		true
-SECTIONORDER	=		td
+SECTIONORDER	=		dt
 
 #dlfixup, dnload or default
 SMOLLOADER		=		dnload
@@ -67,20 +69,20 @@ ifeq ($(SMOLLOADER),dnload)
 	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader -c
 endif
 
-all: vndh okp sh
+all: sh vndh okp
 	./tools/analyze.py bin/*
 
 $(SRCDIR)/vshader.h: $(SHADERPATH)/vshader.vert
 	cp $< ./
-	mono ./tools/shader_minifier.exe vshader.vert -o $@
+	$(MINIFY) vshader.vert -o $@
 	rm vshader.vert
 
 $(SRCDIR)/shader.h: $(SHADERPATH)/$(SHADER)
+	echo  $(GLVERSION) >  /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $< > shader.frag
-	mono ./tools/shader_minifier.exe shader.frag -v -o $@
-	rm shader.frag
+	$(MINIFY) shader.frag -o $@
 
 
 $(BINDIR)/%.vndh: $(BINDIR)/%.smol
@@ -88,7 +90,7 @@ $(BINDIR)/%.vndh: $(BINDIR)/%.smol
 	chmod +x $@
 
 clean:
-	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(SRCDIR)/shader.h $(SRCDIR)/vshader.h /tmp/shader.h
+	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(SRCDIR)/shader.h $(SRCDIR)/vshader.h
 
 %/:
 	@mkdir -vp "$@"
@@ -103,7 +105,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(SRCDIR)/vshader.h $(SRCDIR)/shader.h
 VNDH_FLAGS :=-l -v --vndh vondehi 
 
 $(BINDIR)/main.smol: $(OBJDIR)/main.o $(BINDIR)/
-	python3 ./smol/smold.py $(SMOLFLAGS) $(LIBS) $< $@
+	$(PYTHON) ./smol/smold.py $(SMOLFLAGS) $(LIBS) $< $@
 
 $(BINDIR)/%.lzma: $(BINDIR)/main.smol
 	./tools/autovndh.py $(VNDH_FLAGS) --nostub  $< > $@ -j 6

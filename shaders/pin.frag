@@ -1,4 +1,3 @@
-#version 400
 #define SAMPLES 100
 
 vec3 erot(vec3 p, vec3 ax, float ro) {

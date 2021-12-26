@@ -1,3 +1,6 @@
+#version 400
+float i_X=2560.;
+float i_Y=1440.;
 float i_X=1280.;
 float i_Y=720.;
 float i_threshold=.0001;

@@ -1,4 +1,3 @@
-#version 400
 uniform float iTime;
 out vec3 fragColor;
 vec3 p;
