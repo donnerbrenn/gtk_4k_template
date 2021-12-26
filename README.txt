@@ -22,3 +22,6 @@ Build LZMA-packed target with vondehi dropper
   
 Build oneKpaq target:
   make okp
+  
+  Build all three targets:
+    make all
