@@ -1,4 +1,4 @@
-/* File generated with Shader Minifier 1.1.5
+/* File generated with Shader Minifier 1.1.6
  * http://www.ctrl-alt-test.fr
  */
 #ifndef VSHADER_H_

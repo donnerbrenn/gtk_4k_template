@@ -84,7 +84,7 @@ vec3 triplanarMap(vec3 p, vec3 n, float o)
 
 void main()
 {
-    vec2 uv=((gl_FragCoord.xy/iResolution)*2-1.)*vec2(1,iResolution.y/iResolution.x);
+    vec2 uv=((gl_FragCoord.xy/vec2(i_X,i_Y))*2-1.)*vec2(1,i_Y/i_X);
     
     vec3 rd=normalize(vec3(uv,1));
     vec3 p=ro;

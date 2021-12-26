@@ -166,7 +166,7 @@ float ao(vec3 p, vec3 n, float h) {
 /**********************************************************************************/
 
 vec3 vig(vec3 c, vec2 coord) {
-	vec2 q = coord / iResolution.xy;
+	vec2 q = coord / vec2(i_X,i_Y);
 	c *= .5 + .5 * pow(16. * q.x * q.y * (1. - q.x) * (1. - q.y), .4);
 	return c;
 }
@@ -276,7 +276,7 @@ void main()
 
 	vec3 ro = vec3(-7, 4, -7. - sin(time * .3)),
 		 col = vec3(0);
-			vec2 uv = (gl_FragCoord.xy - .5 * iResolution.xy) / iResolution.y;
+			vec2 uv = (gl_FragCoord.xy - .5 * vec2(i_X,i_Y)) / i_Y;
 			vec3 f = normalize(vec3(0, 3, -4) - ro),
 				 r = normalize(cross(vec3(0, 1, 0), f));
 			col += march(ro, normalize(f + r * uv.x + cross(f, r) * uv.y));

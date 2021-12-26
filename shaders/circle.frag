@@ -1,6 +1,6 @@
 uniform float iTime;
 out vec3 color;
-vec2 uv = (gl_FragCoord.xy/iResolution-.5)*vec2(1,iResolution.y/iResolution.x);
+vec2 uv = (gl_FragCoord.xy/vec2(i_X,i_Y)-.5)*vec2(1,i_Y/i_X);
 
 void main()
 {

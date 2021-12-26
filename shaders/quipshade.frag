@@ -56,7 +56,7 @@ float lightRender(vec3 n,vec3 l, vec3 v, float strength)
 void main(void)
 {
     vec3 i_ro=vec3(.0,0,-4);
-    float d=march(i_ro,normalize(vec3(((gl_FragCoord.xy/i_iResolution)*2-1.)*vec2(1,i_iResolution.y/i_iResolution.x),1.)));
+    float d=march(i_ro,normalize(vec3(((gl_FragCoord.xy/vec2(i_X,i_Y))*2-1.)*vec2(1,i_Y/i_X),1.)));
     float i_l=lightRender(normal(p),vec3(1,0,-1),p.xyz,.125);
     float i_x=atan(-p.x,p.z);
     float i_y=atan(length(p.xz),-p.y);

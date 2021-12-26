@@ -97,14 +97,14 @@ void main()
 {
     bounce=abs(fract(0.05*iTime)-.5)*20.; // triangle function
     
-	vec2 uv=gl_FragCoord.xy/i_iResolution; 
+	vec2 uv=gl_FragCoord.xy/vec2(i_X,i_Y); 
     vec2 p=uv*2.-1.;
    
 // 	bouncy cam every 10 seconds
     float wobble=(fract(.1*(iTime-1.))>=0.9)?fract(-iTime)*0.1*sin(30.*iTime):0.;
     
 //  camera    
-    vec3 dir = normalize(vec3(2.*gl_FragCoord.xy -i_iResolution, i_iResolution.y));
+    vec3 dir = normalize(vec3(2.*gl_FragCoord.xy -vec2(i_X,i_Y), i_Y));
     vec3 org = vec3(0,2.*wobble,-3.);  
     
 
