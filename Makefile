@@ -1,6 +1,6 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		yolp.frag
+SHADER			=		competition.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -35,10 +35,8 @@ COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables
 						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin -fno-ident
 COPTFLAGS 		+=		`pkg-config --cflags gtk+-3.0`
 
-CFLAGS = 				-std=gnu99 -nodefaultlibs $(COPTFLAGS)
-CFLAGS += 				-Wall -Wextra #-Wpedantic
 
-LIBS = 					-lGL `pkg-config --libs gtk+-3.0`
+LIBS			=		-lGL `pkg-config --libs gtk+-3.0`
 
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 	 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
@@ -56,6 +54,9 @@ ifeq ($(DEBUG),true)
 	COPTFLAGS+=-DDEBUG
 	LIBS+=-lc
 endif
+
+CFLAGS 			=		-std=gnu99 -nodefaultlibs $(COPTFLAGS)
+CFLAGS 			+=		-Wall -Wextra #-Wpedantic
 
 ifeq ($(ALIGNSTACK),true)
 	SMOLFLAGS+=-falign-stack
@@ -138,5 +139,8 @@ sh: $(BINDIR)/main.sh
 
 smol: bin/main.smol
 	wc -c $<
+
+delokp:
+	-rm cleanOKP/onekpaq_context.cache
 
 .PHONY: all clean

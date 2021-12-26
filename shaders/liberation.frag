@@ -59,7 +59,7 @@ vec3 normal(vec3 p) {
     return normalize(vec3(de(p+d.yxx), de(p+d.xyx), de(p+d.xxy))-de(p));
 }
 
-
+// Credits: Liberation of the True Self by Kali - Optimized https://www.shadertoy.com/view/tlGfzd
 vec3 march(vec3 from, vec3 dir)
 {
     float d = 0, td = 0;

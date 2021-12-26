@@ -1,3 +1,4 @@
+// Credits: M-O (from Wall-E) by dean_the_coder - could be optimized further
 // 'M-O'
 // by dean_the_coder (Twitter: @deanthecoder)
 //

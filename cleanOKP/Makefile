@@ -3,7 +3,7 @@ BACKUP=backup
 
 
 %.okp: % clean
-	./onekpaq.py 1 3 4 6 uncompressed $@
+	./onekpaq.py 1 1 4 6 uncompressed $@
 
 all: $(TARGET)
 

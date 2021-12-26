@@ -1,3 +1,13 @@
+//Credits:
+// ***********************************************************
+// Alcatraz / Rhodium 4k Intro liquid carbon
+// by Jochen "Virgill" Feldkötter
+//
+// Shadertoy: https://www.shadertoy.com/view/llK3Dy
+// 4kb executable: http://www.pouet.net/prod.php?which=68239
+// Youtube: https://www.youtube.com/watch?v=YK7fbtQw3ZU
+// ***********************************************************
+
 float bounce;
 uniform float iTime;
 

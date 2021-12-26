@@ -1,3 +1,4 @@
+// watch in your browser at https://www.shadertoy.com/view/3dScRc
 uniform float iTime;
 out vec3 color;
 

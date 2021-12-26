@@ -1,3 +1,4 @@
+// watch it in your browser
 uniform float iTime;
 out vec3 fragColor;
 vec3 p;
@@ -61,5 +62,4 @@ void main(void)
     float i_x=atan(-p.x,p.z);
     float i_y=atan(length(p.xz),-p.y);
     fragColor=(smoothstep(-.025,.025,sin(i_y*70.+i_x*45.+iTime*2))*.125+.125+vec3(.125,.5,1.))*.5-i_l;
-   //fragColor=sqrt(fragColor);
 }

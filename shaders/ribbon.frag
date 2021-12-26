@@ -1,5 +1,5 @@
+// Shadercode from To The Road Of Ribbon by FRequency, optimized by me https://www.pouet.net/prod.php?which=53939
 uniform float iTime;
-out vec4 color;
 
 float tunnel(vec3 p){
 	return cos(p.x)+cos(p.y*1.5)+cos(p.z)+cos(p.y*20.)*.05;
@@ -41,13 +41,13 @@ void main(){
 		p+=scene(p)*dir;
 	}
 	
-	color=max(dot(getNormal(p),vec3(.1,.1,.0)),.0)+vec4(.3,cos(iTime*.5)*.5+.5,sin(iTime*.5)*.5+.5,1.)*min(length(p-org)*.04,1.);
+	gl_FragColor=max(dot(getNormal(p),vec3(.1,.1,.0)),.0)+vec4(.3,cos(iTime*.5)*.5+.5,sin(iTime*.5)*.5+.5,1.)*min(length(p-org)*.04,1.);
 	
-	//Ribbon Color
+	//Ribbon gl_FragColor
 	if(tunnel(pp)>ribbon(pp))
 	{
-		color=mix(color,vec4(cos(iTime*.3)*.5+.5,cos(iTime*.2)*.5+.5,sin(iTime*.3)*.5+.5,1.),.3);
+		gl_FragColor=mix(gl_FragColor,vec4(cos(iTime*.3)*.5+.5,cos(iTime*.2)*.5+.5,sin(iTime*.3)*.5+.5,1.),.3);
 	}
-	//Final Color
-	color=sqrt((color+vec4(i_f))+(1.-min(pp.y+1.9,1.))*vec4(1.,.8,.7,1.))*min(iTime*.5,1.);
+	//Final gl_FragColor
+	gl_FragColor=sqrt((gl_FragColor+vec4(i_f))+(1.-min(pp.y+1.9,1.))*vec4(1.,.8,.7,1.))*min(iTime*.5,1.);
 }
