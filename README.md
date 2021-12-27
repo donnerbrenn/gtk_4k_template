@@ -17,7 +17,7 @@ Based on Blackles Linux OpenGL examples. https://github.com/blackle/Linux-OpenGL
 
 ## Build instructions:
 Edit the Makefile and point the Variable called "SHADER" to the desired shader found in the "shaders" folder.
-Edit WIDTH and HEIGHT in the Makefile to the resolution of your screen.
+Edit i_X and i_Y in the Makefile to the resolution of your screen.
 
 ### Build LZMA-packed target with a shell script dropper:
   make sh
