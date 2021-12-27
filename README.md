@@ -35,6 +35,9 @@ Build all three targets:
 Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use WIDTH and HEIGHT for screendimensions. Edit WIDTH and HEIGHT in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
 
 ## Screenshots:
+Blackes OpenGL example - Static - Shortest version: 747 Bytes (shelldropper)
+![blackle.png](screenshots/blackle.png)
+
 Competition - Static - Shortest version: 1987 Bytes (OneKpaq)
 ![competition.png](screenshots/competition.png)
 

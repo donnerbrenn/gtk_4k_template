@@ -1,6 +1,6 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		competition.frag
+SHADER			=		blackle.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
