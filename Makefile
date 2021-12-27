@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		slimebox.frag
+SHADER			=		quipshade.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -33,6 +33,7 @@ endif
 UVLINE = '//in vec2 UV;'
 ifeq ($(USEVARYINGUV),true)
 	UVLINE='in vec2 UV;'
+	COPTFLAGS+=-DUSEVARYINGUV
 endif
 
 
@@ -45,7 +46,7 @@ COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables
 						-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 						-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 						-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
-						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin -fno-ident
+						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
 COPTFLAGS 		+=		`pkg-config --cflags gtk+-3.0`
 
 
@@ -83,7 +84,7 @@ ifeq ($(SMOLLOADER),dnload)
 	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader -c
 endif
 
-all: sh vndh okp
+all: vndh okp
 	./tools/analyze.py bin/*
 
 $(SRCDIR)/vshader.h: $(SHADERPATH)/$(VSHADER)

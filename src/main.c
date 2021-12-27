@@ -26,7 +26,6 @@ typedef void (*voidWithOneParam)(int*,char***);
 GTimer* gtimer;
 #endif
 
-
 static void on_render();
 static void on_realize(GtkWidget *glarea);
 static void check_escape(GtkWidget *widget, GdkEventKey *event);
@@ -62,7 +61,7 @@ void on_realize(GtkWidget *glarea)
 #ifdef VAR_ITIME
 	gtimer = g_timer_new();
 	// if you want to continuously render the shader once per frame
-	GdkGLContext *context = gtk_gl_area_get_context(glarea);
+	GdkGLContext *context = gtk_gl_area_get_context((GtkGLArea *)glarea);
 	GdkWindow *glwindow = gdk_gl_context_get_window(context);
 	GdkFrameClock *frame_clock = gdk_window_get_frame_clock(glwindow);
 	// // Connect update signal:
