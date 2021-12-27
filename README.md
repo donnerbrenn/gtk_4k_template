@@ -45,7 +45,7 @@ Blackles OpenGL example (optimized) - Static - Shortest version: 743 Bytes (shel
 Competition - Static - Shortest version: 1966 Bytes (OneKpaq)
 ![competition.png](screenshots/competition.png)
 
-Slimebox - Animated - Shortest version: 1528 Bytes (shelldropper)
+Slimebox - Animated - Shortest version: 1508 Bytes (shelldropper)
 ![slimebox.png](screenshots/slimebox.png)
 
 Quipshade - Animated - Shortest version: 1302 Bytes (shelldropper)
