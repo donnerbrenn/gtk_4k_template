@@ -12,8 +12,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include <GL/gl.h>
-#include "shader.h"
-#include "vshader.h"
+#include "shaders.h"
 
 #ifdef VAR_ITIME
 GLuint sprogram_id;
@@ -36,7 +35,7 @@ void on_render()
  #ifdef VAR_ITIME
 	glProgramUniform1f(sprogram_id,0,g_timer_elapsed(gtimer, NULL));
 #endif
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4000);
 }
 
 void on_realize(GtkWidget *glarea)

@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		quipshade.frag
+SHADER			=		blackle.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -19,10 +19,10 @@ NASM 			?=		nasm
 OBJCOPY 		?=		objcopy
 PYTHON 			?= 		python3
 CC				=		gcc
-MINIFY			= 		mono ./tools/shader_minifier.exe -v
+MINIFY			= 		mono ./tools/shader_minifier.exe -v --preserve-externals
 USELTO			=		true
 ALIGNSTACK		=		true
-SECTIONORDER	=		dt
+SECTIONORDER	=		td
 
 VSHADER			=		vshader.vert
 ifeq ($(USEVARYINGUV),true)
@@ -35,6 +35,8 @@ ifeq ($(USEVARYINGUV),true)
 	UVLINE='in vec2 UV;'
 	COPTFLAGS+=-DUSEVARYINGUV
 endif
+
+ITIMECNT=0
 
 
 #dlfixup, dnload or default
@@ -84,37 +86,32 @@ ifeq ($(SMOLLOADER),dnload)
 	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader -c
 endif
 
-all: vndh okp
+all: sh vndh okp
 	./tools/analyze.py bin/*
 
-$(SRCDIR)/vshader.h: $(SHADERPATH)/$(VSHADER)
-	echo $<
-	cp $< ./vshader.vert
-	$(MINIFY) ./vshader.vert -o $@
-	# rm ./vshader.vert
-
-$(SRCDIR)/shader.h: $(SHADERPATH)/$(SHADER)
+$(SRCDIR)/shaders.h: $(SHADERPATH)/$(VSHADER) $(SHADERPATH)/$(SHADER)
+	cp $(SHADERPATH)/$(VSHADER) ./vshader.vert
 	echo  $(GLVERSION) >  /tmp/shader.frag
 	echo $(UVLINE)>> /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
-	cat  /tmp/shader.frag $< > shader.frag
-	$(MINIFY) shader.frag -o $@
-
+	cat  /tmp/shader.frag $(SHADERPATH)/$(SHADER) > shader.frag
+	$(MINIFY) ./vshader.vert ./shader.frag -o $@
+	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(BINDIR)/%.smol
 	./tools/autovndh.py $(VNDH_FLAGS) $< > $@ -j 6
 	chmod +x $@
 
 clean:
-	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(SRCDIR)/shader.h $(SRCDIR)/vshader.h
+	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(SRCDIR)/shaders.h
 
 %/:
 	@mkdir -vp "$@"
 
 .SECONDARY:
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(SRCDIR)/vshader.h $(SRCDIR)/shader.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(SRCDIR)/shaders.h
 	$(CC) $(CFLAGS) -c "$<" -o "$@"
 	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
 	size $@

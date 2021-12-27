@@ -1,5 +1,4 @@
 #! /usr/bin/python3
-import py_compile
 import sys
 import os
 
