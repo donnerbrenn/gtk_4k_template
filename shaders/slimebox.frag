@@ -78,7 +78,7 @@ float softshadow(in vec3 ro,in vec3 rd,float mint,float maxt,float k)
 // MAINLOOP
 void main()
 {
-    vec2 uv=(gl_FragCoord.xy/vec2(i_X,i_Y)-.5)/vec2(i_Y/i_X,1);
+    vec2 uv=U*vec2(1,i_Y/i_X);
     vec3 i_ro=vec3(0,0,-3.5);
     vec3 p=i_ro;
     vec3 i_rd=normalize(vec3(uv,1));

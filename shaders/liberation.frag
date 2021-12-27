@@ -86,7 +86,7 @@ vec3 march(vec3 from, vec3 dir)
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy / vec2(i_X,i_Y) - .5)*vec2(i_X/i_Y,1);
+    vec2 uv = U*vec2(i_X/i_Y,1);
     vec3 i_from = vec3(0,0,-10);
     vec3 i_dir = normalize(vec3(uv, 1));
     gl_FragColor.xyz = march(i_from, i_dir);

@@ -107,7 +107,7 @@ void main()
 {
     bounce=abs(fract(0.05*iTime)-.5)*20.; // triangle function
     
-	vec2 uv=gl_FragCoord.xy/vec2(i_X,i_Y); 
+	vec2 uv=U/vec2(i_X,i_Y); 
     vec2 p=uv*2.-1.;
    
 // 	bouncy cam every 10 seconds

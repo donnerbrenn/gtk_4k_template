@@ -1,7 +1,7 @@
 //From my firstie competition https://www.pouet.net/prod.php?which=85919
 float i_threshold=.0001;
 vec3 ro=vec3(0,0,-6);
-vec3 rd=normalize(vec3(((gl_FragCoord.xy.xy/vec2(i_X*.5,i_Y*.5))-1)*vec2(1,i_Y/i_X),1));
+vec3 rd=normalize(vec3(U*vec2(1,i_Y/i_X),1));
 vec3 p=ro;
 vec3 lp[10];
 vec3 lc[3];

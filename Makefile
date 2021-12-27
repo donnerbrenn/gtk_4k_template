@@ -1,6 +1,6 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		blackle.frag
+SHADER			=		texture.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -80,6 +80,7 @@ $(SRCDIR)/vshader.h: $(SHADERPATH)/vshader.vert
 
 $(SRCDIR)/shader.h: $(SHADERPATH)/$(SHADER)
 	echo  $(GLVERSION) >  /tmp/shader.frag
+	echo 'in vec2 U;'>> /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $< > shader.frag

@@ -1,5 +1,5 @@
 
-vec2 uv=(gl_FragCoord.xy/vec2(i_X*.5,i_Y*.5)-1)*vec2(1.78,1);
+vec2 uv=U*vec2(1.78,1);
 vec3 i_ro=vec3(0,0,0);
 vec3 p=i_ro;
 vec3 i_rd=normalize(vec3(uv,1.));
