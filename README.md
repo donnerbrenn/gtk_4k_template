@@ -1,7 +1,7 @@
 # gtk_4k_template
 
 A 4K exegfx Template for Linux x86_64
-Based on Blackles Linux OpenGL examples. https://github.com/blackle/Linux-OpenGL-Examples
+Based on Blackles Linux OpenGL examples (GTK) but even smaller. https://github.com/blackle/Linux-OpenGL-Examples
 
 ## Tools used to do this production: 
 ### Shader Minifier http://www.ctrl-alt-test.fr/glsl-minifier/
