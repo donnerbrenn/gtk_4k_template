@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		blackle.frag
+SHADER			=		slimebox.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false

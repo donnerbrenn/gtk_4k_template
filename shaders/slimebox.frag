@@ -39,18 +39,6 @@ vec3 normal(vec3 p)
     return normalize(map(p)-vec3(map(k[0]),map(k[1]),map(k[2])));
 }
 
-// LIGHT
-float diffuse_directional(vec3 n,vec3 l,float strength)
-{
-    return(dot(n,normalize(l))*.5+.5)*strength;
-}
-
-float specular_directional(vec3 n,vec3 l,vec3 v,float strength)
-{
-    vec3 i_r=reflect(normalize(l),n);
-    return pow(max(dot(v,i_r),0),128)*strength;
-}
-
 float ambient_omni(vec3 p,vec3 l)
 {
     float i_d=1.-abs(length(p-l))/100;
@@ -100,7 +88,7 @@ void main()
     {
         vec3 i_n=normal(p);
         vec3 i_l1=vec3(1,.5,-.25);
-        float rl=ambient_omni(p,i_l1)*diffuse_directional(i_n,i_l1,.25)+specular_directional(i_n,i_l1,i_rd,.9);
+        float rl=ambient_omni(p,i_l1)*(dot(i_n,normalize(i_l1))*.5+.5)*.25+pow(max(dot(i_rd,reflect(normalize(i_l1),i_n)),0),128)*.9;
         color=vec3(rl)+vec3(.1,.4,.1);
         color=mix(vec3(0),color,softshadow(i_ro+t*i_rd,normalize(i_l1),1e-2,10,20)*.25+.75);
     }

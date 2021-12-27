@@ -39,7 +39,7 @@ vec2 uv=UV*(1,i_Y/i_X);
 You can deactivate this behaviour by setting USEVARYINGUV to "false" in the Makefile.
 
 ## Screenshots:
-Blackles OpenGL example - Static - Shortest version: 743 Bytes (shelldropper)
+Blackles OpenGL example (optimized) - Static - Shortest version: 743 Bytes (shelldropper)
 ![blackle.png](screenshots/blackle.png)
 
 Competition - Static - Shortest version: 1966 Bytes (OneKpaq)
