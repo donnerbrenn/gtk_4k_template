@@ -2,115 +2,68 @@
 in vec2 U;
 float i_X=2560.;
 float i_Y=1440.;
-
-out vec3 color;
-float approx=.001;
-float renderDist=15;
-float maxIter=1000;
+// watch it in your browser
 uniform float iTime;
-vec3 ro=vec3(0);
+out vec3 fragColor;
+vec3 p;
 
 vec3 rotate(vec3 p,vec3 t)
 {
       float c=cos(t.x),s=sin(t.x);
       mat3 m=mat3(vec3(1,0,0),vec3(0,c,-s),vec3(0,s,c));
-
       c=cos(t.y);s=sin(t.y);
       m*=mat3(vec3(c,0,s),vec3(0,1,0),vec3(-s,0,c));
-
       c=cos(t.z);s=sin(t.z);
       m*=mat3(vec3(c,-s,0),vec3(s,c,0),vec3(0,0,1));
-
       return m*p;
 }
 
-float sdPlane(vec3 p, vec4 n)
+float sdTorus( vec3 p, vec2 t )
 {
-    return dot(p, n.xyz) + n.w;
+  vec2 i_q = vec2(length(p.xz)-t.x,p.y);
+  return length(i_q)-t.y;
 }
-
-float sdRoundbox( vec3 p, vec3 b, float r)
-{
-  vec3 q = abs(p) - b;
-  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
-}
-
-float hash21(vec2 p) {
-    p = fract(p * vec2(233.34, 851.74));
-    p += dot(p, p + 23.45);
-    return fract(p.x * p.y);
-}
-
-vec2 hash22(vec2 p) {
-    float k = hash21(p);
-    return vec2(k, hash21(p + k));
-}
-
 
 float map(vec3 p)
 {
+    p.z+=1.9;
+    p=rotate(p,vec3(.1,.0,.0));
+    return -sdTorus(p,vec2(1.1,.7));
+}
 
-    p.z+=iTime;
-    p=rotate(p,vec3(0,0,sin(iTime*1+p.z))*.25);
-    float plane=sdPlane(p,vec4(0,3.14/4,0,.5));   
-    p.xz=mod(p.xz,2)-1;
 
-    float sphere=sdRoundbox(p,vec3(.1,8,.3),.1);
-    return min(plane,sphere);
+float march(vec3 ro, vec3 rd)
+{
+    p=ro;
+    float d=1.;
+    while(d>.001&&distance(ro,p)<20.)
+    {
+        p+=rd*d;
+        d=map(p);
+    }
+    return d;
 }
 
 vec3 normal(vec3 p) 
 {
-    mat3 k = mat3(p,p,p) - mat3(0.005);
+    mat3 k = mat3(p,p,p) - mat3(0.01);
     return normalize(map(p) - vec3( map(k[0]),map(k[1]),map(k[2])) );
 }
 
 float lightRender(vec3 n,vec3 l, vec3 v, float strength)
 {
-      return ((dot(n,normalize(l))*.5+.5)+pow(max(dot(v,reflect(normalize(l),n)),0),10))*strength;
+    float i_ambient=abs(dot(n,normalize(l)));
+    float i_specular=abs(pow(max(dot(v,reflect(normalize(l),n)),0),1.))*.5;
+    return(i_ambient+i_specular)*strength;
+
 }
 
-vec3 triplanarMap(vec3 p, vec3 n, float o)
+void main(void)
 {
-//        p.z+=iTime;
-        p=rotate(p,vec3(0,0,sin(iTime+p.z))*.25);
-
-    // Take projections along 3 axes, sample texture values from each projection, and stack into a matrix
-    mat3 triMapSamples = mat3(
-    step(vec3(mod(p.yz,.2),.2),vec3(.1)),
-    step(vec3(mod(p.xz,.2),.2),vec3(.1)),
-    step(vec3(mod(p.xy,.2),.2),vec3(.1))
-    );
- 
-    // Weight three samples by absolute value of normal components
-    return triMapSamples * abs(n);
-}
-
-void main()
-{
-    vec2 uv=U*vec2(1,i_Y/i_X);
-    
-    vec3 rd=normalize(vec3(uv,1));
-    vec3 p=ro;
-
-    float iterations;
-    float d=1;
-    while(distance(p,ro)<renderDist&&d>approx&&iterations<maxIter)
-    {
-        d=map(p);
-        p+=d*rd;
-        iterations++;
-    }
-    if(d<approx)
-    {
-        vec3 n=normal(p);
-        color=triplanarMap(p+vec3(0,0,iTime),n,.5);
-        color*=lightRender(n,vec3(10),rd,.5);
-        color*=pow((1.-distance(ro,p)/renderDist),2);
-    }
-    color=sqrt(color);
-//    color.yz=vec2(0);
-//    color.r+=iterations*(1/maxIter);
-//    if(color.r==1.) color.g=1;
-//    else color.b=1;
+    vec3 i_ro=vec3(.0,0,-4);
+    float d=march(i_ro,normalize(vec3(U*vec2(1,i_Y/i_X),1.)));
+    float i_l=lightRender(normal(p),vec3(1,0,-1),p.xyz,.125);
+    float i_x=atan(-p.x,p.z);
+    float i_y=atan(length(p.xz),-p.y);
+    fragColor=(smoothstep(-.025,.025,sin(i_y*70.+i_x*45.+iTime*2))*.125+.125+vec3(.125,.5,1.))*.5-i_l;
 }

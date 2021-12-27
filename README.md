@@ -37,16 +37,16 @@ Create a new textfile in the shaders subdirectory and edit your shader. No #vers
 If you need a UV, there is automatically genereated a varying called "U". Multiply it by vec2(1,i_Y/i_X), to correct the aspect ratio, if needed.
 
 ## Screenshots:
-Blackles OpenGL example - Static - Shortest version: 747 Bytes (shelldropper)
+Blackles OpenGL example - Static - Shortest version: 743 Bytes (shelldropper)
 ![blackle.png](screenshots/blackle.png)
 
-Competition - Static - Shortest version: 1987 Bytes (OneKpaq)
+Competition - Static - Shortest version: 1966 Bytes (OneKpaq)
 ![competition.png](screenshots/competition.png)
 
-Slimebox - Animated - Shortest version: 1545 Bytes (shelldropper)
+Slimebox - Animated - Shortest version: 1528 Bytes (shelldropper)
 ![slimebox.png](screenshots/slimebox.png)
 
-Quipshade - Animated - Shortest version: 1314 Bytes (shelldropper)
+Quipshade - Animated - Shortest version: 1302 Bytes (shelldropper)
 ![quipshade.png](screenshots/quipshade.png)
 
 ## Have fun!

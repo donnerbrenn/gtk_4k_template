@@ -1,6 +1,6 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		texture.frag
+SHADER			=		quipshade.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
