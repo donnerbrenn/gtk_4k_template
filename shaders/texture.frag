@@ -84,7 +84,7 @@ vec3 triplanarMap(vec3 p, vec3 n, float o)
 
 void main()
 {
-    vec2 uv=U*vec2(1,i_Y/i_X);
+    vec2 uv=UV*vec2(1,i_Y/i_X);
     
     vec3 rd=normalize(vec3(uv,1));
     vec3 p=ro;

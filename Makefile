@@ -1,6 +1,7 @@
 #setup
 SHADERPATH		=		shaders
-SHADER			=		quipshade.frag
+USEVARYINGUV 	=		true
+SHADER			=		blackle.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -22,6 +23,18 @@ MINIFY			= 		mono ./tools/shader_minifier.exe -v
 USELTO			=		true
 ALIGNSTACK		=		true
 SECTIONORDER	=		dt
+
+VSHADER			=		vshader.vert
+ifeq ($(USEVARYINGUV),true)
+	VSHADER		=		vshaderU.vert
+endif
+
+
+UVLINE = '//in vec2 UV;'
+ifeq ($(USEVARYINGUV),true)
+	UVLINE='in vec2 UV;'
+endif
+
 
 #dlfixup, dnload or default
 SMOLLOADER		=		dnload
@@ -73,14 +86,15 @@ endif
 all: sh vndh okp
 	./tools/analyze.py bin/*
 
-$(SRCDIR)/vshader.h: $(SHADERPATH)/vshader.vert
-	cp $< ./
-	$(MINIFY) vshader.vert -o $@
-	rm vshader.vert
+$(SRCDIR)/vshader.h: $(SHADERPATH)/$(VSHADER)
+	echo $<
+	cp $< ./vshader.vert
+	$(MINIFY) ./vshader.vert -o $@
+	# rm ./vshader.vert
 
 $(SRCDIR)/shader.h: $(SHADERPATH)/$(SHADER)
 	echo  $(GLVERSION) >  /tmp/shader.frag
-	echo 'in vec2 U;'>> /tmp/shader.frag
+	echo $(UVLINE)>> /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $< > shader.frag

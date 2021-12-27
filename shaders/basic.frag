@@ -1,5 +1,5 @@
 
-vec2 uv=U*vec2(1.78,1);
+vec2 uv=UV*vec2(1.78,1);
 vec3 i_ro=vec3(0,0,0);
 vec3 p=i_ro;
 vec3 i_rd=normalize(vec3(uv,1.));

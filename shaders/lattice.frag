@@ -83,7 +83,7 @@ float lightRender(vec3 n,vec3 l, vec3 v, float strength)
 
 void main(void)
 {
-    vec2 uv=U*vec2(1,i_Y/i_X);
+    vec2 uv=UV*vec2(1,i_Y/i_X);
     vec3 ro=vec3(.0,0,-4);
     vec3 rd=normalize(vec3(uv,1.));
     float d=march(ro,rd);
