@@ -34,6 +34,8 @@ Edit WIDTH and HEIGHT in the Makefile to the resolution of your screen.
 ## Create your own shaders:
 Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use i_X and i_Y for screendimensions. Edit WIDTH and HEIGHT in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
 
+If you need a UV, there is automatically genereated a varying called "U". Multiply it by vec2(1,i_Y/i_X), to correct the aspect ratio, if needed.
+
 ## Screenshots:
 Blackles OpenGL example - Static - Shortest version: 747 Bytes (shelldropper)
 ![blackle.png](screenshots/blackle.png)
