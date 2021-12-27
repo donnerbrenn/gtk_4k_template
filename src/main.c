@@ -35,7 +35,7 @@ void on_render()
  #ifdef VAR_ITIME
 	glProgramUniform1f(sprogram_id,0,g_timer_elapsed(gtimer, NULL));
 #endif
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4000);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void on_realize(GtkWidget *glarea)

@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		blackle.frag
+SHADER			=		mo.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -14,6 +14,8 @@ OBJDIR 			:=		obj
 BINDIR			:=		bin
 RTDIR 			:=		rt
 SRCDIR			:=		src
+GENDIR			:=		gen
+TEMPLATES		:=		template
 
 NASM 			?=		nasm
 OBJCOPY 		?=		objcopy
@@ -42,7 +44,7 @@ ITIMECNT=0
 #dlfixup, dnload or default
 SMOLLOADER		=		dnload
 
-COPTFLAGS		= 		-Os -march=nocona
+COPTFLAGS		= 		-Os -march=nocona -I gen/
 COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 						-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
 						-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
@@ -89,14 +91,14 @@ endif
 all: sh vndh okp
 	./tools/analyze.py bin/*
 
-$(SRCDIR)/shaders.h: $(SHADERPATH)/$(VSHADER) $(SHADERPATH)/$(SHADER)
-	cp $(SHADERPATH)/$(VSHADER) ./vshader.vert
+$(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERPATH)/$(SHADER)
+	cp $(TEMPLATES)/$(VSHADER) $(GENDIR)/vshader.vert
 	echo  $(GLVERSION) >  /tmp/shader.frag
 	echo $(UVLINE)>> /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
-	cat  /tmp/shader.frag $(SHADERPATH)/$(SHADER) > shader.frag
-	$(MINIFY) ./vshader.vert ./shader.frag -o $@
+	cat  /tmp/shader.frag $(SHADERPATH)/$(SHADER) > $(GENDIR)/shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -o $@
 	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(BINDIR)/%.smol
@@ -104,14 +106,14 @@ $(BINDIR)/%.vndh: $(BINDIR)/%.smol
 	chmod +x $@
 
 clean:
-	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(SRCDIR)/shaders.h
+	@$(RM) -vrf $(OBJDIR) $(BINDIR) $(GENDIR)
 
 %/:
 	@mkdir -vp "$@"
 
 .SECONDARY:
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(SRCDIR)/shaders.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(GENDIR)/shaders.h
 	$(CC) $(CFLAGS) -c "$<" -o "$@"
 	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
 	size $@
