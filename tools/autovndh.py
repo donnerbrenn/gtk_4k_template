@@ -76,7 +76,7 @@ opt_xz_lzma = [
     [ 'pb=0', 'pb=1', 'pb=2', 'pb=3', 'pb=4' ],
     [ 'mf=bt4', 'mf=hc4' ],
     [ 'mode=normal' ],
-    ['nice='+(str(nice)) for nice in [int for int in list(range(4,25))]],
+    ['nice='+(str(nice)) for nice in [int for int in list(range(4,50))]],
     [ 'depth=1000' ]
 ]
 

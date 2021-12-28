@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		mo.frag
+SHADER			=		blackle.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -9,6 +9,9 @@ GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
 DEBUG			=		false
+
+VNDH_FLAGS	:= -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
+AVNDH_FLAGS :=-l -v --vndh vondehi 
 
 OBJDIR 			:=		obj
 BINDIR			:=		bin
@@ -51,10 +54,9 @@ COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables
 						-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 						-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
 						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
-COPTFLAGS 		+=		`pkg-config --cflags gtk+-3.0`
+COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` 
 
-
-LIBS			=		-lGL `pkg-config --libs gtk+-3.0`
+LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
 
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 	 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
@@ -101,8 +103,9 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERPATH)/$(SHADER)
 	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -o $@
 	./tools/replace.py $@
 
-$(BINDIR)/%.vndh: $(BINDIR)/%.smol
-	./tools/autovndh.py $(VNDH_FLAGS) $< > $@ -j 6
+$(BINDIR)/%.vndh: $(GENDIR)/main.lzma
+	nasm -fbin -o $(GENDIR)/vondehi vondehi/vondehi.asm $(VNDH_FLAGS)
+	cat $(GENDIR)/vondehi $(GENDIR)/main.lzma > $@
 	chmod +x $@
 
 clean:
@@ -118,24 +121,22 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(GENDIR)/shaders.h
 	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
 	size $@
 
-VNDH_FLAGS :=-l -v --vndh vondehi 
+
 
 $(BINDIR)/main.smol: $(OBJDIR)/main.o $(BINDIR)/
 	$(PYTHON) ./smol/smold.py $(SMOLFLAGS) $(LIBS) $< $@
 
-$(BINDIR)/%.lzma: $(BINDIR)/main.smol
-	./tools/autovndh.py $(VNDH_FLAGS) --nostub  $< > $@ -j 6
-	# rm $<
+$(GENDIR)/%.lzma: $(BINDIR)/main.smol
+	./tools/autovndh.py $(AVNDH_FLAGS) --nostub  $< > $@
 
-heatmap: $(BINDIR)/%.lzma
+heatmap: $(GENDIR)/%.lzma
 	../LZMA-Vizualizer/LzmaSpec $<
 	@stat --printf="$@: %s bytes\n" $<
 	rm $<
 
-$(BINDIR)/main.sh: tools/shelldropper.sh $(BINDIR)/main.lzma
+$(BINDIR)/main.sh: tools/shelldropper.sh $(GENDIR)/main.lzma
 	cat $^ > $@
 	chmod +x $@
-	rm $(BINDIR)/main.lzma
 
 $(BINDIR)/main.okp: $(BINDIR)/main.smol
 	cp $< cleanOKP/uncompressed
