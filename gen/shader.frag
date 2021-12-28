@@ -1,3 +1,7 @@
+#version 400
+in vec2 UV;
+float i_X=2560.;
+float i_Y=1440.;
 //From my firstie competition https://www.pouet.net/prod.php?which=85919
 float i_threshold=.0001;
 vec3 ro=vec3(0,0,-6);

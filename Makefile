@@ -1,7 +1,7 @@
 #setup
 SHADERPATH		=		shaders
 USEVARYINGUV 	=		true
-SHADER			=		blackle.frag
+SHADER			=		competition.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -90,9 +90,6 @@ ifeq ($(SMOLLOADER),dnload)
 	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader -c
 endif
 
-all: sh vndh okp
-	./tools/analyze.py bin/*
-
 $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERPATH)/$(SHADER)
 	cp $(TEMPLATES)/$(VSHADER) $(GENDIR)/vshader.vert
 	echo  $(GLVERSION) >  /tmp/shader.frag
@@ -119,6 +116,12 @@ clean:
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(GENDIR)/shaders.h
 	$(CC) $(CFLAGS) -c "$<" -o "$@"
 	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
+	size $@
+
+$(BINDIR)/%.elf: $(SRCDIR)/%.c $(BINDIR)/ $(GENDIR)/shaders.h
+	$(CC) $(CFLAGS) $(LIBS) "$<" -o "$@"
+	strip --strip-unneeded $@
+	sstrip -z $@
 	size $@
 
 
@@ -156,7 +159,13 @@ sh: $(BINDIR)/main.sh
 smol: bin/main.smol
 	wc -c $<
 
+elf: $(BINDIR)/main.elf
+	wc -c $<
+
 delokp:
 	-rm cleanOKP/onekpaq_context.cache
+
+all: sh vndh okp elf
+	./tools/analyze.py bin/*
 
 .PHONY: all clean

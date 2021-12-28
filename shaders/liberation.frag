@@ -2,6 +2,7 @@
 uniform float iTime;
 
 vec3 objcol;
+out vec3 color;
 
 // by Dave_Hoskins
 float hash12(vec2 p)
@@ -89,5 +90,5 @@ void main()
     vec2 uv = UV*vec2(i_X/i_Y,1);
     vec3 i_from = vec3(0,0,-10);
     vec3 i_dir = normalize(vec3(uv, 1));
-    gl_FragColor.xyz = march(i_from, i_dir);
+    color = march(i_from, i_dir);
 }

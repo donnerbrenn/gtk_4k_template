@@ -75,6 +75,7 @@ void check_escape(GtkWidget* widget __attribute__((unused)), GdkEventKey* event)
 
 void _start()
 {
+	// asm volatile("sub $8, %rsp\n");
 #ifdef DEBUG
 	printf("DEBUG MODE ON!\n");
 #endif
