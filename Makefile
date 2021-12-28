@@ -165,7 +165,7 @@ elf: $(BINDIR)/main.elf
 delokp:
 	-rm cleanOKP/onekpaq_context.cache
 
-all: sh vndh okp elf
+all: sh vndh okp #elf
 	./tools/analyze.py bin/*
 
 .PHONY: all clean
