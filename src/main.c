@@ -62,7 +62,7 @@ void on_realize(GtkGLArea* glarea)
 	GdkWindow* glwindow = gdk_gl_context_get_window(context);
 	GdkFrameClock* frame_clock = gdk_window_get_frame_clock(glwindow);
 	// // Connect update signal:
-	g_signal_connect_object(frame_clock, "update", (GCallback*)gtk_gl_area_queue_render, glarea, G_CONNECT_SWAPPED);
+	g_signal_connect_object(frame_clock, "update", (GCallback)gtk_gl_area_queue_render, glarea, G_CONNECT_SWAPPED);
 	// // Start updating:
 	gdk_frame_clock_begin_updating(frame_clock);
 #endif	
@@ -85,8 +85,8 @@ void _start()
 	GtkWidget* win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	GtkWidget* glarea = gtk_gl_area_new();
 	gtk_container_add((GtkContainer*)win, glarea);
-	g_signal_connect_object(glarea, "render", (GCallback*)on_render, NULL,0);
-	g_signal_connect_object(win, "key_press_event", (GCallback*)check_escape, NULL,0);
+	g_signal_connect_object(glarea, "render", (GCallback)on_render, NULL,0);
+	g_signal_connect_object(win, "key_press_event", (GCallback)check_escape, NULL,0);
 	gtk_widget_show_all (win);
 	gtk_window_fullscreen((GtkWindow*)win);
 	

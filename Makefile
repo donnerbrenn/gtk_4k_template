@@ -1,6 +1,6 @@
 #setup
 SHADERDIR		=		shaders
-SHADER			=		blackle.frag
+SHADER			=		liberation.frag
 USEVARYINGUV 	=		true
 WIDTH			=		2560
 HEIGHT			=		1440
