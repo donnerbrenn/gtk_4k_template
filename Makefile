@@ -1,7 +1,7 @@
 #setup
-SHADERPATH		=		shaders
+SHADERDIR		=		shaders
+SHADER			=		blackle.frag
 USEVARYINGUV 	=		true
-SHADER			=		competition.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		false
@@ -61,7 +61,6 @@ LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 	 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
 
-
 ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR
 endif
@@ -90,13 +89,13 @@ ifeq ($(SMOLLOADER),dnload)
 	SMOLFLAGS+= -fuse-$(SMOLLOADER)-loader -c
 endif
 
-$(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERPATH)/$(SHADER)
+$(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	cp $(TEMPLATES)/$(VSHADER) $(GENDIR)/vshader.vert
 	echo  $(GLVERSION) >  /tmp/shader.frag
 	echo $(UVLINE)>> /tmp/shader.frag
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
-	cat  /tmp/shader.frag $(SHADERPATH)/$(SHADER) > $(GENDIR)/shader.frag
+	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
 	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -o $@
 	./tools/replace.py $@
 
