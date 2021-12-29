@@ -1,6 +1,6 @@
 #setup
 SHADERDIR		=		shaders
-SHADER			=		liberation.frag
+SHADER			=		knutae.frag
 USEVARYINGUV 	=		true
 WIDTH			=		2560
 HEIGHT			=		1440
@@ -10,7 +10,7 @@ I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
 DEBUG			=		false
 
-VNDH_FLAGS	:= -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
+VNDH_FLAGS	:= -DNO_CHEATING -DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
 AVNDH_FLAGS :=-l -v --vndh vondehi 
 
 OBJDIR 			:=		obj
@@ -34,8 +34,6 @@ ifeq ($(USEVARYINGUV),true)
 	VSHADER		=		vshaderU.vert
 endif
 
-
-UVLINE = '//in vec2 UV;'
 ifeq ($(USEVARYINGUV),true)
 	UVLINE='in vec2 UV;'
 	COPTFLAGS+=-DUSEVARYINGUV
@@ -100,7 +98,7 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(GENDIR)/main.lzma
-	nasm -fbin -o $(GENDIR)/vondehi vondehi/vondehi.asm $(VNDH_FLAGS)
+	nasm -fbin $(VNDH_FLAGS) -o $(GENDIR)/vondehi vondehi/vondehi.asm
 	cat $(GENDIR)/vondehi $(GENDIR)/main.lzma > $@
 	chmod +x $@
 

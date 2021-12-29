@@ -26,7 +26,7 @@ GTimer* gtimer;
 static void on_render();
 static void on_realize(GtkGLArea* glarea);
 static void check_escape(GtkWidget* widget, GdkEventKey* event);
-__attribute__((__externally_visible__, __section__(".text.startup._start"))) void _start();
+__attribute__((__externally_visible__, __section__(".text._start"))) void _start();
 
 void on_render()
 {
