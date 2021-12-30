@@ -42,7 +42,7 @@ You can deactivate this behaviour by setting USEVARYINGUV to "false" in the Make
 Blackles example shader (optimized) - Static - Shortest version (okp vs. vndh): 846 Bytes (vondehi)
 ![blackle.png](screenshots/blackle.png)
 
-Competition - Static - Shortest version  (okp vs. vndh): 1952 Bytes (OneKpaq)
+Competition - Static - Shortest version  (okp vs. vndh): 1945 Bytes (OneKpaq)
 ![competition.png](screenshots/competition.png)
 
 Slimebox - Animated - Shortest version  (okp vs. vndh): 1560 Bytes (OneKpaq)

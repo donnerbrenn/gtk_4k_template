@@ -149,16 +149,15 @@ float softshadow(in vec3 ro,in vec3 rd,float mint,float maxt,float k)
 
 vec3 calcLight(vec3 p,vec3 n,vec3 color,float power)
 {
-    vec3 oc;
     for(int i=0;i<3;i++)
     {
         
-        float diffuse=max(.0,dot(reflect(lp[i],n),rd));
+        float diffuse=max(.0,dot(reflect(rd,n),lp[i]));
         float i_specular=pow(diffuse,64);
         float i_s=softshadow(p,lp[i],.1,20.,25);
-        oc+=(diffuse*power*.333+i_specular*power*3)*lc[i]*i_s;
+        color+=(diffuse*power*.333+i_specular*power*3)*lc[i]*i_s;
     }
-    return color+oc;
+    return color;
 }
 
 void main()

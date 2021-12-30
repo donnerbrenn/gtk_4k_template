@@ -1,6 +1,6 @@
 #setup
 SHADERDIR		=		shaders
-SHADER			=		knutae.frag
+SHADER			=		competition.frag
 USEVARYINGUV 	=		true
 WIDTH			=		2560
 HEIGHT			=		1440
