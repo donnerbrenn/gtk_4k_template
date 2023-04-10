@@ -1,4 +1,5 @@
-//From my firstie competition https://www.pouet.net/prod.php?which=85919
+//From my firstie "competition" https://www.pouet.net/prod.php?which=85919
+vec2 UV=(gl_FragCoord.xy/iResolution)*2/1;
 float i_threshold=.0001;
 vec3 ro=vec3(0,0,-6);
 vec3 rd=normalize(vec3(UV*vec2(1,i_Y/i_X),1));
@@ -51,13 +52,6 @@ MA sdRoundBox(vec3 p,vec3 b,float r,vec3 color)
     return MA(i_d,color,false);
 }
 
-//by iq
-MA sdPlane(vec3 p,vec3 n,float h,vec3 color)
-{
-    float i_d=dot(p,n)+h;
-    return MA(i_d,color,false);
-}
-
 MA minimum(MA a,MA b)
 {
     return a.d<b.d?a:b;
@@ -74,7 +68,8 @@ MA map(vec3 p)
     p=rotate(rotate(p,vec3(-.7,.0,-.04)),vec3(0,1.1,0));
     p.y-=1.05;
     p.x+=.5;
-    MA plane=sdPlane(p+vec3(0,1.25,0),vec3(0,1,0),1.,i_ground);
+    float i_distance=dot(p+vec3(0,1.25,0),vec3(0,1,0)) + 1;
+    MA plane=MA(i_distance,i_ground,false);
     MA stick=sdCappedCone(p+vec3(0,.1,0),1.,.15,.25,0,i_red);
     MA ring1=sdCappedCone(p+vec3(0,.6,0),.05,.3,.3,.05,i_black);
     MA ring2=sdCappedCone(p+vec3(0,1.,0),.3,.6,.6,.05,i_black);
@@ -108,11 +103,12 @@ MA map(vec3 p)
     return minimum(ball,cable);
 }
 
+
 MA march(vec3 ro,vec3 rd,float len)
 {
     
     MA result;
-    while(iter<80&&length(ro-p)<len&&!result.hit)
+    while(iter<800&&length(ro-p)<len&&!result.hit)
     {
         p+=result.d*rd;
         result=map(p);
@@ -129,33 +125,33 @@ vec3 normal(vec3 p)
 }
 
 //by iq
-float softshadow(in vec3 ro,in vec3 rd,float mint,float maxt,float k)
+float softshadow(in vec3 ro,in vec3 rd)
 {
     float res=1.;
     float ph=0;
-    for(float t=mint;t<maxt;)
+    for(float t=.1;t<20;)
     {
         float h=map(ro+rd*t).d;
         if(h<.001)
-        return 0.;
+            return 0.;
         float y=h*h/(2.*ph);
         float i_d=sqrt(h*h-y*y);
-        res=min(res,k*i_d/max(0.,t-y));
+        res=min(res,25*i_d/max(0.,t-y));
         ph=h;
         t+=h;
     }
     return res;
 }
 
-vec3 calcLight(vec3 p,vec3 n,vec3 color,float power)
+vec3 calcLight(vec3 p,vec3 n,vec3 color)
 {
     for(int i=0;i<3;i++)
     {
         
         float diffuse=max(.0,dot(reflect(rd,n),lp[i]));
         float i_specular=pow(diffuse,64);
-        float i_s=softshadow(p,lp[i],.1,20.,25);
-        color+=(diffuse*power*.333+i_specular*power*3)*lc[i]*i_s;
+        float i_s=softshadow(p,lp[i]);
+        color+=(diffuse*.0333+i_specular*.3)*lc[i]*i_s;
     }
     return color;
 }
@@ -176,7 +172,7 @@ void main()
     if(res.hit)
     {
         color=res.col;
-        color=calcLight(p,n,res.col,.1);
+        color=calcLight(p,n,res.col);
         if(res.col==i_black)
         {
             p-=rd*.01;
@@ -184,7 +180,7 @@ void main()
             res=march(p,rd,2.5);
             if(res.hit)
             {
-                color=mix(color,calcLight(p,normal(p),res.col,.1),.1);
+                color=mix(color,calcLight(p,normal(p),res.col),.1);
             }
         }
     }

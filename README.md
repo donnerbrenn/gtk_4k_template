@@ -39,16 +39,16 @@ vec2 uv=UV*(1,i_Y/i_X);
 You can deactivate this behaviour by setting USEVARYINGUV to "false" in the Makefile.
 
 ## Screenshots:
-Blackles example shader (optimized) - Static - Shortest version (okp vs. vndh): 846 Bytes (vondehi)
+Blackles example shader (optimized) - Static - Shortest version (okp vs. vndh): 842 Bytes (vondehi)
 ![blackle.png](screenshots/blackle.png)
 
 Competition - Static - Shortest version  (okp vs. vndh): 1945 Bytes (OneKpaq)
 ![competition.png](screenshots/competition.png)
 
-Slimebox - Animated - Shortest version  (okp vs. vndh): 1560 Bytes (OneKpaq)
+Slimebox - Animated - Shortest version  (okp vs. vndh): 1558 Bytes (OneKpaq)
 ![slimebox.png](screenshots/slimebox.png)
 
-Quipshade - Animated - Shortest version  (okp vs. vndh): 1381 Bytes (OneKpaq)
+Quipshade - Animated - Shortest version  (okp vs. vndh): 1382 Bytes (OneKpaq)
 ![quipshade.png](screenshots/quipshade.png)
 
 ## Have fun!

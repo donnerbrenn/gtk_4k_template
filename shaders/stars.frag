@@ -14,7 +14,7 @@ mat2 rotate(float a)
 
 void main(void)
 {
-  vec2 uv=UV*vec2(i_X/i_Y,1)+vec2(1.+2*cos(iTime/2),2*sin(iTime/10))*.5*rotate(iTime/10);
+  vec2 uv=gl_FragCoord.xy / vec2(i_X,i_Y)*vec2(i_X/i_Y,1)+vec2(1.+2*cos(iTime/2),2*sin(iTime/10))*.5*rotate(iTime/10);
   for(int i=0;i<5;i++)
   {
     float z=fract((i*.2)+iTime/10);

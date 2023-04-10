@@ -9,7 +9,7 @@ out vec3 fragColor;
 void main()
 {  
       float i_size=8;
-      vec2 uv=UV*vec2(i_X/i_Y,1);
+      vec2 uv=gl_FragCoord.xy/vec2(i_X,i_Y)*vec2(i_X/i_Y,1);
       vec2 index=floor(uv*i_size);
       vec2 offset=fract(uv*i_size)*2.-1.;
       // float r=clamp(tixy(iTime,int(index.y*i_size+index.x), int(index.x), int(index.y)),-.9,.9);

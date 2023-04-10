@@ -2,15 +2,18 @@
 uniform float iTime;
 out vec3 color;
 
-//rotate a vector... Not very happy with this huge function...
-vec3 rotate(vec3 p,vec3 t)
-{
-    float c=cos(t.x),s=sin(t.x);
-    mat3 m=mat3(vec3(1,0,0),vec3(0,c,-s),vec3(0,s,c));
-    c=cos(t.y);s=sin(t.y);
-    m*=mat3(vec3(c,0,s),vec3(0,1,0),vec3(-s,0,c));
-    c=cos(t.z);s=sin(t.z);
-    return m*mat3(vec3(c,-s,0),vec3(s,c,0),vec3(0,0,1))*p;
+vec3 rotate(vec3 p, vec3 t) {
+    vec3 c = cos(t);
+    vec3 s = sin(t);
+    vec3 cx = vec3(1, 0, 0);
+    vec3 cy = vec3(0, 1, 0);
+    vec3 cz = vec3(0, 0, 1);
+
+    return mat3(
+        vec3(c.y * c.z, s.x * s.y * c.z - s.z * c.x, s.x * s.z + c.x * s.y * c.z),
+        vec3(c.y * s.z, s.x * s.y * s.z + c.x * c.z, c.x * s.y * s.z - s.x * c.z),
+        vec3(-s.y, s.x * c.y, c.x * c.y)
+    ) * p;
 }
 
 //SDF-Functions
@@ -66,7 +69,7 @@ float softshadow(in vec3 ro,in vec3 rd,float mint,float maxt,float k)
 // MAINLOOP
 void main()
 {
-    vec2 uv=UV*vec2(1,i_Y/i_X);
+    vec2 uv=(gl_FragCoord.xy/vec2(i_X,i_Y)*2-1)*vec2(1,i_Y/i_X);
     vec3 i_ro=vec3(0,0,-3.5);
     vec3 p=i_ro;
     vec3 i_rd=normalize(vec3(uv,1));

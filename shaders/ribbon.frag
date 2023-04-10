@@ -15,7 +15,7 @@ vec3 getNormal(vec3 p) {
 }
 
 void main() {
-	vec2 v = UV * vec2(1, i_Y / i_X);
+	vec2 v = (gl_FragCoord.xy/vec2(i_X,i_Y) *2 -1) * vec2(1, i_Y / i_X);
 	vec3 org = vec3(sin(iTime * .5) * .5, cos(iTime * .5) * .25 + .25, iTime);
 	vec3 dir = normalize(vec3(v.x * 1.6, v.y, 1.));
 	vec3 p = org;

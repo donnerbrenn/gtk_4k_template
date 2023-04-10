@@ -1,7 +1,3 @@
-#version 330
-
-float i_X=2560.;
-float i_Y=1440.;
 out vec4 fragCol;
 
 float box(vec3 p, vec3 d) {

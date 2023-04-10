@@ -1,16 +1,15 @@
 #setup
 SHADERDIR		=		shaders
-SHADER			=		competition.frag
-USEVARYINGUV 	=		true
+SHADER			=		storage.frag
 WIDTH			=		2560
 HEIGHT			=		1440
-HIDECURSOR		=		false
-GLVERSION		=		'\#version 400'
+HIDECURSOR		=		true
+GLVERSION		=		'\#version 330'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
 DEBUG			=		false
 
-VNDH_FLAGS	:= -DNO_CHEATING -DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
+VNDH_FLAGS	:= -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
 AVNDH_FLAGS :=-l -v --vndh vondehi 
 
 OBJDIR 			:=		obj
@@ -27,17 +26,9 @@ CC				=		gcc
 MINIFY			= 		mono ./tools/shader_minifier.exe -v --preserve-externals
 USELTO			=		true
 ALIGNSTACK		=		true
-SECTIONORDER	=		td
+SECTIONORDER	=		dt
 
 VSHADER			=		vshader.vert
-ifeq ($(USEVARYINGUV),true)
-	VSHADER		=		vshaderU.vert
-endif
-
-ifeq ($(USEVARYINGUV),true)
-	UVLINE='in vec2 UV;'
-	COPTFLAGS+=-DUSEVARYINGUV
-endif
 
 ITIMECNT=0
 
@@ -45,19 +36,20 @@ ITIMECNT=0
 #dlfixup, dnload or default
 SMOLLOADER		=		dnload
 
-COPTFLAGS		= 		-Os -march=nocona -I gen/
+COPTFLAGS		= 		-Oz -march=nocona -I gen/
 COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 						-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
 						-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 						-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 						-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
-						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
-COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` 
+						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin 
+COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` #-mincoming-stack-boundary=3
 
 LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
 
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 	 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
+						-funsafe-dynamic
 
 ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR
