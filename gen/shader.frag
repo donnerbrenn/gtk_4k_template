@@ -6,8 +6,11 @@ const float c_pi = acos(-1);
 const float c_twopi = c_pi*2;
 out vec4 fragColor;
 #define threshold .001
-float attentuation=1;
+vec3 attentuation=vec3(1);
 uint state = uint (gl_FragCoord.x*gl_FragCoord.y);
+#define SAMPLES 300
+#define BOUNCES 8
+vec3 albedo;
 
 
 uint wang_hash(inout uint seed)
@@ -54,14 +57,18 @@ float fBox(vec3 p, vec3 b) {
 }
 
 float scene(vec3 p) {
-        float box=fBox(p,vec3(5,4,100));
+    albedo=vec3(1);
+        float box=-fBox(p,vec3(1,1.1,6));
         float ball=fSphere(p,1);
-       return min(-box,ball);
+        float final=min(box,ball);
+        if(final==ball)
+            albedo=vec3(0,.3,0);
+       return final;
 }
 
 vec3 normal(vec3 p)
 {
-    mat3 k=mat3(p,p,p)-mat3(.005);
+    mat3 k=mat3(p,p,p)-mat3(.0005);
     return normalize(scene(p)-vec3(scene(k[0]),scene(k[1]),scene(k[2])));
 }
 
@@ -71,7 +78,6 @@ bool march(inout vec3 p, vec3 dir) {
               p+=dir*dst;
               dst=scene(p);
        }
-    //    attentuation*=.5;
        return dst<threshold;  
 }
 
@@ -80,21 +86,22 @@ void main() {
     fragColor.rgb=vec3(0);
        vec3 n;
        
-       for(int j=0;j<300;j++) {
+       for(int j=0;j<SAMPLES;j++) {
             vec3 d = normalize(vec3(uv,1));
-            vec3 ro=vec3(0,0,-6);
-           for(int i=0;i<8&&march(ro,d);i++) {
+            vec3 ro=vec3(0,0,-3);
+            attentuation=vec3(1);
+           for(int i=0;i<BOUNCES&&march(ro,d);i++) {
                 n = normal(ro);
-                fragColor.rgb+=vec3(max(dot(normalize(vec3(0,1,-1))*attentuation,n),0));
-                fragColor.rgb+=vec3(max(dot(normalize(vec3(-1,0,1))*attentuation,n),0));
-                fragColor.rgb+=vec3(max(dot(-d,n)*attentuation,0));
+                fragColor.rgb+=albedo*max(dot(normalize(vec3(1,1,1))*attentuation,n),0);
+                fragColor.rgb+=albedo*max(dot(normalize(vec3(-1,0,-1))*attentuation,n),0);
+                fragColor.rgb+=albedo*max(dot(d,n)*attentuation,0);
                 d=reflect(n,d); 
                 if(i==0) 
                 {
                      d=normalize(n+RandomUnitVector(state));
                 }
-                // attentuation*=max(dot(d,n),0);
+                attentuation*=max(dot(d,n),0);
            }
        }
-       fragColor.rgb=sqrt(fragColor.rgb/(300*8));
+       fragColor.rgb=sqrt(fragColor.rgb/(SAMPLES*BOUNCES/3));
 }
