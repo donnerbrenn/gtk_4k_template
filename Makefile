@@ -4,6 +4,7 @@ SHADER			=		storage.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		true
+SCISSORS		=		true
 GLVERSION		=		'\#version 330'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
@@ -54,6 +55,11 @@ SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR
 endif
+
+ifeq ($(SCISSORS),true)
+	COPTFLAGS+=-DSCISSORS
+endif
+
 
 ifeq ($(USELTO),true)
 	COPTFLAGS+=-flto

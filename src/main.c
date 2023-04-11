@@ -40,7 +40,17 @@ void on_render()
 	glProgramUniform1f(sprogram_id,0,g_timer_elapsed(gtimer, NULL));
 	gtk_gl_area_queue_render(glarea);
 #endif
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+#ifdef SCISSORS
+	glEnable(GL_SCISSOR_TEST);
+	for (int i = 0; i < 1440; i += 40) 
+	{
+		glScissor(0,i,2560,40);
+#endif
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glFinish();	
+#ifdef SCISSORS
+	}
+#endif
 	#ifdef DEBUG
 	clock_t end=clock();
 	printf("%i\n",((double)end-start)/CLOCKS_PER_SEC);
