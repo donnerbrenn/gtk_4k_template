@@ -42,9 +42,9 @@ void on_render()
 #endif
 #ifdef SCISSORS
 	glEnable(GL_SCISSOR_TEST);
-	for (int i = 0; i < 1440; i += 40) 
+	for (int i = 0; i < 1440; i += 180) 
 	{
-		glScissor(0,i,2560,40);
+		glScissor(0,i,2560,180);
 #endif
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glFinish();	
