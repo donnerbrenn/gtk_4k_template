@@ -40,14 +40,24 @@ void on_render()
 	glProgramUniform1f(sprogram_id,0,g_timer_elapsed(gtimer, NULL));
 	gtk_gl_area_queue_render(glarea);
 #endif
+
 #ifdef SCISSORS
+	#ifdef DEBUG
+	int step=HEIGHT/20;
+	float per=100.f / step;
+	int cnt=0;
+	#endif
 	glEnable(GL_SCISSOR_TEST);
-	for (int i = 0; i < 1440; i += 180) 
-	{
-		glScissor(0,i,2560,180);
+	for (int i = 0; i < HEIGHT; i += 20) {
+		glScissor(0,i,WIDTH,20);
+		#ifdef DEBUG
+		cnt++;
+		printf("%f\n",per*cnt);
+		
+		#endif
 #endif
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glFinish();	
+		glFinish();
 #ifdef SCISSORS
 	}
 #endif
@@ -74,6 +84,7 @@ void on_realize()
 	#endif
 	glBindProgramPipeline(pipelineId);
 	glBindVertexArray(vao);
+	gtk_main();
 	
 #ifdef VAR_ITIME
 	gtimer = g_timer_new();
@@ -105,6 +116,5 @@ void _start()
 	gdk_window_set_cursor(window, Cursor);
 #endif
 	on_realize();
-	gtk_main();
 	__builtin_unreachable();
 }

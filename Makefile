@@ -1,11 +1,11 @@
 #setup
 SHADERDIR		=		shaders
-SHADER			=		storage.frag
+SHADER			=		pathtracer.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		true
 SCISSORS		=		true
-GLVERSION		=		'\#version 330'
+GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
 DEBUG			=		false
@@ -43,9 +43,9 @@ COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables
 						-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 						-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 						-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
-						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin 
+						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
 COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` #-mincoming-stack-boundary=3
-
+COPTFLAGS		+=		-DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT)
 LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
 
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
@@ -92,7 +92,8 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -o $@
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag --aggressive-inlining --move-declarations -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --format text --aggressive-inlining --move-declarations -o $(GENDIR)/min_shader.frag
 	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(GENDIR)/main.lzma
