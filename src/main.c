@@ -26,6 +26,10 @@ static GLuint vprogram_id;
 static GTimer* gtimer;
 #endif
 
+#ifdef DEBUG
+static GTimer* gClock;
+#endif
+
 static void on_render();
 static void on_realize();
 static void check_escape(GtkWidget* widget, GdkEventKey* event);
@@ -33,9 +37,9 @@ __attribute__((used,__externally_visible__, __section__(".text._start"))) static
 
 void on_render()
 {
-	#ifdef DEBUG
-	clock_t start=clock();
-	#endif
+	static gboolean rendered=FALSE;
+	if(rendered)
+		return TRUE;
  #ifdef VAR_ITIME
 	glProgramUniform1f(sprogram_id,0,g_timer_elapsed(gtimer, NULL));
 	gtk_gl_area_queue_render(glarea);
@@ -52,7 +56,7 @@ void on_render()
 		glScissor(0,i,WIDTH,20);
 		#ifdef DEBUG
 		cnt++;
-		printf("%f\n",per*cnt);
+		printf("\33[2K\r%.2f\n",per*cnt);
 		
 		#endif
 #endif
@@ -62,9 +66,9 @@ void on_render()
 	}
 #endif
 	#ifdef DEBUG
-	clock_t end=clock();
-	printf("%i\n",((double)end-start)/CLOCKS_PER_SEC);
+	printf("render time: %.2f seconds\n", g_timer_elapsed(gClock, NULL));
 	#endif
+	rendered=TRUE;
 }
 
 void on_realize()
@@ -100,6 +104,7 @@ void _start()
 {
 #ifdef DEBUG
 	printf("DEBUG MODE ON!\n");
+	gClock = g_timer_new();
 #endif
 	gtk_init(0,NULL);
 	GtkWidget* win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -113,7 +118,7 @@ void _start()
 #ifdef HIDECURSOR
 	GdkWindow* window = gtk_widget_get_window(win);
 	GdkCursor* Cursor = gdk_cursor_new_for_display(gdk_display_get_default(),GDK_BLANK_CURSOR);
-	gdk_window_set_cursor(window, Cursor);
+	#pragma GCC diagnostic pop
 #endif
 	on_realize();
 	__builtin_unreachable();

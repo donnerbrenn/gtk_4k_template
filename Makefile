@@ -92,8 +92,14 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	echo  $(I_X) >>  /tmp/shader.frag
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag --aggressive-inlining --move-declarations -o $@
-	$(MINIFY) $(GENDIR)/shader.frag --format text --aggressive-inlining --move-declarations -o $(GENDIR)/min_shader.frag
+ifeq ($(DEBUG),true)
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --move-declarations -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --format indented --no-renaming --move-declarations -o $(GENDIR)/min_shader.frag
+else
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --aggressive-inlining --move-declarations -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --format indented --aggressive-inlining --move-declarations -o $(GENDIR)/min_shader.frag
+endif
+	
 	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(GENDIR)/main.lzma
