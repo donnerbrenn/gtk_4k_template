@@ -1,4 +1,5 @@
 #setup
+BENCHMARK		=		true
 SHADERDIR		=		shaders
 SHADER			=		pathtracer.frag
 WIDTH			=		2560
@@ -56,6 +57,10 @@ ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR
 endif
 
+ifeq ($(BENCHMARK),true)
+	COPTFLAGS+=-DBENCHMARK
+endif
+
 ifeq ($(SCISSORS),true)
 	COPTFLAGS+=-DSCISSORS
 endif
@@ -67,6 +72,10 @@ endif
 
 ifeq ($(DEBUG),true)
 	COPTFLAGS+=-DDEBUG
+	LIBS+=-lc
+endif
+
+ifeq ($(BENCHMARK),true)
 	LIBS+=-lc
 endif
 

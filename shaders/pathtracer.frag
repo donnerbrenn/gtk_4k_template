@@ -1,6 +1,6 @@
 #define threshold .01
-#define SAMPLES 300
-#define BOUNCES 8
+#define SAMPLES 600
+#define BOUNCES 16
 float c_pi = acos(-1);
 float c_twopi = c_pi * 2;
 out vec4 fragColor;
@@ -40,8 +40,8 @@ float fBox(vec3 p, vec3 b) {
 }
 
 float scene(vec3 p) {
-  albedo = vec3(1.3);
-  float box = -fBox(p, vec3(1., 1., 6)) + .5;
+  albedo = vec3(1.);
+  float box = -fBox(p + vec3(0, 0, 3.5), vec3(1.2, 1.2, 5)) + .1;
   float ball = fSphere(p, 1);
   float ball2 = fSphere(p + vec3(.75, .75, .75), .3);
   float ball3 = fSphere(p + vec3(-.75, .75, .75), .3);
@@ -55,7 +55,7 @@ float scene(vec3 p) {
   if (final == ball3)
     albedo = vec3(.9, .2, .2);
   if (final == ball5)
-    albedo = vec3(.1);
+    albedo = vec3(.05);
   return final;
 }
 
@@ -73,9 +73,10 @@ bool march(inout vec3 p, vec3 dir) {
   return dst < threshold;
 }
 
-vec3 calcColor(vec3 d, vec3 n, float power) {
-  vec3 diffuse = albedo * attentuation * max(dot(normalize(d), n), 0) * power;
-  return diffuse;
+vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
+    float light = max(dot(n, -normalize(d)), 0);
+  vec3 diffuse = albedo * attentuation * light * power;
+  return color*diffuse * (pow(light,16)*power/2);
 }
 
 void main() {
@@ -90,10 +91,11 @@ void main() {
     attentuation = vec3(1);
     for (int i = 0; i < BOUNCES && march(ro, d); i++) {
       n = normal(ro);
-      fragColor.rgb += calcColor(vec3(1, 1, -1), n, .7);
-      fragColor.rgb += calcColor(vec3(-1, 0, -1), n, .33);
-      fragColor.rgb += calcColor(RandomUnitVector(state), n, 1);
-      // fragColor.rgb+=calcColor(n,d,1);
+      fragColor.rgb += calcLight(ro - vec3(0, 6, -6), n, vec3(1), 2);
+      fragColor.rgb += calcLight(vec3(1, -1, .1), n, vec3(.5,.5,.125), 1);
+      fragColor.rgb += calcLight(vec3(-1, -1, .1), n, vec3(.5,1,.125), 1);
+    //   fragColor.rgb += calcLight(vec3(-1, 1, .1), n, vec3(.5,.5,.125), 1.5/4);
+      fragColor.rgb += calcLight(d, n, vec3(.2,.2,.5), 2);
       d = reflect(d, n);
       if (i == 0) {
         d = normalize(n + RandomUnitVector(state));
@@ -101,5 +103,5 @@ void main() {
       attentuation *= albedo * max(dot(d, n), 0);
     }
   }
-  fragColor.rgb = sqrt(fragColor.rgb / (SAMPLES * BOUNCES));
+  fragColor.rgb = sqrt(fragColor.rgb / (SAMPLES * sqrt(BOUNCES)));
 }

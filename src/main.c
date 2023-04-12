@@ -26,7 +26,7 @@ static GLuint vprogram_id;
 static GTimer* gtimer;
 #endif
 
-#ifdef DEBUG
+#ifdef BENCHMARK
 static GTimer* gClock;
 #endif
 
@@ -65,8 +65,8 @@ void on_render()
 #ifdef SCISSORS
 	}
 #endif
-	#ifdef DEBUG
-	printf("render time: %.2f seconds\n", g_timer_elapsed(gClock, NULL));
+	#ifdef BENCHMARK
+	printf("RT: %.2f seconds\n", g_timer_elapsed(gClock, NULL));
 	#endif
 	rendered=TRUE;
 }
@@ -104,6 +104,8 @@ void _start()
 {
 #ifdef DEBUG
 	printf("DEBUG MODE ON!\n");
+#endif
+#ifdef BENCHMARK
 	gClock = g_timer_new();
 #endif
 	gtk_init(0,NULL);
