@@ -1,10 +1,10 @@
 #setup
-BENCHMARK		=		true
-DEBUG			=		true
-SHADERDIR		=		shaders
-SHADER			=		pathtracer.frag
 WIDTH			=		2560
 HEIGHT			=		1440
+BENCHMARK		=		true
+# DEBUG			=		true
+SHADERDIR		=		shaders
+SHADER			=		pathtracer.frag
 HIDECURSOR		=		true
 SCISSORS		=		true
 GLVERSION		=		'\#version 400'

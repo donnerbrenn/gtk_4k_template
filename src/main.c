@@ -46,7 +46,7 @@ void on_render()
 #endif
 
 #ifdef SCISSORS
-	#define lines 90
+	#define lines 180
 	#ifdef DEBUG
 	int step=HEIGHT/lines;
 	float per=100.f / step;
