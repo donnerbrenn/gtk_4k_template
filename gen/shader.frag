@@ -2,9 +2,9 @@
 
 float i_X=2560.;
 float i_Y=1440.;
-#define TSH .001 //Threshold
-#define SMPL 1000 // Samples
-#define BNC 8 // Bounces
+#define TSH .001  // Threshold
+#define SMPL 300 // Samples
+#define BNC 8     // Bounces
 float c_pi = acos(-1);
 out vec4 Frag;
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
@@ -47,17 +47,17 @@ float scene(vec3 p) {
   sharpness = 2;
   emission = 0;
   float ground = fPlane(p, vec3(0, 1, 0), 1.25);
-  //= -fBox(p + vec3(0, 0, 3.5), vec3(1.2, 1.2, 3)) + .1;
-  // box = min(box, fPlane(p, vec3(0, -1, 0), 2.2));
   float ball = fSphere(p, 1);
-  float ball2 = fSphere(p + vec3(.8, .8, .8), .4);
-  float ball3 = fSphere(p + vec3(-.8, .8, .8), .4);
-  float ball4 = fSphere(p + vec3(-.8, -.8, .8), .4);
-  float ball5 = fSphere(p + vec3(.8, -.8, .8), .4);
+  float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
+  float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
+  float greenBall = fSphere(p + vec3(-.8, -.8, .8), .4);
+  float blackBall = fSphere(p + vec3(.8, -.8, .8), .4);
   float light = fSphere(p + vec3(0, -12, -8), 3);
 
-  float final = min(
-      min(min(min(min(min(ground, ball), ball2), ball3), ball4), ball5), light);
+  float final =
+      min(min(min(min(min(min(ground, ball), blueBall), redBall), greenBall),
+              blackBall),
+          light);
   if (final == light) {
     emission = 1.;
   }
@@ -66,23 +66,24 @@ float scene(vec3 p) {
     specularity = 1;
     sharpness = 128;
   }
-  if (final == ball4) {
+  if (final == greenBall) {
     albedo = vec3(.1, .9, .1);
-    specularity = .5;
+    specularity = .25;
   }
-  if (final == ball2) {
+  if (final == blueBall) {
     albedo = vec3(.1, .1, .9);
-    specularity = .05;
+    sharpness = 8;
+    specularity = .8;
   }
-  if (final == ball3) {
+  if (final == redBall) {
     albedo = vec3(.9, .1, .1);
     sharpness = 128;
     specularity = 1;
   }
-  if (final == ball5) {
-    albedo = vec3(.0);
-    sharpness = 128;
-    specularity = 1;
+  if (final == blackBall) {
+    albedo = vec3(.01);
+    sharpness = 8;
+    specularity = .5;
   }
   return final;
 }
@@ -95,7 +96,7 @@ vec3 normal(vec3 p) {
 bool march(inout vec3 p, vec3 dir) {
   float dst = .1;
   float travel = 0;
-  while (travel < 25 && dst > TSH) {
+  while (travel < 100 && dst > TSH) {
     p += dir * dst;
     dst = scene(p);
     travel += dst;
@@ -124,18 +125,16 @@ void main() {
     for (int i = 0; i < BNC && march(ro, d); i++) {
       n = normal(ro);
       Frag.rgb += emission;
-      Frag.rgb += calcLight(ro - vec3(0, 6, -6), n, vec3(1), .25);
-      Frag.rgb += calcLight(vec3(1, -1, -.1), n, vec3(1), .5);
-      Frag.rgb += calcLight(vec3(-1, -1, -.1), n, vec3(.5, 1, .125), .33);
-      Frag.rgb += calcLight(rndVector(state), n, vec3(1), .5);
+      Frag.rgb += calcLight(ro - vec3(0, 6, -6), n, vec3(1), .5);
+      Frag.rgb += calcLight(vec3(1, -1, -.3), n, vec3(1, 0, 0), .5);
+      Frag.rgb += calcLight(vec3(-1, -1, -.3), n, vec3(.5, 1, .125), .8);
+      Frag.rgb += calcLight(rndVector(state), n, vec3(.1, .1, 1.), .25);
       d = normalize(n + rndVector(state));
-
       attentuation *= albedo * max(dot(d, n), 0);
       Frag.w++;
     }
-    if (Frag.w > 0)
-      Frag.rgb += attentuation;
+    Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;
   }
+  // Frag.rgb = Frag.w == 0? vec3(vec2(uv.y),1):Frag.rgb;
   Frag.rgb = sqrt(Frag.rgb / Frag.w);
-  // Frag.rgb*=1./(ro.z*.01);
 }

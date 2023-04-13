@@ -117,11 +117,10 @@ void _start()
 	g_signal_connect_object(win, "key_press_event", (GCallback)check_escape, NULL,0);
 	gtk_widget_show_all (win);
 	gtk_window_fullscreen((GtkWindow*)win);
-	
 #ifdef HIDECURSOR
 	GdkWindow* window = gtk_widget_get_window(win);
 	GdkCursor* Cursor = gdk_cursor_new_for_display(gdk_display_get_default(),GDK_BLANK_CURSOR);
-	#pragma GCC diagnostic pop
+	gdk_window_set_cursor(window, Cursor);
 #endif
 	on_realize();
 	__builtin_unreachable();
