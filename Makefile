@@ -1,5 +1,6 @@
 #setup
 BENCHMARK		=		true
+DEBUG			=		true
 SHADERDIR		=		shaders
 SHADER			=		pathtracer.frag
 WIDTH			=		2560
@@ -9,7 +10,7 @@ SCISSORS		=		true
 GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
-DEBUG			=		false
+
 
 VNDH_FLAGS	:= -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
 AVNDH_FLAGS :=-l -v --vndh vondehi 

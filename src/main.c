@@ -46,14 +46,15 @@ void on_render()
 #endif
 
 #ifdef SCISSORS
+	#define lines 90
 	#ifdef DEBUG
-	int step=HEIGHT/20;
+	int step=HEIGHT/lines;
 	float per=100.f / step;
 	int cnt=0;
 	#endif
 	glEnable(GL_SCISSOR_TEST);
-	for (int i = 0; i < HEIGHT; i += 20) {
-		glScissor(0,i,WIDTH,20);
+	for (int i = 0; i < HEIGHT; i += lines) {
+		glScissor(0,i,WIDTH,lines);
 		#ifdef DEBUG
 		cnt++;
 		printf("\33[2K\r%.2f\n",per*cnt);
