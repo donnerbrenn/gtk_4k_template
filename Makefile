@@ -1,12 +1,13 @@
 #setup
+SHADER			=		competition_pro.frag
 WIDTH			=		2560
 HEIGHT			=		1440
+HIDECURSOR		=		true
 BENCHMARK		=		true
 # DEBUG			=		true
-SHADERDIR		=		shaders
-SHADER			=		pathtracer.frag
-HIDECURSOR		=		true
 SCISSORS		=		true
+
+SHADERDIR		=		shaders
 GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'

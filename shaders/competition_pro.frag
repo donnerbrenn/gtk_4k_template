@@ -1,7 +1,3 @@
-#version 400
-
-float i_X=2560.;
-float i_Y=1440.;
 float i_THRESHOLD = .001; // Threshold
 uint i_SAMPLES = 300;     // Samples
 uint i_BOUNCES = 8;       // Bounces
