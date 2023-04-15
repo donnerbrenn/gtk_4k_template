@@ -2,9 +2,9 @@
 
 float i_X=2560.;
 float i_Y=1440.;
-float i_THRESHOLD = .001; // Threshold
-uint i_SAMPLES = 300;     // Samples
-uint i_BOUNCES = 8;       // Bounces
+float i_THRESHOLD = .001;
+uint i_SAMPLES = 300;
+uint i_BOUNCES = 8;
 
 float c_pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
@@ -16,15 +16,12 @@ float sharpness;
 float emission;
 
 vec3 rotate(vec3 p, vec3 t) {
-  float c = cos(t.x), s = sin(t.x);
-  mat3 m = mat3(vec3(1, 0, 0), vec3(0, c, -s), vec3(0, s, c));
-  c = cos(t.y);
-  s = sin(t.y);
-  m *= mat3(vec3(c, 0, s), vec3(0, 1, 0), vec3(-s, 0, c));
-  c = cos(t.z);
-  s = sin(t.z);
-  m *= mat3(vec3(c, -s, 0), vec3(s, c, 0), vec3(0, 0, 1));
-  return m * p;
+  vec3 c = cos(t);
+  vec3 s = sin(t);
+  mat3 i_rx = mat3(1, 0, 0, 0, c.x, -s.x, 0, s.x, c.x);
+  mat3 i_ry = mat3(c.y, 0, s.y, 0, 1, 0, -s.y, 0, c.y);
+  mat3 i_rz = mat3(c.z, -s.z, 0, s.z, c.z, 0, 0, 0, 1);
+  return i_rz * i_ry * i_rx * p;
 }
 
 float softmin(float f1, float f2, float val) {
@@ -83,17 +80,17 @@ float scene(vec3 p) {
   vec2 seed = fract(p.xz * vec2(233.34, 851.74));
   seed += dot(seed, seed + 23.45);
   float i_noise = fract(seed.x * seed.y);
-  float grid = fBox(i_mp, vec3(.0)) - i_noise * .001;
+  float grid = fBox(i_mp, vec3(.0)) - i_noise * .002;
 
   // float ground = fPlane(p, vec3(0, 1, 0), 2.2);
   float ground = mix(fPlane(p, vec3(0, 1, 0), 2.2), grid, .01);
-  float i_stick = fCappedCone(p + vec3(0, .1, 0), 1., .15, .25, 0);
+  float i_stick = fCappedCone(p + vec3(0, .1, 0), 1, .15, .25, 0);
   float i_ball = fSphere(p + vec3(.0, -1., .0), .5);
   float i_ring1 = fCappedCone(p + vec3(0, .6, 0), .05, .3, .3, .05);
-  float i_ring2 = fCappedCone(p + vec3(0, 1., 0), .3, .6, .6, .05);
+  float i_ring2 = fCappedCone(p + vec3(0, 1, 0), .3, .6, .6, .05);
   float i_base1 = fBox(p + vec3(0, 1.4, 0), vec3(.9, .15, .9)) - .1;
   float i_base2 =
-      mix(fBox(p + vec3(.5, 1.85, 0), vec3(1.55, .0, 1.05)) - .45, grid, .005);
+      mix(fBox(p + vec3(.5, 1.85, 0), vec3(1.55, .0, 1.05)) - .45, grid, .0025);
   float i_bbase =
       min(fCappedCone(p + vec3(1.75, 1.34, .75), .05, .55, .45, .02),
           fCappedCone(p + vec3(1.75, 1.34, -.75), .05, .55, .45, .02)) -
@@ -102,29 +99,26 @@ float scene(vec3 p) {
       min(fCappedCone(p + vec3(1.75, 1.27, -.75), .05, .4, .4, .015),
           fCappedCone(p + vec3(1.75, 1.27, .75), .05, .4, .4, .015)) -
       .01;
-  float i_cable = fBox(p + vec3(10, sin(p.x * 1.8) * .1 + 2.05,
+  float i_cable = fBox(p + vec3(15.5, sin(p.x * 1.8) * .1 + 2.05,
                                 sin((p.x * .0) + sin(p.x * .7)) + .75),
-                       vec3(8, 0, 0)) -
+                       vec3(15, 0, 0)) -
                   .1;
 
-  float i_red = min(min(softmin(i_ball, i_stick, .05), i_buttons), i_bbase);
+  float red = min(min(softmin(i_ball, i_stick, .025), i_buttons), i_bbase);
   float i_black =
       min(softmin(softmin(softmin(i_ring1, i_ring2, .15), i_base1, .15),
                   i_base2, .15),
           i_cable);
-  float final = min(min(i_red, i_black), ground);
-  if (final == i_red) {
+  float final = min(min(red, i_black), ground);
+  if (final == red) {
     albedo = vec3(.8, .01, .01);
-    sharpness = 256;
-    // specularity=.1;
-    // sharpness=4;
+    sharpness = 64;
   }
   if (final == ground) {
     albedo = vec3(.03);
     sharpness = 64;
     specularity = .1;
   }
-
   return final;
 }
 
@@ -151,10 +145,9 @@ vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
 }
 
 void main() {
-  vec3[3] lp;
-  lp[0] = vec3(0, 10, -20);
-  lp[1] = vec3(-50, 20, -50);
-  lp[2] = vec3(50, 20, -50);
+  vec3 i_lp1 = vec3(0, 10, -20);
+  vec3 i_lp2 = vec3(-50, 20, -50);
+  vec3 i_lp3 = vec3(50, 20, -50);
   vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
   Frag.rgb = vec3(0);
   vec3 n;
@@ -169,9 +162,9 @@ void main() {
     for (int i = 0; i < i_BOUNCES && march(ro, d); i++) {
       n = normal(ro);
       Frag.rgb += emission;
-      Frag.rgb += calcLight(lp[0], n, vec3(.5, .5, .9), .5);
-      Frag.rgb += calcLight(lp[1], n, vec3(1, .1, .1), .5);
-      Frag.rgb += calcLight(lp[2], n, vec3(.5, 1, .125), .8);
+      Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
+      Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
+      Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
       Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .25);
       d = normalize(n + rndVector(state));
       attentuation *= albedo * max(dot(d, n), 0);
@@ -179,6 +172,5 @@ void main() {
     }
     Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;
   }
-  // Frag.rgb = Frag.w == 0? vec3(vec2(uv.y),1):Frag.rgb;
   Frag.rgb = sqrt(Frag.rgb / Frag.w);
 }
