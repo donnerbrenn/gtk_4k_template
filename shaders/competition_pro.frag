@@ -1,5 +1,5 @@
 float i_THRESHOLD = .01;
-uint i_SAMPLES = 300;
+uint i_SAMPLES = 250;
 uint i_BOUNCES = 8;
 
 float i_pi = acos(-1);
@@ -10,6 +10,7 @@ vec3 albedo;
 float specularity;
 float sharpness;
 float emission;
+float metal;
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
@@ -63,14 +64,13 @@ float fBox(vec3 p, vec3 b) {
 }
 
 float scene(vec3 p) {
-  p = rotate(rotate(p, vec3(-.7, .0, -.04)), vec3(0, 1.1, 0));
-  p.y -= 1.05;
-  p.x += .5;
-  albedo = vec3(.0);
-
+  p = rotate(rotate(p, vec3(-.7, .0, -.04)), vec3(0, 1.1, 0)) +
+      vec3(.5, -1.05, 0);
+  albedo = vec3(.03);
   specularity = .3;
   sharpness = 64;
   emission = 0;
+  metal=.2;
 
   vec3 i_mp = mod(p, .0001) - .00005;
   vec2 seed = fract(p.xz * vec2(233.34, 851.74));
@@ -78,14 +78,14 @@ float scene(vec3 p) {
   float i_noise = fract(seed.x * seed.y);
   float grid = fBox(i_mp, vec3(.0)) - i_noise * .002;
 
-  float ground = mix(fPlane(p, vec3(0, 1, 0), 2.2), grid, .01);
+  float ground = mix(fPlane(p, vec3(0, 1, 0), 2.2),grid,.005);
   float i_stick = fCappedCone(p + vec3(0, .1, 0), 1, .15, .25, 0);
   float i_ball = fSphere(p + vec3(.0, -1., .0), .5);
   float i_ring1 = fCappedCone(p + vec3(0, .6, 0), .05, .3, .3, .05);
   float i_ring2 = fCappedCone(p + vec3(0, 1, 0), .3, .6, .6, .05);
   float i_base1 = fBox(p + vec3(0, 1.4, 0), vec3(.9, .15, .9)) - .1;
   float i_base2 =
-      mix(fBox(p + vec3(.5, 1.85, 0), vec3(1.55, .0, 1.05)) - .45, grid, .0025);
+      mix(fBox(p + vec3(.5, 1.85, 0), vec3(1.55, .0, 1.05)) - .45, grid, .03);
   float i_bbase = fCappedCone(vec3(p.x, p.y, abs(p.z)) + vec3(1.75, 1.34, -.75),
                               .05, .55, .45, .02) -
                   .005;
@@ -99,25 +99,30 @@ float scene(vec3 p) {
                   .1;
 
   float red = min(min(softmin(i_ball, i_stick, .025), i_buttons), i_bbase);
-  float i_black =
+  float black =
       min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .15),
                   i_base2, .05),
           i_cable);
-  float final = min(min(red, i_black), ground);
+  float final = min(min(red, black), ground);
   if (final == red) {
     albedo = vec3(.8, .01, .01);
     sharpness = 64;
+    metal=.3;
   }
   if (final == ground) {
-    albedo = vec3(.03);
+    albedo = vec3(.05);
     sharpness = 64;
     specularity = .1;
+    metal=1;
+  }
+  if(final == black) {
+    metal = .8;
   }
   return final;
 }
 
 vec3 normal(vec3 p) {
-  mat3 k = mat3(p, p, p) - mat3(5e-5);
+  mat3 k = mat3(p, p, p) - mat3(5e-4);
   return normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
 }
 
@@ -146,7 +151,7 @@ void main() {
   Frag.rgb = vec3(0);
   vec3 n;
   vec3 ro;
-  vec3 d;
+  vec3 d, reflection;
   float i_FOVDegrees = 85;
   float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * i_pi / 180.0f);
   for (int j = 0; j < i_SAMPLES; j++) {
@@ -160,7 +165,11 @@ void main() {
       Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
       Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
       Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .25);
+      reflection = reflect(d, n);
       d = normalize(n + rndVector(state));
+      
+      d = normalize(mix(d, reflection, metal));
+
       attentuation *= albedo * max(dot(d, n), 0);
       Frag.w++;
     }
