@@ -4,9 +4,7 @@
 // Shadercode from To The Road Of Ribbon by FRequency, optimized by me https://www.pouet.net/prod.php?which=53939
 uniform float iTime;
 float tunnel(vec3 p) { return cos(p.x) + cos(p.y * 1.5) + cos(p.z) + cos(p.y * 20.) * .05; }
-
 float ribbon(vec3 p) { return length(max(abs(p - vec3(cos(p.z * 1.5) * .3, -.5 + cos(p.z) * .2, .0)) - vec3(.125, .02, iTime + 3.), vec3(.0))); }
-
 float scene(vec3 p) { return min(tunnel(p), ribbon(p)); }
 
 vec3 getNormal(vec3 p) {

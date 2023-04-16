@@ -82,7 +82,7 @@ ifeq ($(BENCHMARK),true)
 endif
 
 CFLAGS 			=		-std=gnu99 -nodefaultlibs $(COPTFLAGS)
-CFLAGS 			+=		-Wall -Wextra #-Wpedantic
+CFLAGS 			+=		#-Wall -Wextra #-Wpedantic
 
 ifeq ($(ALIGNSTACK),true)
 	SMOLFLAGS+=-falign-stack
@@ -178,7 +178,12 @@ elf: $(BINDIR)/main.elf
 delokp:
 	-rm cleanOKP/onekpaq_context.cache
 
+run: all
+	bin/main.smol
+
 all: sh vndh okp #elf
 	./tools/analyze.py bin/*
+
+purge: clean delokp
 
 .PHONY: all clean

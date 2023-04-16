@@ -1,5 +1,6 @@
+#define PHI (sqrt(5) * 0.5 + 0.5)
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 300;
+uint i_SAMPLES = 1000;
 uint i_BOUNCES = 8;
 float i_FOVDegrees = 45;
 float i_pi = acos(-1);
@@ -63,59 +64,36 @@ float fBox(vec3 p, vec3 b) {
   return length(max(d, vec3(0))) + vmax(min(d, vec3(0)));
 }
 
+float fBlob(vec3 p) {
+  p = abs(p);
+  if (p.x < max(p.y, p.z))
+    p = p.yzx;
+  if (p.x < max(p.y, p.z))
+    p = p.yzx;
+  float b = max(max(max(dot(p, normalize(vec3(1, 1, 1))),
+                        dot(p.xz, normalize(vec2(PHI + 1, 1)))),
+                    dot(p.yx, normalize(vec2(1, PHI)))),
+                dot(p.xz, normalize(vec2(1, PHI))));
+  float l = length(p);
+  return l - 1.5 -
+         0.2 * (1.5 / 2) * cos(min(sqrt(1.01 - b / l) * (i_pi / 0.25), i_pi));
+}
+
 float scene(vec3 p) {
   albedo = vec3(.05);
   specularity = .01;
   sharpness = 2;
   emission = 0;
-  metal=0;
+  metal = 0;
   float ground = fPlane(p, vec3(0, 1, 0), 1.25);
-  float bigBall = fSphere(p, 1);
-  float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
-  float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
-  float greenBall = fSphere(p + vec3(-.8, -.8, .8), .4);
-  float blackBall = fSphere(p + vec3(.8, -.8, .8), .4);
-  float light = fSphere(p + vec3(0, -12, 0), 3);
+  float blob = fBlob(p);
 
-  float final =
-      min(min(min(min(min(min(ground, bigBall), blueBall), redBall), greenBall),
-              blackBall),
-          light);
+  float final = min(ground, blob);
+  albedo = final == blob ? vec3(.8) : albedo;
+  specularity = final == blob ? 0 : specularity;
+  metal = final == blob ? 1 : metal;
+  sharpness = final == blob ? 128 : sharpness;
 
-  if (final == ground) {
-    albedo=vec3(1);
-    metal=.6;
-  }
-  
-  if (final == light) {
-    emission = 2.;
-    albedo=vec3(1);
-  }
-  if (final == bigBall) {
-    albedo = vec3(1);
-    specularity = 1;
-    sharpness = 128;
-    metal = .7;
-  }
-  if (final == greenBall) {
-    albedo = vec3(.1, .9, .1);
-    specularity = .25;
-  }
-  if (final == blueBall) {
-    albedo = vec3(.1, .1, .9);
-    sharpness = 8;
-    specularity = .3;
-  }
-  if (final == redBall) {
-    albedo = vec3(.9, .1, .1);
-    sharpness = 128;
-    specularity = 1;
-  }
-  if (final == blackBall) {
-    albedo = vec3(.01);
-    sharpness = 8;
-    specularity = .5;
-  }
   return final;
 }
 
@@ -158,14 +136,14 @@ void main() {
     attentuation = vec3(.5, .5, 1);
     for (int i = 0; i < i_BOUNCES && march(ro, d); i++) {
       n = normal(ro);
-      attentuation += emission*albedo;
-      // Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
-      // Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
-      // Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      // Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .25);
       float i_reflection = reflect(d, n);
       float i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, metal));
+      attentuation += emission * albedo;
+      Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
+      Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
+      Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
+      Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .25);
       attentuation *= albedo * max(dot(d, n), 0);
       Frag.w++;
     }

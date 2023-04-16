@@ -1,4 +1,5 @@
-out vec4 fragCol;
+out vec4 Frag;
+float ref;
 
 float box(vec3 p, vec3 d) {
 	vec3 q = abs(p)-d;
@@ -11,18 +12,17 @@ float tex(vec3 p) {
 		+sin(dot(sin(p*52.),vec3(2,3,1)))*cos(dot(cos(p*73.),vec3(3,1,2)));
 }
 
-float ref;
 float scene(vec3 p) {
-	float tx = tex(p*100)/5000*(exp(tex(p)+tex(p*2)+tex(p/5))*.3+.6); //add very tiny bumps to the SDF itself, which will cause glossy reflections!
+	float i_tx = tex(p*100)/5000*(exp(tex(p)+tex(p*2)+tex(p/5))*.3+.6); //add very tiny bumps to the SDF itself, which will cause glossy reflections!
 	float bx = -box(p, vec3(7.9));
 	p = asin(sin(p));
 	float sbx = box(p,vec3(.7,.6,.6))-.02;
 	ref = sbx>bx?sin(length(p)*20):1;
-	return min(bx, sbx)-tx;
+	return min(bx, sbx)-i_tx;
 }
 
 void main() {
-	// fragCol=vec4(0);
+	// Frag=vec4(0);
 	for (int j = 0; j < 100; j++) {
 		vec2 uv = (gl_FragCoord.xy-vec2(i_X*.5,i_Y*.5))/1000 + vec2(tex(vec3(j)))/2000;
 
@@ -41,7 +41,7 @@ void main() {
 			}
 			p += cam*dist;
 		}
-		fragCol += vec4(dist*dist<1e-6?(sin(vec3(0,5,4)-p*.2)*.2+1.2)*atten:vec3(0.01), 1);
+		Frag += vec4(dist*dist<1e-6?(sin(vec3(0,5,4)-p*.2)*.2+1.2)*atten:vec3(0.01), 1);
 	}
-	fragCol=sqrt(fragCol/fragCol.w);
+	Frag=sqrt(Frag/Frag.w);
 }

@@ -19,9 +19,6 @@ static GtkWidget *glarea;
 #ifdef VAR_ITIME
 static GLuint sprogram_id;
 static GLuint vprogram_id;
-#endif
-
-#ifdef VAR_ITIME
 static GTimer *gtimer;
 #endif
 
