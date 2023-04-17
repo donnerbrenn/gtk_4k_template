@@ -19,11 +19,10 @@ static GtkWidget *glarea;
 #ifdef VAR_ITIME
 static GLuint sprogram_id;
 static GLuint vprogram_id;
-static GTimer *gtimer;
 #endif
 
-#ifdef BENCHMARK
-static GTimer *gClock;
+#if defined BENCHMARK || defined VAR_ITIME
+static GTimer *timer;
 #endif
 
 static void on_render();
@@ -33,11 +32,14 @@ __attribute__((used, __externally_visible__, __section__(".text._start"))) stati
 
 void on_render()
 {
+#ifndef VAR_ITIME
 	static gboolean rendered = FALSE;
 	if (rendered)
 		return TRUE;
+#endif
 #ifdef VAR_ITIME
-	glProgramUniform1f(sprogram_id, 0, g_timer_elapsed(gtimer, NULL));
+	// glUniform1f(, itime);
+	glProgramUniform1f(sprogram_id, 0, g_timer_elapsed(timer, NULL));
 	gtk_gl_area_queue_render(glarea);
 #endif
 
@@ -64,9 +66,11 @@ void on_render()
 	}
 #endif
 #ifdef BENCHMARK
-	printf("RT: %.2f seconds\n", g_timer_elapsed(gClock, NULL));
+	printf("RT: %.2f seconds\n", g_timer_elapsed(timer, NULL));
 #endif
+#ifndef VAR_ITIME
 	rendered = TRUE;
+#endif
 }
 
 void on_realize()
@@ -74,7 +78,7 @@ void on_realize()
 	static GLuint pipelineId;
 	static GLuint vao;
 #ifdef VAR_ITIME
-	gtimer = g_timer_new();
+	timer = g_timer_new();
 #endif
 	gtk_gl_area_make_current(glarea);
 	glGenVertexArrays(1, &vao);
@@ -103,7 +107,7 @@ void _start()
 	printf("DEBUG MODE ON!\n");
 #endif
 #ifdef BENCHMARK
-	gClock = g_timer_new();
+	timer = g_timer_new();
 #endif
 	gtk_init(0, NULL);
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
