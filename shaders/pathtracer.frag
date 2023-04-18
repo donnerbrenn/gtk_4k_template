@@ -8,9 +8,11 @@ out vec4 Frag;
 vec3 attentuation;
 vec3 albedo;
 float specularity;
-float sharpness;
+float shininess;
 float emission;
 float metal;
+float transparency;
+float refraction;
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
@@ -66,10 +68,10 @@ float fBox(vec3 p, vec3 b) {
 float scene(vec3 p) {
   albedo = vec3(.05);
   specularity = .01;
-  sharpness = 2;
+  shininess = 2;
   emission = 0;
   metal=0;
-  float ground = fPlane(p, vec3(0, 1, 0), 1.25);
+  float ground = -fBox(p,vec3(1.5,1.5,5)); //fPlane(p, vec3(0, 1, 0), 1.25); 
   float bigBall = fSphere(p, 1);
   float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
   float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
@@ -82,40 +84,32 @@ float scene(vec3 p) {
               blackBall),
           light);
 
-  if (final == ground) {
-    albedo=vec3(1);
-    metal=.6;
-  }
-  
-  if (final == light) {
-    emission = 2.;
-    albedo=vec3(1);
-  }
-  if (final == bigBall) {
-    albedo = vec3(1);
-    specularity = 1;
-    sharpness = 128;
-    metal = .7;
-  }
-  if (final == greenBall) {
-    albedo = vec3(.1, .9, .1);
-    specularity = .25;
-  }
-  if (final == blueBall) {
-    albedo = vec3(.1, .1, .9);
-    sharpness = 8;
-    specularity = .3;
-  }
-  if (final == redBall) {
-    albedo = vec3(.9, .1, .1);
-    sharpness = 128;
-    specularity = 1;
-  }
-  if (final == blackBall) {
-    albedo = vec3(.01);
-    sharpness = 8;
-    specularity = .5;
-  }
+albedo = final == ground ? vec3(1) :
+         final == light ? vec3(1) :
+         final == bigBall ? vec3(.5) :
+         final == greenBall ? vec3(.1, .9, .1) :
+         final == blueBall ? vec3(.1, .1, .9) :
+         final == redBall ? vec3(.9, .1, .1) :
+         final == blackBall ? vec3(.01) : albedo;
+
+metal = final == ground ? .8 :
+        final == bigBall ? 1 :
+        metal;
+
+emission = final == light ? 2. : emission;
+
+shininess = final == bigBall ? 128 :
+            final == blueBall ? 8 :
+            final == blackBall ? 8 :
+            final == redBall ? 128 :
+            shininess;
+
+specularity = final == bigBall ? 1 :
+              final == greenBall ? .25 :
+              final == blueBall ? .3 :
+              final == redBall ? 1 :
+              final == blackBall ? .5 :
+              specularity;
   return final;
 }
 
@@ -123,6 +117,13 @@ vec3 normal(vec3 p)
 {
     mat3 k = mat3(p,p,p) - mat3(0.005);
     return normalize(scene(p) - vec3( scene(k[0]),scene(k[1]),scene(k[2])) );
+}
+
+
+vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
+  float light = max(dot(n, normalize(d)), 0);
+  vec3 i_diffuse = albedo * attentuation * light;
+  return (color * i_diffuse + pow(light, shininess) * specularity) * power;
 }
 
 bool march(inout vec3 p, vec3 dir) {
@@ -134,12 +135,6 @@ bool march(inout vec3 p, vec3 dir) {
     travel += dst;
   }
   return dst < i_THRESHOLD;
-}
-
-vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
-  float light = max(dot(n, normalize(d)), 0);
-  vec3 i_diffuse = albedo * attentuation * light;
-  return (color * i_diffuse + pow(light, sharpness) * specularity) * power;
 }
 
 void main() {
@@ -156,13 +151,13 @@ void main() {
     d = normalize(vec3(uv, i_cameraDistance));
     ro = vec3(uv, -5);
     attentuation = vec3(.5, .5, 1);
-    for (int i = 0; i < i_BOUNCES && march(ro, d); i++) {
+    for (int i = 0; i < i_BOUNCES + 1 && march(ro, d); i++) {
       n = normal(ro);
       attentuation += emission*albedo;
-      // Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
-      // Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
-      // Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      // Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .25);
+      Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
+      Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
+      Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
+      Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .5);
       float i_reflection = reflect(d, n);
       float i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, metal));
