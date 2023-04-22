@@ -1,5 +1,5 @@
 #setup
-SHADER			=		competition_pro.frag
+SHADER			=		pathtracer.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		true
@@ -7,7 +7,7 @@ BENCHMARK		=		true
 # DEBUG			=		true
 SCISSORS		=		true
 
-SHADERDIR		=		shaders
+SHADERDIR		=		pathtracer
 GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'
@@ -30,7 +30,7 @@ CC				=		gcc
 MINIFY			= 		mono ./tools/shader_minifier.exe -v --preserve-externals
 USELTO			=		true
 ALIGNSTACK		=		true
-SECTIONORDER	=		dt
+SECTIONORDER	=		td
 
 VSHADER			=		vshader.vert
 
@@ -104,11 +104,11 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
 ifeq ($(DEBUG),true)
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --move-declarations -o $@
-	$(MINIFY) $(GENDIR)/shader.frag --format indented --no-renaming --move-declarations -o $(GENDIR)/min_shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
 else
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --aggressive-inlining --move-declarations -o $@
-	$(MINIFY) $(GENDIR)/shader.frag --format indented --aggressive-inlining --move-declarations -o $(GENDIR)/min_shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --move-declarations -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --format indented --move-declarations -o $(GENDIR)/min_shader.frag
 endif
 	
 	./tools/replace.py $@
@@ -179,7 +179,11 @@ delokp:
 	-rm cleanOKP/onekpaq_context.cache
 
 run: all
-	bin/main.smol
+	bin/main.okp
+
+runsmol: clean $(BINDIR)/main.smol
+	./tools/analyze.py bin/*
+	./$(BINDIR)/main.smol
 
 all: sh vndh okp #elf
 	./tools/analyze.py bin/*

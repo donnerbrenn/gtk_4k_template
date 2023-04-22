@@ -1,7 +1,5 @@
 #define GL_GLEXT_PROTOTYPES
-
 #include "sys.h"
-
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -16,12 +14,12 @@
 
 static GtkWidget *glarea;
 
-#ifdef VAR_ITIME
+#if defined VAR_ITIME || defined DEBUG
 static GLuint sprogram_id;
 static GLuint vprogram_id;
 #endif
 
-#if defined BENCHMARK || defined VAR_ITIME
+#if defined BENCHMARK || defined VAR_ITIME || defined DEBUG
 static GTimer *timer;
 #endif
 
@@ -45,20 +43,10 @@ void on_render()
 
 #ifdef SCISSORS
 #define lines 180
-#ifdef DEBUG
-	int step = HEIGHT / lines;
-	float per = 100.f / step;
-	int cnt = 0;
-#endif
 	glEnable(GL_SCISSOR_TEST);
 	for (int i = 0; i < HEIGHT; i += lines)
 	{
 		glScissor(0, i, WIDTH, lines);
-#ifdef DEBUG
-		cnt++;
-		printf("\33[2K\r%.2f\n", per * cnt);
-
-#endif
 #endif
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glFinish();
@@ -83,6 +71,7 @@ void on_realize()
 	gtk_gl_area_make_current(glarea);
 	glGenVertexArrays(1, &vao);
 	glGenProgramPipelines(1, &pipelineId);
+#ifndef DEBUG
 #ifdef VAR_ITIME
 	glUseProgramStages(pipelineId, GL_VERTEX_SHADER_BIT, glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vshader_vert));
 	sprogram_id = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
@@ -90,6 +79,45 @@ void on_realize()
 #else
 	glUseProgramStages(pipelineId, GL_VERTEX_SHADER_BIT, glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vshader_vert));
 	glUseProgramStages(pipelineId, GL_FRAGMENT_SHADER_BIT, glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag));
+#endif
+#else
+	
+	GLboolean isLinked;
+	GLint maxLength = 0;
+	printf("Compiling vertex shader\n");
+
+	float current = g_timer_elapsed(timer, NULL);
+	vprogram_id = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vshader_vert);
+	glGetProgramiv(vprogram_id, GL_LINK_STATUS, &isLinked);
+	glGetProgramiv(vprogram_id, GL_INFO_LOG_LENGTH, &maxLength);
+	char *error = malloc(maxLength);
+	glGetProgramInfoLog(vprogram_id, maxLength, &maxLength, error);
+	if (maxLength > 2)
+		printf("%s\n", error);
+	if (isLinked == GL_FALSE)
+		SYS_exit_group(-1);
+
+	glUseProgramStages(pipelineId, GL_VERTEX_SHADER_BIT, vprogram_id);
+	// printf("Compiled vertex shader in %.2f seconds\n\n\n", g_timer_elapsed(timer, NULL) - current);
+
+	printf("Compiling fragment shader\n");
+	current = g_timer_elapsed(timer, NULL);
+	sprogram_id = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
+	glGetProgramiv(sprogram_id, GL_LINK_STATUS, &isLinked);
+	glGetProgramiv(sprogram_id, GL_INFO_LOG_LENGTH, &maxLength);
+
+	char *error2 = malloc(maxLength);
+	glGetProgramInfoLog(sprogram_id, maxLength, &maxLength, error2);
+	if (maxLength > 2)
+		printf("%s\n", error2);
+	if (isLinked == GL_FALSE)
+	{
+		printf("%s",shader_frag);
+		SYS_exit_group(-1);
+	}
+
+	glUseProgramStages(pipelineId, GL_FRAGMENT_SHADER_BIT, sprogram_id);
+	// printf("Compiled fragment shader in %.2f seconds\n", g_timer_elapsed(timer, NULL) - current);
 #endif
 	glBindProgramPipeline(pipelineId);
 	glBindVertexArray(vao);

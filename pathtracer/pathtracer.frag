@@ -7,12 +7,28 @@ uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 Frag;
 vec3 attentuation;
 vec3 albedo;
-float specularity;
-float shininess;
-float emission;
-float metal;
-float transparency;
-float refraction;
+// float specularity;
+// float shininess;
+// float emission;
+// float metal;
+// float transparency;
+// float refraction;
+
+struct MA {
+  vec3 abd;  // Albedo
+  float spc; // Specularity
+  float shp; // Sharpness
+  float ems; // Emission
+  float mtl; // Metalness
+} material;
+
+MA Mred = MA(vec3(.7, .01, .01), .3, 64, 0, 0);
+MA Mground = MA(vec3(.1), .1, 64, 0, .25);
+MA Mblack = MA(vec3(.03), .2, 64, 0, 0);
+MA Mblue = MA(vec3(.03, .03, .8), .2, 64, 0, 0);
+MA Mgreen = MA(vec3(.03, .8, .03), .2, 64, 0, 0);
+MA Mmirror = MA(vec3(.7), .2, 64, 0, .95);
+MA Mlight = MA(vec3(.7), 0, 0, 1, 0);
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
@@ -66,12 +82,8 @@ float fBox(vec3 p, vec3 b) {
 }
 
 float scene(vec3 p) {
-  albedo = vec3(.05);
-  specularity = .01;
-  shininess = 2;
-  emission = 0;
-  metal=0;
-  float ground = -fBox(p,vec3(1.5,1.5,5)); //fPlane(p, vec3(0, 1, 0), 1.25); 
+  material = MA(vec3(.03), .2, 64, 0, 0);
+  float ground = fPlane(p, vec3(0, 1, 0), 1.25);
   float bigBall = fSphere(p, 1);
   float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
   float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
@@ -84,46 +96,27 @@ float scene(vec3 p) {
               blackBall),
           light);
 
-albedo = final == ground ? vec3(1) :
-         final == light ? vec3(1) :
-         final == bigBall ? vec3(.5) :
-         final == greenBall ? vec3(.1, .9, .1) :
-         final == blueBall ? vec3(.1, .1, .9) :
-         final == redBall ? vec3(.9, .1, .1) :
-         final == blackBall ? vec3(.01) : albedo;
+  material = final == ground      ? Mground
+             : final == redBall   ? Mred
+             : final == blackBall ? Mblack
+             : final == greenBall ? Mgreen
+             : final == blueBall  ? Mblue
+             : final == bigBall   ? Mmirror
+             : final == light     ? Mlight
+                                  : material;
 
-metal = final == ground ? .8 :
-        final == bigBall ? 1 :
-        metal;
-
-emission = final == light ? 2. : emission;
-
-shininess = final == bigBall ? 128 :
-            final == blueBall ? 8 :
-            final == blackBall ? 8 :
-            final == redBall ? 128 :
-            shininess;
-
-specularity = final == bigBall ? 1 :
-              final == greenBall ? .25 :
-              final == blueBall ? .3 :
-              final == redBall ? 1 :
-              final == blackBall ? .5 :
-              specularity;
   return final;
 }
 
-vec3 normal(vec3 p) 
-{
-    mat3 k = mat3(p,p,p) - mat3(0.005);
-    return normalize(scene(p) - vec3( scene(k[0]),scene(k[1]),scene(k[2])) );
+vec3 normal(vec3 p) {
+  mat3 k = mat3(p, p, p) - mat3(0.005);
+  return normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
 }
-
 
 vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
   float light = max(dot(n, normalize(d)), 0);
   vec3 i_diffuse = albedo * attentuation * light;
-  return (color * i_diffuse + pow(light, shininess) * specularity) * power;
+  return (color * i_diffuse + pow(light, material.shp) * material.spc) * power;
 }
 
 bool march(inout vec3 p, vec3 dir) {
@@ -153,15 +146,15 @@ void main() {
     attentuation = vec3(.5, .5, 1);
     for (int i = 0; i < i_BOUNCES + 1 && march(ro, d); i++) {
       n = normal(ro);
-      attentuation += emission*albedo;
+      attentuation += material.ems * material.abd;
       Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
       Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
       Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
       Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .5);
-      float i_reflection = reflect(d, n);
-      float i_rnd = normalize(n + rndVector(state));
-      d = normalize(mix(i_rnd, i_reflection, metal));
-      attentuation *= albedo * max(dot(d, n), 0);
+      vec3 i_reflection = reflect(d, n);
+      vec3 i_rnd = normalize(n + rndVector(state));
+      d = normalize(mix(i_rnd, i_reflection, material.mtl));
+      attentuation *= material.abd * max(dot(d, n), 0);
       Frag.w++;
     }
     Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;

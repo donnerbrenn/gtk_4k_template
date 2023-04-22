@@ -5,7 +5,7 @@ float i_FOVDegrees = 85;
 
 float i_pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
-out vec4 Frag;
+out vec4 F;
 
 struct M {
   vec3 abd; // Albedo
@@ -17,7 +17,7 @@ struct M {
 
 M Mred = M(vec3(.7, .01, .01) , .3,  64, 0, .3);
 M Mground = M(vec3(.1)        , .1, 64, 0, .25);
-M Mblack = M(vec3(0)          , .2, 64, 0, .95);
+M Mblack = M(vec3(.03)          , .2, 64, 0, .95);
 
 vec3 attentuation;
 
@@ -103,8 +103,8 @@ float scene(vec3 p) {
   sdf = min(min(red, black), ground);
   // float i_cellX = mod(p.x, 1) * 225;
   // float i_cellZ = mod(p.z, 1) * 225;
-  // vec3 i_xor = vec3(float(uint(i_cellX) ^ uint(i_cellZ))) / 255;
-  // Mground.abd=i_xor;
+  // float i_xor = float(uint(i_cellX) ^ uint(i_cellZ)) / 255;
+  // Mground.abd.b=i_xor;
 
   material = sdf == red      ? Mred
              : sdf == ground ? Mground
@@ -141,7 +141,7 @@ void main() {
   vec3 i_lp2 = vec3(-50, 20, -50);
   vec3 i_lp3 = vec3(50, 20, -50);
   vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
-  Frag.rgb = vec3(0);
+  F.rgbw = vec4(1);
   vec3 n, ro, d;
   float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * i_pi / 180.0f);
   for (int j = 0; j < i_SAMPLES; j++) {
@@ -154,14 +154,14 @@ void main() {
       vec3 i_l1 = calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
       vec3 i_l2 = calcLight(i_lp2, n, vec3(1, .1, .1), .5);
       vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      Frag.rgb += i_l1 + i_l2 + i_l3;
+      F.rgb += i_l1 + i_l2 + i_l3;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));
       attentuation *= material.abd * max(dot(d, n), 0) * .98;
-      Frag.w++;
+      F.w++;
     }
-    Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;
+    F.rgb += F.w == 0 ? vec3(0) : attentuation;
   }
-  Frag.rgb = sqrt(Frag.rgb / Frag.w);
+  F.rgb = sqrt(F.rgb / F.w);
 }

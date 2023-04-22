@@ -1,5 +1,5 @@
 uniform float iTime;
-out vec3 fragColor;
+out vec3 F;
 
 // float tixy(float t, int i, int x, int y)
 // {
@@ -14,6 +14,6 @@ void main()
       vec2 offset=fract(uv*i_size)*2.-1.;
       // float r=clamp(tixy(iTime,int(index.y*i_size+index.x), int(index.x), int(index.y)),-.9,.9);
       float r=sin(int(index.x)*int(index.y)*int(index.y*i_size+index.x)+iTime);
-      fragColor.x=float((length(offset)-abs(r))<0);
-      fragColor=r>0?fragColor:fragColor.xxx;  
+      F.x=float((length(offset)-abs(r))<0);
+      F=r>0?F:F.xxx;  
 }
