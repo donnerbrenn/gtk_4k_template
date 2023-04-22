@@ -1,5 +1,5 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 300;
+uint i_SAMPLES = 900;
 uint i_BOUNCES = 8;
 float i_FOVDegrees = 45;
 float i_pi = acos(-1);
@@ -7,12 +7,6 @@ uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 Frag;
 vec3 attentuation;
 vec3 albedo;
-// float specularity;
-// float shininess;
-// float emission;
-// float metal;
-// float transparency;
-// float refraction;
 
 struct MA {
   vec3 abd;  // Albedo
@@ -23,12 +17,12 @@ struct MA {
 } material;
 
 MA Mred = MA(vec3(.7, .01, .01), .3, 64, 0, 0);
-MA Mground = MA(vec3(.1), .1, 64, 0, .25);
-MA Mblack = MA(vec3(.03), .2, 64, 0, 0);
-MA Mblue = MA(vec3(.03, .03, .8), .2, 64, 0, 0);
-MA Mgreen = MA(vec3(.03, .8, .03), .2, 64, 0, 0);
+MA Mground = MA(vec3(.1), .1, 4, 0, .25);
+MA Mblack = MA(vec3(.03), .2, 1024, 0, 0);
+MA Mblue = MA(vec3(.03, .03, .8), .2, 8, 0, 0);
+MA Mgreen = MA(vec3(.03, .8, .03), .2, 12, 0, 0);
 MA Mmirror = MA(vec3(.7), .2, 64, 0, .95);
-MA Mlight = MA(vec3(.7), 0, 0, 1, 0);
+MA Mlight = MA(vec3(1), 0, 1, 1, 0);
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
