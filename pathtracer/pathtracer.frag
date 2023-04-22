@@ -1,5 +1,5 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 600;
+uint i_SAMPLES = 300;
 uint i_BOUNCES = 8;
 float i_FOVDegrees = 45;
 float pi = acos(-1);
@@ -17,13 +17,13 @@ struct MA {
 } material;
 
 MA Mred = MA(vec3(.7, .01, .01), 1, 64, .1, .5);
-MA Mground = MA(vec3(.5), .1, 4, .1, .4);
-MA Mblack = MA(vec3(.1), 1, 32, .1, .9);
+MA Mground = MA(vec3(.05), 1, 4, 1, .4);
+MA Mblack = MA(vec3(.1), 1, 128, .1, .9);
 MA Mblue = MA(vec3(.03, .03, .8), .1, 8, .1, .1);
 MA Mgreen = MA(vec3(.03, .8, .03), 1, 12, .1, .1);
-MA Mmirror = MA(vec3(.7), .2, 64, .1, 1);
-MA Mlight = MA(vec3(1), 1, 1, 4, 0);
-MA Mceiling = MA(vec3(.8), 12, .2, 1, .02);
+MA Mmirror = MA(vec3(.7), .2, 64, .1, .1);
+MA Mlight = MA(vec3(1), 1, 1, 8, 0);
+MA Mceiling = MA(vec3(.5), 1, 1, 0, .02);
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
@@ -79,15 +79,19 @@ float fBox(vec3 p, vec3 b) {
 float scene(vec3 p) {
   material = MA(vec3(.03), .2, 64, 0, 0);
   float ground = fPlane(p, vec3(0, 1, 0), 1.25);
-  float ceiling = fPlane(p, vec3(0, -1, 0), 13.25);
+  // float ceiling = -fBox(p,vec3(10,15,40));
+  float ceiling = fPlane(p, vec3(0, -1, 0), 10);
+  ceiling = min(ceiling, fPlane(p, vec3(0, 0, -1), 50));
+  ceiling = min(ceiling, fPlane(p, vec3(1, 0, 0), 20));
+  ceiling = min(ceiling, fPlane(p, vec3(-1, 0, 0), 20));
   float bigBall = fSphere(p, 1);
   float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
   float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
   float greenBall = fSphere(p + vec3(-.8, -.8, .8), .4);
   float blackBall = fSphere(p + vec3(.8, -.8, .8), .4);
   vec3 pp = p;
-  pp.z = mod(pp.z, 10) - 5;
-  float light = fBox(pp + vec3(0, -12, 0), vec3(20, 0, 0)) - .25;
+  pp.z = mod(pp.z, 15) - 7.5;
+  float light = fBox(pp + vec3(0, -8, 0), vec3(20, 0, 0)) - .25;
   // float light = fSphere(p + vec3(0, -12, 0), 3);
 
   float final = min(
@@ -123,7 +127,7 @@ vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
 bool march(inout vec3 p, vec3 dir) {
   float dst = .1;
   float travel = 0;
-  while (travel < 100 && dst > i_THRESHOLD) {
+  while (travel < 200 && dst > i_THRESHOLD) {
     p += dir * dst;
     dst = scene(p);
     travel += dst;
@@ -151,6 +155,10 @@ void main() {
       spec += spec * pow(max(dot(-d, n), 0), material.shp) * material.spc *
               material.ems;
       Frag.rgb += spec;
+      vec3 i_l1 = calcLight(i_lp1, n, vec3(.5, .5, .9), 1);
+      vec3 i_l2 = calcLight(i_lp2, n, vec3(1, .1, .1), .5);
+      vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
+      Frag.rgb += i_l1 + i_l2 + i_l3;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));
