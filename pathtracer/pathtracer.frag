@@ -1,8 +1,8 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 900;
+uint i_SAMPLES = 600;
 uint i_BOUNCES = 8;
 float i_FOVDegrees = 45;
-float i_pi = acos(-1);
+float pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 Frag;
 vec3 attentuation;
@@ -16,13 +16,14 @@ struct MA {
   float mtl; // Metalness
 } material;
 
-MA Mred = MA(vec3(.7, .01, .01), .3, 64, 0, 0);
-MA Mground = MA(vec3(.1), .1, 4, 0, .25);
-MA Mblack = MA(vec3(.03), .2, 1024, 0, 0);
-MA Mblue = MA(vec3(.03, .03, .8), .2, 8, 0, 0);
-MA Mgreen = MA(vec3(.03, .8, .03), .2, 12, 0, 0);
-MA Mmirror = MA(vec3(.7), .2, 64, 0, .95);
-MA Mlight = MA(vec3(1), 0, 1, 1, 0);
+MA Mred = MA(vec3(.7, .01, .01), 1, 64, .1, .5);
+MA Mground = MA(vec3(.5), .1, 4, .1, .4);
+MA Mblack = MA(vec3(.1), 1, 32, .1, .9);
+MA Mblue = MA(vec3(.03, .03, .8), .1, 8, .1, .1);
+MA Mgreen = MA(vec3(.03, .8, .03), 1, 12, .1, .1);
+MA Mmirror = MA(vec3(.7), .2, 64, .1, 1);
+MA Mlight = MA(vec3(1), 1, 1, 4, 0);
+MA Mceiling = MA(vec3(.8), 12, .2, 1, .02);
 
 vec3 rotate(vec3 p, vec3 t) {
   vec3 c = cos(t);
@@ -57,7 +58,7 @@ float wang_hash(inout uint seed) {
 
 vec3 rndVector(inout uint state) {
   float z = wang_hash(state) * 2 - 1;
-  float a = wang_hash(state) * (i_pi * 2);
+  float a = wang_hash(state) * (pi * 2);
   float r = sqrt(1 - z * z);
   return vec3(r * cos(a), r * sin(a), z);
 }
@@ -78,17 +79,22 @@ float fBox(vec3 p, vec3 b) {
 float scene(vec3 p) {
   material = MA(vec3(.03), .2, 64, 0, 0);
   float ground = fPlane(p, vec3(0, 1, 0), 1.25);
+  float ceiling = fPlane(p, vec3(0, -1, 0), 13.25);
   float bigBall = fSphere(p, 1);
   float blueBall = fSphere(p + vec3(.8, .8, .8), .4);
   float redBall = fSphere(p + vec3(-.8, .8, .8), .4);
   float greenBall = fSphere(p + vec3(-.8, -.8, .8), .4);
   float blackBall = fSphere(p + vec3(.8, -.8, .8), .4);
-  float light = fSphere(p + vec3(0, -12, 0), 3);
+  vec3 pp = p;
+  pp.z = mod(pp.z, 10) - 5;
+  float light = fBox(pp + vec3(0, -12, 0), vec3(20, 0, 0)) - .25;
+  // float light = fSphere(p + vec3(0, -12, 0), 3);
 
-  float final =
+  float final = min(
       min(min(min(min(min(min(ground, bigBall), blueBall), redBall), greenBall),
               blackBall),
-          light);
+          light),
+      ceiling);
 
   material = final == ground      ? Mground
              : final == redBall   ? Mred
@@ -97,6 +103,7 @@ float scene(vec3 p) {
              : final == blueBall  ? Mblue
              : final == bigBall   ? Mmirror
              : final == light     ? Mlight
+             : final == ceiling   ? Mceiling
                                   : material;
 
   return final;
@@ -133,18 +140,17 @@ void main() {
   vec3 n;
   vec3 ro;
   vec3 d;
-  float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * i_pi / 180.0f);
+  float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * pi / 180.0f);
   for (int j = 0; j < i_SAMPLES; j++) {
     d = normalize(vec3(uv, i_cameraDistance));
     ro = vec3(uv, -5);
     attentuation = vec3(.5, .5, 1);
     for (int i = 0; i < i_BOUNCES + 1 && march(ro, d); i++) {
       n = normal(ro);
-      attentuation += material.ems * material.abd;
-      Frag.rgb += calcLight(i_lp1, n, vec3(.5, .5, .9), .5);
-      Frag.rgb += calcLight(i_lp2, n, vec3(1, .1, .1), .5);
-      Frag.rgb += calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      Frag.rgb += calcLight(rndVector(state), n, vec3(0, 0, 1.), .5);
+      vec3 spec = attentuation * material.ems;
+      spec += spec * pow(max(dot(-d, n), 0), material.shp) * material.spc *
+              material.ems;
+      Frag.rgb += spec;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));
