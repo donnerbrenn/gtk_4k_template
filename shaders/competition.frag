@@ -1,8 +1,9 @@
 //From my firstie "competition" https://www.pouet.net/prod.php?which=85919
-vec2 UV=(gl_FragCoord.xy/iResolution)*2/1;
+vec2 i_Resolution = vec2(i_X,i_Y);
+vec2 i_UV=(gl_FragCoord.xy/i_Resolution)*2-1;
 float i_threshold=.0001;
 vec3 ro=vec3(0,0,-6);
-vec3 rd=normalize(vec3(UV*vec2(1,i_Y/i_X),1));
+vec3 rd=normalize(vec3(i_UV*vec2(1,i_Y/i_X),1));
 vec3 p=ro;
 vec3 lp[10];
 vec3 lc[3];
@@ -93,14 +94,9 @@ MA map(vec3 p)
     MA ringbase=MA(.0,i_black,true);
     ringbase.d=softmin(ring2.d,base1.d,.15);
     ringbase.d=softmin(ringbase.d,ring1.d,.05);
-    ball=minimum(ball,stick);
-    ball=minimum(ball,base2);
+    ball=minimum(minimum(ball,stick),base2);
     ball.d=mix(ball.d,grid.d,.3);
-    ball=minimum(ball,ringbase);
-    ball=minimum(ball,bbase);
-    ball=minimum(ball,buttons);
-    ball=minimum(ball,plane);
-    return minimum(ball,cable);
+    return minimum(minimum(minimum(minimum(minimum(ball,ringbase),bbase),buttons),plane),cable);
 }
 
 

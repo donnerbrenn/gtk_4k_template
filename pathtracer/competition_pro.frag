@@ -1,6 +1,6 @@
 float i_THRESHOLD = .01;
 uint i_SAMPLES = 300;
-uint i_BOUNCES = 8;
+uint i_BOUNCES = 12;
 float i_FOVDegrees = 85;
 
 float i_pi = acos(-1);
@@ -8,16 +8,17 @@ uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 F;
 
 struct M {
-  vec3 abd; // Albedo
+  vec3 abd;  // Albedo
   float spc; // Specularity
   float shp; // Sharpness
   float ems; // Emission
   float mtl; // Metalness
 } material;
 
-M Mred = M(vec3(.7, .01, .01) , .3,  64, 0, .3);
-M Mground = M(vec3(.1)        , .1, 64, 0, .25);
-M Mblack = M(vec3(.03)          , .2, 64, 0, .95);
+M Mred = M(vec3(.7, .01, .01), .3, 32, 0, .0);
+M Mground = M(vec3(.1), .1, 64, 0, .95);
+M Mceil = M(vec3(.1), .1, 64, 1, .95);
+M Mblack = M(vec3(.03), .2, 64, 0, .9);
 
 vec3 attentuation;
 
@@ -76,6 +77,7 @@ float scene(vec3 p) {
   float sdf = fBox(i_mp, vec3(.0)) - i_noise * .02;
 
   float ground = fPlane(p, vec3(0, 1, 0), 2.2);
+  float ceiling = fPlane(p, vec3(0, -1, 0), 40);
   float i_stick = fCappedCone(p + vec3(0, .3, 0), 1, .15, .25, 0);
   float i_ball = fBox(p + vec3(.0, -1, .0), vec3(0)) - .5;
   float i_ring1 = fCappedCone(p + vec3(0, .6, 0), .05, .3, .3, .05);
@@ -100,17 +102,13 @@ float scene(vec3 p) {
       min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .1), i_base2,
                   .05),
           i_cable);
-  sdf = min(min(red, black), ground);
-  // float i_cellX = mod(p.x, 1) * 225;
-  // float i_cellZ = mod(p.z, 1) * 225;
-  // float i_xor = float(uint(i_cellX) ^ uint(i_cellZ)) / 255;
-  // Mground.abd.b=i_xor;
+  sdf = min(min(min(red, black), ground),ceiling);
 
   material = sdf == red      ? Mred
              : sdf == ground ? Mground
              : sdf == black  ? Mblack
+             : sdf == ceiling  ? Mceil
                              : material;
-
   return sdf;
 }
 
@@ -120,14 +118,12 @@ vec3 normal(vec3 p) {
 }
 
 bool march(inout vec3 p, vec3 dir) {
-  float dst = .1;
+  float dist = .1;
   float travel = 0;
-  while (travel < 50 && dst > i_THRESHOLD) {
-    p += dir * dst;
-    dst = scene(p);
-    travel += dst;
-  }
-  return dst < i_THRESHOLD;
+  for (; travel < 50 && dist > i_THRESHOLD;
+       dist = scene(p += dir * dist), travel += dist)
+    ;
+  return dist < i_THRESHOLD;
 }
 
 vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
@@ -147,7 +143,7 @@ void main() {
   for (int j = 0; j < i_SAMPLES; j++) {
     d = normalize(vec3(uv, i_cameraDistance));
     ro = vec3(uv, -5);
-    attentuation = vec3(.5, .5, 1);
+    attentuation = vec3(.5, .5, .99);
     for (int i = 0; i < i_BOUNCES + 1 && march(ro, d); i++) {
       n = normal(ro);
       attentuation += material.abd * material.ems;
@@ -157,7 +153,7 @@ void main() {
       F.rgb += i_l1 + i_l2 + i_l3;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
-      d = normalize(mix(i_rnd, i_reflection, material.mtl));
+      d = normalize(mix(normalize(i_rnd), i_reflection, material.mtl));
       attentuation *= material.abd * max(dot(d, n), 0) * .98;
       F.w++;
     }

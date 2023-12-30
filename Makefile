@@ -1,10 +1,10 @@
 #setup
-SHADER			=		pathtracer.frag
+SHADER			=		cp2.frag
 WIDTH			=		2560
 HEIGHT			=		1440
 HIDECURSOR		=		true
 BENCHMARK		=		true
-# DEBUG			=		true
+DEBUG			=		false
 SCISSORS		=		true
 
 SHADERDIR		=		pathtracer
@@ -104,11 +104,12 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	echo  $(I_Y) >> /tmp/shader.frag
 	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
 ifeq ($(DEBUG),true)
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@
 	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@	
 else
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --move-declarations -o $@
 	$(MINIFY) $(GENDIR)/shader.frag --format indented --move-declarations -o $(GENDIR)/min_shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --move-declarations -o $@
+	
 endif
 	
 	./tools/replace.py $@
@@ -182,8 +183,16 @@ run: all
 	bin/main.okp
 
 runsmol: clean $(BINDIR)/main.smol
-	./tools/analyze.py bin/*
+	./tools/analyze.py bin/main.smol
 	./$(BINDIR)/main.smol
+
+runokp: clean $(BINDIR)/main.okp
+	./tools/analyze.py bin/main.okp bin/main.smol
+	./$(BINDIR)/main.okp
+
+runvndh: clean $(BINDIR)/main.vndh
+	./tools/analyze.py bin/main.vndh bin/main.smol
+	./$(BINDIR)/main.vndh
 
 all: sh vndh okp #elf
 	./tools/analyze.py bin/*

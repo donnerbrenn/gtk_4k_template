@@ -1,6 +1,7 @@
 uniform float iTime;
+out vec4 F;
 
 void main()
 {
-      gl_FragColor=sin(gl_FragCoord*.1+iTime);
+      F=sin(gl_FragCoord*.1+iTime);
 }

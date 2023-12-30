@@ -1,14 +1,10 @@
 // watch in your browser at https://www.shadertoy.com/view/3dScRc
 uniform float iTime;
-out vec3 color;
+out vec3 Frag;
 
 vec3 rotate(vec3 p, vec3 t) {
     vec3 c = cos(t);
     vec3 s = sin(t);
-    vec3 cx = vec3(1, 0, 0);
-    vec3 cy = vec3(0, 1, 0);
-    vec3 cz = vec3(0, 0, 1);
-
     return mat3(
         vec3(c.y * c.z, s.x * s.y * c.z - s.z * c.x, s.x * s.z + c.x * s.y * c.z),
         vec3(c.y * s.z, s.x * s.y * s.z + c.x * c.z, c.x * s.y * s.z - s.x * c.z),
@@ -92,9 +88,9 @@ void main()
         vec3 i_n=normal(p);
         vec3 i_l1=vec3(1,.5,-.25);
         float rl=ambient_omni(p,i_l1)*(dot(i_n,normalize(i_l1))*.5+.5)*.25+pow(max(dot(i_rd,reflect(normalize(i_l1),i_n)),0),128)*.9;
-        color=vec3(rl)+vec3(.1,.4,.1);
-        color=mix(vec3(0),color,softshadow(i_ro+t*i_rd,normalize(i_l1),1e-2,10,20)*.25+.75);
+        Frag=vec3(rl)+vec3(.1,.4,.1);
+        Frag=mix(vec3(0),Frag,softshadow(i_ro+t*i_rd,normalize(i_l1),1e-2,10,20)*.25+.75);
     }
-    color*=mix(color,vec3(1),1-exp(-.1*pow(t,128)));
-    color-=t*.05;
+    Frag*=mix(Frag,vec3(1),1-exp(-.1*pow(t,128)));
+    Frag-=t*.05;
 }
