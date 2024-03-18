@@ -176,7 +176,6 @@ void main() {
       d = normalize(mix(i_rnd, i_reflection, material.mtl));
       attentuation *= material.abd;
       Frag.w++;
-      
     }
     Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;
   }

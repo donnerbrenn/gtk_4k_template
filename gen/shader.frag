@@ -3,9 +3,9 @@
 float i_X=2560.;
 float i_Y=1440.;
 float i_THRESHOLD = .01;
-uint i_SAMPLES = 300;
-uint i_BOUNCES = 8;
-float i_FOVDegrees = 85;
+uint i_SAMPLES = 800;
+uint i_BOUNCES = 80;
+float i_FOVDegrees = 90;
 
 float pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
@@ -19,11 +19,9 @@ struct MA {
   float mtl; // Metalness
 } material;
 
-MA Mred = MA(vec3(.7, .01, .01), .3, 64, 0, .3);
-MA Mground = MA(vec3(.1), .1, 64, 0, .25);
-MA Mbox = MA(vec3(.1), .1, 64, 0, 0);
-MA Mblack = MA(vec3(.03), .2, 64, 0, .98);
-MA Mlight = MA(vec3(1), 1, 1, 2, 0);
+MA Mground = MA(vec3(.1), .5, 64, 0, 0);
+MA Mred = MA(vec3(.6, 0, 0), .5, 64, 0, .1);
+MA Mblack = MA(vec3(.02), .5, 64, 0, .9);
 
 vec3 attentuation;
 
@@ -37,17 +35,17 @@ vec3 rotate(vec3 p, vec3 t) {
 }
 
 float softmin(float f1, float f2, float val) {
-  float i_e = pow(max(val - abs(f1 - f2), 0.), 2) * .25;
+  float i_e = pow(max(val - abs(f1 - f2), 0), 2) * .25;
   return min(f1, f2) - i_e / val;
 }
 
 float fCappedCone(vec3 p, float h, float r1, float r2, float r3) {
   vec2 q = vec2(length(p.xz), p.y);
   vec2 k1 = vec2(r2, h);
-  vec2 k2 = vec2(r2 - r1, 2. * h);
+  vec2 k2 = vec2(r2 - r1, 2 * h);
   vec2 ca = vec2(q.x - min(q.x, (q.y < 0.) ? r1 : r2), abs(q.y) - h);
   vec2 cb = q - k1 + k2 * clamp(dot(k1 - q, k2) / dot(k2, k2), 0., 1.);
-  return (cb.x < 0. && ca.y < 0.) ? -1.
+  return (cb.x < 0 && ca.y < 0) ? -1
                                   : sqrt(min(dot(ca, ca), dot(cb, cb))) - r3;
 }
 
@@ -107,19 +105,12 @@ float scene(vec3 p) {
                   .05),
           i_cable);
   float box = -fBox(p, vec3(20));
-  float light = fBox(p+vec3(0,-8,0), vec3(4,.1,4));
-  // light = min(light,fBox(p+vec3(1,-8,-3), vec3(0))-6);
+  float light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
   sdf = min(min(min(red, black), ground), light);
-  float i_cellX = mod(p.x, 1) * 225;
-  float i_cellZ = mod(p.z, 1) * 225;
-  float i_xor = float(uint(i_cellX) ^ uint(i_cellZ)) / 255;
-  Mbox.abd.b=i_xor;
 
   material = sdf == red      ? Mred
              : sdf == ground ? Mground
              : sdf == black  ? Mblack
-             : sdf == box    ? Mbox
-            //  : sdf == light  ? Mlight
                              : material;
 
   return sdf;
@@ -146,12 +137,11 @@ vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
   vec3 i_diffuse = material.abd * attentuation * light;
   return (color * i_diffuse + pow(light, material.shp) * material.spc) * power;
 }
-// float i_X, i_Y;
 
 void main() {
-  vec3 i_lp1 = vec3(0, 10, -20);
-  vec3 i_lp2 = vec3(-50, 20, -50);
-  vec3 i_lp3 = vec3(50, 20, -50);
+  vec3 i_lp1 = vec3(50, -30, -30);
+  vec3 i_lp2 = vec3(0, 20, -50);
+  // vec3 i_lp3 = vec3(50, 20, -50);
   vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
   Frag.rgb = vec3(0);
   vec3 n;
@@ -168,10 +158,10 @@ void main() {
       spec += spec * pow(max(dot(d, n), 0), material.shp) * material.spc *
               material.ems;
       Frag.rgb += spec * 3;
-      vec3 i_l1 = calcLight(i_lp1, n, vec3(.5, .5, .9), 1);
-      vec3 i_l2 = calcLight(i_lp2, n, vec3(1, .1, .1), .5);
-      vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      Frag.rgb += i_l1 + i_l2 + i_l3;
+      vec3 i_l1 = calcLight(i_lp1, n, vec3(.25, .25, .9), .25);
+      vec3 i_l2 = calcLight(i_lp2, n, vec3(1), 1);
+      // vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
+      Frag.rgb += i_l1 + i_l2;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));

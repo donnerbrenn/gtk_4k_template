@@ -102,13 +102,13 @@ float scene(vec3 p) {
       min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .1), i_base2,
                   .05),
           i_cable);
-  sdf = min(min(min(red, black), ground),ceiling);
+  sdf = min(min(min(red, black), ground), ceiling);
 
-  material = sdf == red      ? Mred
-             : sdf == ground ? Mground
-             : sdf == black  ? Mblack
-             : sdf == ceiling  ? Mceil
-                             : material;
+  material = sdf == red       ? Mred
+             : sdf == ground  ? Mground
+             : sdf == black   ? Mblack
+             : sdf == ceiling ? Mceil
+                              : material;
   return sdf;
 }
 

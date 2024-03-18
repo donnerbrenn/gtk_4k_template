@@ -15,10 +15,9 @@ struct M {
   float mtl; // Metalness
 } material;
 
-M Mred = M(vec3(.7, .01, .01) , .3,  64, 0, .3);
-M Mground = M(vec3(.1)        , .1, 64, 0, .25);
-M Mblack = M(vec3(.03)          , .2, 64, 0, .95);
-
+M Mred = M(vec3(.7, .01, .01), .3, 64, 0, .3);
+M Mground = M(vec3(.1), .1, 64, 0, .25);
+M Mblack = M(vec3(.03), .2, 64, 0, .95);
 
 M Mred = M(vec3(.7, .01, .01), .3, 64, 0, .3);
 M Mground = M(vec3(.1), .1, 64, 0, .25);
@@ -78,26 +77,23 @@ float fBox(vec3 p, vec3 d) {
   return length(max(q, 0.)) + min(0., max(q.x, max(q.y, q.z)));
 }
 
-void moda (inout vec2 p, float rep)
-{
-  float per = 2*i_pi/rep;
-  float a = atan(p.y,p.x);
+void moda(inout vec2 p, float rep) {
+  float per = 2 * i_pi / rep;
+  float a = atan(p.y, p.x);
   float i_l = length(p);
-  a = mod(a,per)-per*0.5;
-  p = vec2(cos(a),sin(a))*i_l;  
+  a = mod(a, per) - per * 0.5;
+  p = vec2(cos(a), sin(a)) * i_l;
 }
-
 
 float scene(vec3 p) {
   p = rotate(rotate(p, vec3(-.7, .0, -.04)), vec3(0, 1.1, 0)) +
       vec3(.5, -1.05, 0);
-  
-  vec3 pp=p + vec3(0,0,0);
-  
-  pp += vec3(.5,0,0);
+
+  vec3 pp = p + vec3(0, 0, 0);
+
+  pp += vec3(.5, 0, 0);
   moda(pp.xz, 5);
-  
-  
+
   vec3 i_mp = mod(p, .0001) - .00005;
   vec2 seed = fract(p.xz * vec2(233.34, 851.74));
   seed += dot(seed, seed + 23.45);
@@ -113,7 +109,7 @@ float scene(vec3 p) {
   float grid = fBox(pp, vec3(1));
   float disc = fCappedCone(p + vec3(0, -1, 0), .001, .6, .6, 0);
   sdf = grid;
-  //sdf = min(min(min(ground, house), disc), grid);
+  // sdf = min(min(min(ground, house), disc), grid);
   uint even = uint((p.y * .5 + 4) * 4) % 2;
   Mred.abd = even == 1 ? vec3(1, 1, 1) : vec3(1, 0, 0);
 
