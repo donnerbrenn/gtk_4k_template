@@ -1,13 +1,13 @@
 #setup
-SHADER			=		cp2.frag
+SHADER			=		slimebox.frag
 WIDTH			=		2560
 HEIGHT			=		1440
-HIDECURSOR		=		true
-BENCHMARK		=		true
+HIDECURSOR		=		false
+BENCHMARK		=		false
 DEBUG			=		false
-SCISSORS		=		true
+SCISSORS		=		false
 
-SHADERDIR		=		pathtracer
+SHADERDIR		=		shaders
 GLVERSION		=		'\#version 400'
 I_X				=		'float i_X=$(WIDTH).;'
 I_Y				=		'float i_Y=$(HEIGHT).;'

@@ -63,7 +63,7 @@ float scene(vec3 p)
 	pp.x-=12;
 	float balls=sphere(pp,5);
 	pp=p;
-	pp=erot(pp,vec3(0,1,0),iTime+pp.y*.03);
+	pp=erot(pp,vec3(0,1,0),iTime*.3+pp.y*.03);
 	moda(pp.xz,5);
 	pp.x-=25;
 	float bars=pipe(pp.xz,2.5);

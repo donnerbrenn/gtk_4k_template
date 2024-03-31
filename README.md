@@ -32,23 +32,19 @@ Edit WIDTH and HEIGHT in the Makefile to the resolution of your screen.
   make all
     
 ## Create your own shaders:
-Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automaticly. In the shader use i_X and i_Y for screendimensions, they are generated atomatically and oped out by shader minifier, if they aren't used. Edit WIDTH and HEIGHT in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automaticaly, when this is present in the shader.
-
-If you need a UV, there is one automatically genereated as varying called "UV". Multiply it by vec2(1,i_Y/i_X), to correct the aspect ratio, if needed. For example:
-vec2 uv=UV*(1,i_Y/i_X);
-You can deactivate this behaviour by setting USEVARYINGUV to "false" in the Makefile.
+Create a new textfile in the shaders subdirectory and edit your shader. No #version directive is needed, "#version 400" is added automatically. In the shader use i_X and i_Y for screen dimensions, they are generated automatically and opted out by shader minifier, if they aren't used. Edit WIDTH and HEIGHT in the Makefile for your needs. They will be added by the Makefile while compilation to your shader. So there is no need, to define them yourself. This way we save some bytes, because we don't need to do a uniform update. If you need a time uniform, use "uniform float iTime;" for runtime in seconds. The uniform update code will be added automatically, when this is present in the shader.
 
 ## Screenshots:
-Blackles example shader (optimized) - Static - Shortest version (okp vs. vndh): 842 Bytes (vondehi)
-![blackle.png](screenshots/blackle.png)
+Blackles example shader (optimized) - Static - Shortest version (okp vs. vndh): 875 Bytes (vondehi)
+![blackle.jpg](screenshots/blackle.jpg)
 
-Competition - Static - Shortest version  (okp vs. vndh): 1945 Bytes (OneKpaq)
-![competition.png](screenshots/competition.png)
+Competition - Static - Shortest version  (okp vs. vndh): 1930 Bytes (OneKpaq)
+![competition.jpg](screenshots/competition.jpg)
 
-Slimebox - Animated - Shortest version  (okp vs. vndh): 1558 Bytes (OneKpaq)
-![slimebox.png](screenshots/slimebox.png)
+Slimebox - Animated - Shortest version  (okp vs. vndh): 1441 Bytes (OneKpaq)
+![slimebox.jpg](screenshots/slimebox.jpg)
 
-Quipshade - Animated - Shortest version  (okp vs. vndh): 1382 Bytes (OneKpaq)
-![quipshade.png](screenshots/quipshade.png)
+Nucleus - Animated - Shortest version  (okp vs. vndh): 1471 Bytes (OneKpaq)
+![nucleus.jpg](screenshots/nucleus.jpg)
 
 ## Have fun!
