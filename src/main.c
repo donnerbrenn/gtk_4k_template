@@ -42,7 +42,7 @@ void on_render()
 #endif
 
 #ifdef SCISSORS
-#define lines 180
+#define lines 160
 	glEnable(GL_SCISSOR_TEST);
 	for (int i = 0; i < HEIGHT; i += lines)
 	{

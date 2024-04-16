@@ -1,6 +1,6 @@
-float i_THRESHOLD = .01;
-uint i_SAMPLES = 800;
-uint i_BOUNCES = 80;
+float i_THRESHOLD = .003;
+uint i_SAMPLES = 600;
+uint i_BOUNCES = 5;
 float i_FOVDegrees = 90;
 
 float pi = acos(-1);
@@ -37,13 +37,14 @@ float softmin(float f1, float f2, float val) {
 
 float fCappedCone(vec3 p, float h, float r1, float r2, float r3) {
   vec2 q = vec2(length(p.xz), p.y);
-  vec2 k1 = vec2(r2, h);
   vec2 k2 = vec2(r2 - r1, 2 * h);
-  vec2 ca = vec2(q.x - min(q.x, (q.y < 0.) ? r1 : r2), abs(q.y) - h);
-  vec2 cb = q - k1 + k2 * clamp(dot(k1 - q, k2) / dot(k2, k2), 0., 1.);
-  return (cb.x < 0 && ca.y < 0) ? -1
-                                  : sqrt(min(dot(ca, ca), dot(cb, cb))) - r3;
+  vec2 ca = vec2(q.x - min(q.x, (q.y < .0) ? r1 : r2), abs(q.y) - h);
+  vec2 cb = q - vec2(r2, h) +
+            k2 * clamp(dot(vec2(r2, h) - q, k2) / dot(k2, k2), .0, 1.);
+  return ((cb.x < .0 && ca.y < .0) ? -1. : 1.) *
+         sqrt(min(dot(ca, ca), dot(cb, cb)))-r3;
 }
+
 
 float wang_hash(inout uint seed) {
   seed ^= 61 ^ (seed >> 16) * 9 ^ (seed >> 4) * 0x27d4eb2d ^ (seed >> 15);
