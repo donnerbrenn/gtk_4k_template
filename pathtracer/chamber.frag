@@ -1,6 +1,6 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 300;
-uint i_BOUNCES = 8;
+uint i_SAMPLES = 150;
+uint i_BOUNCES = 4;
 float i_FOVDegrees = 95;
 
 float i_pi = acos(-1);
@@ -15,15 +15,15 @@ struct MA {
   float mtl; // Metalness
 } material;
 
-MA Mground = MA(vec3(.03), .9, 64, 0, .75);
-MA Mred = MA(vec3(.55, .01, .01), .125, 4, 0, 0);
-MA Mblack = MA(vec3(.02), 1, 32, 0, .925);
-MA Mwhite = MA(vec3(.8), .025, 8, 0, .05);
-MA Mbrown = MA(vec3(.6, .3, .03), .5, 16, 0, .35);
-MA Mspace = MA(vec3(.7, .7, .99), .1, 1, 1, 1);
-MA Mgreenlight = MA(vec3(.01, .9, .01), 0, 128, 1, 0);
-MA Mgray = MA(vec3(.1), 0, 1, 0, 0);
-MA Msilver = MA(vec3(1), 1, 32, 0, 1);
+MA i_Mground = MA(vec3(.03), .9, 64, 0, .75);
+MA i_Mred = MA(vec3(.55, .01, .01), .125, 4, 0, 0);
+MA i_Mblack = MA(vec3(.02), 1, 32, 0, .925);
+MA i_Mwhite = MA(vec3(.8), .025, 8, 0, .05);
+MA i_Mbrown = MA(vec3(.6, .3, .03), .5, 16, 0, .35);
+MA i_Mspace = MA(vec3(.7, .7, .99), .1, 1, 1, 1);
+MA i_Mgreenlight = MA(vec3(.01, .9, .01), 0, 128, 1, 0);
+MA i_Mgray = MA(vec3(.1), 0, 1, 0, 0);
+MA i_Msilver = MA(vec3(1), 1, 32, 0, 1);
 
 vec3 attentuation;
 
@@ -97,8 +97,8 @@ float pModInterval1(inout float p, float size, float start, float stop) {
 }
 
 float fTorus(vec3 p, vec2 t) {
-  vec2 q = vec2(length(p.xy) - t.x, p.z);
-  return length(q) - t.y;
+  vec2 i_q = vec2(length(p.xy) - t.x, p.z);
+  return length(i_q) - t.y;
 }
 
 float fBox(vec3 p, vec3 d) {
@@ -107,12 +107,12 @@ float fBox(vec3 p, vec3 d) {
 }
 
 float fTable(vec3 p, vec3 o, vec3 s, float L) {
-  float table = fBox(p + o, s);
+  float i_table = fBox(p + o, s);
   float i_l1 = fBox(p + o + vec3(-s.x + L, 1, -s.z + L), vec3(s.y, 1, s.y));
   float i_l2 = fBox(p + o + vec3(s.x - L, 1, -s.z + L), vec3(s.y, 1, s.y));
   float i_l3 = fBox(p + o + vec3(-s.x + L, 1, s.z - L), vec3(s.y, 1, s.y));
   float i_l4 = fBox(p + o + vec3(s.x - L, 1, s.z - L), vec3(s.y, 1, s.y));
-  return min(min(min(min(table, i_l1), i_l2), i_l3), i_l4);
+  return min(min(min(min(i_table, i_l1), i_l2), i_l3), i_l4);
 }
 
 float fCapsule(vec3 p, float h, float r) {
@@ -123,25 +123,26 @@ float fCapsule(vec3 p, float h, float r) {
 float scene(vec3 p) {
   p = rotate(p, vec3(-.7, 1, 0)) + vec3(.8, -1.3, 0);
 
-  float ground = fPlane(p, vec3(0, 1, 0), 2);
-  float room = fBox(p + vec3(0, .6, 0), vec3(2, 1.5, 3));
-  float wall = fBox(p + vec3(-.2, .3, .2), vec3(2, 1.5, 3));
-  room = max(room, -wall) - .05;
-  float table = fTable(p, vec3(-.03, .8, -2.1), vec3(1.85, .05, .75), .1);
-  float board = fBox(p + vec3(0, -.35, -2.6), vec3(1, .02, .25));
-  float chair = fTable(rotate(p, vec3(0, -.25, 0)), vec3(-.25, 1.2, 0),
-                       vec3(.3, .025, .3), .05);
-  float seatpillow = fBox(rotate(p + vec3(-.3, 1.15, -.06), vec3(0, -.25, 0)),
-                          vec3(.28, .03, .28));
+  float i_ground = fPlane(p, vec3(0, 1, 0), 2);
+  float i_wall1 = fBox(p + vec3(0, .6, 0), vec3(2, 1.5, 3));
+  float i_wall2 = fBox(p + vec3(-.2, .3, .2), vec3(2, 1.5, 3));
+  float i_room = max(i_wall1, -i_wall2) - .05;
+  float i_table = fTable(p, vec3(-.03, .8, -2.1), vec3(1.85, .05, .75), .1);
+  float i_board = fBox(p + vec3(0, -.35, -2.6), vec3(1, .02, .25));
+  float i_chair = fTable(rotate(p, vec3(0, -.25, 0)), vec3(-.25, 1.2, 0),
+                         vec3(.3, .025, .3), .05);
+  float i_seatpillow = fBox(rotate(p + vec3(-.3, 1.15, -.06), vec3(0, -.25, 0)),
+                            vec3(.28, .03, .28));
   vec3 pz = rotate(p + vec3(.025, 1.2, 0), vec3(0, -.25, 0));
   pModInterval1(pz.z, .09, -3, 3);
-  float backrest = fCapsule(pz, .75, .02);
-  vec3 pchair = rotate(p, vec3(0, -.25, 0));
-  pchair = rotate(pchair, vec3(i_pi / 2, 0, 0));
-  float chairtop = fCapsule(pchair + vec3(0, .3, -.45), .6, .04);
+  float i_backrest = fCapsule(pz, .75, .02);
+  vec3 i_pchair1 = rotate(p, vec3(0, -.25, 0));
+  vec3 i_pchair2 = rotate(i_pchair1, vec3(i_pi / 2, 0, 0));
+  float i_chairtop = fCapsule(i_pchair2 + vec3(0, .3, -.45), .6, .04);
 
-  float bed = fBox(p + vec3(.3, 1.5, 2.2), vec3(1.2, .25, .5)) - .1;
-  bed = min(bed, fBox(p + vec3(.3, 1.25, 2.2), vec3(1.4, .1, .6)) - .1);
+  float i_bed1 = fBox(p + vec3(.3, 1.5, 2.2), vec3(1.2, .25, .5)) - .1;
+  float i_bed2 = fBox(p + vec3(.3, 1.25, 2.2), vec3(1.4, .1, .6)) - .1;
+  float i_bed = min(i_bed1, i_bed2);
   float i_height = .1;
   float i_blanket1 = fBox(p + vec3(-.2, 1.2, 2.2), vec3(.8, i_height, .5));
   float i_blanket2 =
@@ -153,80 +154,83 @@ float scene(vec3 p) {
   float i_blanket4 =
       fBox(p + vec3(-.2, 1.2 + (sin(p.x + p.y) * sin(p.z * 2.5)) * .02, 2.2),
            vec3(.58, i_height, .37));
-  float blanket =
+  float i_blanket =
       softmin(softmin(softmin(i_blanket1, i_blanket2, .5), i_blanket3, .5),
               i_blanket4, .5);
-  // blanket = softmin(blanket,i_blanket4,.5);
   float i_pillow1 = fBox(p + vec3(1.1, 1., 2.2), vec3(.2, .0125, .5)) - .1;
   float i_pillow2 = fBox(p + vec3(1.1, 1., 2.2), vec3(.018, .001, .048));
-  float pillow = softmin(i_pillow1, i_pillow2, .75);
+  float i_pillow = softmin(i_pillow1, i_pillow2, .75);
 
-  float monitor = fBox(p + vec3(-.25, .25, -2.4), vec3(.5, .3, .03));
-  monitor =
-      max(monitor, -fBox(p + vec3(-.25, .25, -2.37), vec3(.47, .27, .01)));
+  float i_monitor1 = fBox(p + vec3(-.25, .25, -2.4), vec3(.5, .3, .03));
+  float i_monitor2 = fBox(p + vec3(-.25, .25, -2.37), vec3(.47, .27, .01));
+  float i_monitor = max(i_monitor1, -i_monitor2);
 
-  float monitorfoot = fCappedCone(p + vec3(-.25, .75, -2.5), .03, .2, .2);
-  monitorfoot =
-      max(monitorfoot, -fCappedCone(p + vec3(-.25, .75, -2.5), .04, .15, .15));
-  float space = -fBox(p, vec3(50));
-  float speaker1 =
+  float i_monitorfoot1 = fCappedCone(p + vec3(-.25, .75, -2.5), .03, .2, .2);
+  float i_monitorfoot2 = fCappedCone(p + vec3(-.25, .75, -2.5), .04, .15, .15);
+  float i_monitorfoot = max(i_monitorfoot1, -i_monitorfoot2);
+  // float space = -fBox(p, vec3(50));
+  float i_speaker1 =
       fBox(rotate(p + vec3(.7, .65, -2.5), vec3(0, -.4, 0)), vec3(.1)) - .02;
-  float speaker2 =
+  float i_speaker2 =
       fBox(rotate(p + vec3(-1.2, .65, -2.5), vec3(0, .3, 0)), vec3(.1)) - .02;
-  float keyboard = fBox(p + vec3(-.2, .725, -1.85), vec3(.35, .03, .15)) - .02;
-  float backlight = fBox(p + vec3(-.2, .7 - .02, -1.85), vec3(.33, .01, .13));
+  float i_keyboard =
+      fBox(p + vec3(-.2, .725, -1.85), vec3(.35, .03, .15)) - .02;
+  float i_backlight = fBox(p + vec3(-.2, .7 - .02, -1.85), vec3(.33, .01, .13));
   vec3 xz = p + vec3(-.2, .675, -1.85);
   pModInterval1(xz.x, .05, -6, 6);
   pModInterval1(xz.z, .05, -2, 2);
-  float keys = fBox(xz, vec3(.019)) - .001;
+  float i_keys = fBox(xz, vec3(.019)) - .001;
 
-  float stand = fCappedCone(p + vec3(0, -.42, -2.55), .05, .1, .1);
-  float cube =
+  float i_stand = fCappedCone(p + vec3(0, -.42, -2.55), .05, .1, .1);
+  float i_cube =
       fBox(rotate(p + vec3(0, -.54, -2.55), vec3(i_pi * .25, i_pi * .25, 0)),
            vec3(.05));
 
-  float mouse = fBox(rotate(p + vec3(-.9, .725, -1.85), vec3(0, -.13, 0)),
-                     vec3(.05, .04, .1)) -
-                .02;
-  float mousepad = fBox(p + vec3(-.35, .725, -1.85), vec3(.75, .002, .4));
-  float carpet = fBox(p + vec3(-.15, 1.75, -.4), vec3(1.75, .002, .8));
-  float bin = fCappedCone(p + vec3(1, 1.5, -1.7), .3, .2, .3);
-  bin = max(bin, -fCappedCone(p + vec3(1, 1.4, -1.7), .3, .2, .3));
-  float pc = fBox(rotate(p + vec3(-1.5, 1.35, -1.7), vec3(0, .2, 0)),
-                  vec3(.175, .4, .35)) -
-             .02;
-  float fan1 =
+  float i_mouse = fBox(rotate(p + vec3(-.9, .725, -1.85), vec3(0, -.13, 0)),
+                       vec3(.05, .04, .1)) -
+                  .02;
+  float i_mousepad = fBox(p + vec3(-.35, .725, -1.85), vec3(.75, .002, .4));
+  float i_carpet = fBox(p + vec3(-.15, 1.75, -.4), vec3(1.75, .002, .8));
+  float i_bin1 = fCappedCone(p + vec3(1, 1.5, -1.7), .3, .2, .3);
+  float i_bin2 = fCappedCone(p + vec3(1, 1.4, -1.7), .3, .2, .3);
+  float i_bin = max(i_bin1, -i_bin2);
+  float i_pc = fBox(rotate(p + vec3(-1.5, 1.35, -1.7), vec3(0, .2, 0)),
+                    vec3(.175, .4, .35)) -
+               .02;
+  float i_fan1 =
       fTorus(rotate(p + vec3(-1.4, 1.2, -1.34), vec3(0, .2, 0)), vec2(.1, .01));
-  float fan2 =
+  float i_fan2 =
       fTorus(rotate(p + vec3(-1.4, 1.5, -1.34), vec3(0, .2, 0)), vec2(.1, .01));
 
-  float Olights = min(min(fan1, fan2), backlight);
-  float Owhite = min(min(min(room, blanket), pillow), keys);
+  float Olights = min(min(i_fan1, i_fan2), i_backlight);
+  float Owhite = min(min(min(i_room, i_blanket), i_pillow), i_keys);
   float Oblack =
-      min(min(min(min(min(min(min(pc, mouse), keyboard), speaker1), speaker2),
-                  monitorfoot),
-              monitor),
-          stand);
-  float Ored = seatpillow;
-  float Ogray = min(min(min(bed, mousepad), carpet), bin);
-  float Obrown = min(min(min(min(table, chair), board), backrest), chairtop);
-  float Osilver = cube;
+      min(min(min(min(min(min(min(i_pc, i_mouse), i_keyboard), i_speaker1),
+                      i_speaker2),
+                  i_monitorfoot),
+              i_monitor),
+          i_stand);
+  float Ored = i_seatpillow;
+  float Ogray = min(min(min(i_bed, i_mousepad), i_carpet), i_bin);
+  float Obrown =
+      min(min(min(min(i_table, i_chair), i_board), i_backrest), i_chairtop);
+  float Osilver = i_cube;
 
-  float sdf =
-      min(min(min(min(min(min(min(min(Owhite, Ored), Oblack), Obrown), ground),
-                      carpet),
-                  Ogray),
-              Olights),
-          Osilver);
+  float sdf = min(
+      min(min(min(min(min(min(min(Owhite, Ored), Oblack), Obrown), i_ground),
+                  i_carpet),
+              Ogray),
+          Olights),
+      Osilver);
 
-  material = sdf == Oblack    ? Mblack
-             : sdf == Owhite  ? Mwhite
-             : sdf == Ored    ? Mred
-             : sdf == Obrown  ? Mbrown
-             : sdf == Ogray   ? Mgray
-             : sdf == Olights ? Mgreenlight
-             : sdf == Osilver ? Msilver
-                              : Mground;
+  material = sdf == Oblack    ? i_Mblack
+             : sdf == Owhite  ? i_Mwhite
+             : sdf == Ored    ? i_Mred
+             : sdf == Obrown  ? i_Mbrown
+             : sdf == Ogray   ? i_Mgray
+             : sdf == Olights ? i_Mgreenlight
+             : sdf == Osilver ? i_Msilver
+                              : i_Mground;
   return sdf;
 }
 
@@ -246,17 +250,16 @@ bool march(inout vec3 p, vec3 dir) {
   return dst < i_THRESHOLD;
 }
 
-vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
+vec3 calcLight(vec3 d, vec3 n, vec3 color) {
   float light = max(dot(n, normalize(d)), .0);
   return (color * material.abd * attentuation * light +
-          pow(light, material.shp) * material.spc) *
-         power;
+          pow(light, material.shp) * material.spc);
 }
 
 void main() {
-  vec3 i_lp1 = vec3(0, 20, -50);
   vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
   Frag.rgbw = vec4(0);
+  vec3 i_lp1 = vec3(0, 20, -50);
   vec3 n;
   vec3 ro;
   vec3 d;
@@ -271,15 +274,15 @@ void main() {
       spec += spec * pow(max(dot(d, n), 0), material.shp) * material.spc *
               material.ems;
       Frag.rgb += spec;
-      vec3 i_l1 = calcLight(i_lp1, n, vec3(1), 1);
+      vec3 i_l1 = calcLight(i_lp1, n, vec3(1));
       Frag.rgb += i_l1 + material.ems * material.abd;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));
       attentuation *= material.abd;
-      Frag.w++;
+      Frag.a++;
     }
-    Frag.rgb += Frag.w == 0 ? vec3(0) : attentuation;
+    Frag.rgb += Frag.a == 0 ? vec3(0) : attentuation;
   }
-  Frag.rgb = sqrt(Frag.rgb / Frag.w);
+  Frag.rgb = sqrt(Frag.rgb / Frag.a);
 }

@@ -1,6 +1,6 @@
 float i_THRESHOLD = .003;
 uint i_SAMPLES = 300;
-uint i_BOUNCES = 4;
+uint i_BOUNCES = 40;
 float i_FOVDegrees = 90;
 
 float pi = acos(-1);
@@ -18,6 +18,7 @@ struct MA {
 MA Mground = MA(vec3(.1), .5, 64, 0, .25);
 MA Mred = MA(vec3(.6, .002, .002), .6, 64, 0, .2);
 MA Mblack = MA(vec3(.02), .5, 64, 0, .8);
+MA Mlight = MA(vec3(.7), 1, 1, 10, 0);
 
 vec3 attentuation;
 
@@ -99,15 +100,19 @@ float scene(vec3 p) {
   float red = min(min(softmin(i_ball, i_stick, .025), i_buttons), i_bbase);
   float black =
       min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .1), i_base2,
-                  .1),
+                  .05),
           i_cable);
-  float box = -fBox(p, vec3(20));
-  float light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
+
+  p.x = mod(p.x, .25) - .125;
+  p.z = mod(p.z, .25) - .125;
+
+  float light = fBox(p + vec3(0, -3, 0), vec3(0)) - .1;
   sdf = min(min(min(red, black), ground), light);
 
   material = sdf == red      ? Mred
              : sdf == ground ? Mground
              : sdf == black  ? Mblack
+             : sdf == light  ? Mlight
                              : material;
 
   return sdf;
@@ -138,7 +143,7 @@ vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
 void main() {
   vec3 i_lp1 = vec3(50, -30, -30);
   vec3 i_lp2 = vec3(0, 20, -50);
-  // vec3 i_lp3 = vec3(50, 20, -50);
+  vec3 i_lp3 = vec3(50, 20, -50);
   vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
   Frag.rgb = vec3(0);
   vec3 n;
@@ -155,10 +160,10 @@ void main() {
       spec += spec * pow(max(dot(d, n), 0), material.shp) * material.spc *
               material.ems;
       Frag.rgb += spec * 3;
-      vec3 i_l1 = calcLight(i_lp1, n, vec3(.25, .25, .9), .25);
-      vec3 i_l2 = calcLight(i_lp2, n, vec3(1), 1);
+      // vec3 i_l1 = calcLight(i_lp1, n, vec3(.25, .25, .9), .25);
+      // vec3 i_l2 = calcLight(i_lp2, n, vec3(1), 1);
       // vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-      Frag.rgb += i_l1 + i_l2;
+      // Frag.rgb += i_l1 + i_l2 + i_l3;
       vec3 i_reflection = reflect(d, n);
       vec3 i_rnd = normalize(n + rndVector(state));
       d = normalize(mix(i_rnd, i_reflection, material.mtl));

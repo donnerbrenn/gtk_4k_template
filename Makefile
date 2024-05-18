@@ -178,8 +178,8 @@ elf: $(BINDIR)/main.elf
 delokp:
 	-rm cleanOKP/onekpaq_context.cache
 
-run: all
-	bin/main.okp
+run: smol
+	bin/main.smol
 
 runsmol: clean $(BINDIR)/main.smol
 	./tools/analyze.py bin/main.smol
