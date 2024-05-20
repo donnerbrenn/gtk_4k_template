@@ -3,7 +3,7 @@ uint i_SAMPLES = 300;
 uint i_BOUNCES = 4;
 float i_FOVDegrees = 90;
 
-float pi = acos(-1);
+float i_pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 Frag;
 
@@ -15,9 +15,9 @@ struct MA {
   float mtl; // Metalness
 } material;
 
-MA Mground = MA(vec3(.1), .5, 64, 0, .25);
-MA Mred = MA(vec3(.6, .002, .002), .6, 64, 0, .2);
-MA Mblack = MA(vec3(.02), .5, 64, 0, .8);
+MA i_Mground = MA(vec3(.1), .5, 64, 0, .25);
+MA i_Mred = MA(vec3(.6, .002, .002), .6, 64, 0, 0);
+MA i_Mblack = MA(vec3(.02), .5, 64, 0, .8);
 
 vec3 attentuation;
 
@@ -30,7 +30,7 @@ vec3 rotate(vec3 p, vec3 t) {
   return i_rz * i_ry * i_rx * p;
 }
 
-float softmin(float f1, float f2, float val) {
+float smin(float f1, float f2, float val) {
   float i_e = pow(max(val - abs(f1 - f2), 0), 2) * .25;
   return min(f1, f2) - i_e / val;
 }
@@ -53,7 +53,7 @@ float wang_hash(inout uint seed) {
 
 vec3 rndVector(inout uint state) {
   float z = wang_hash(state) * 2 - 1;
-  float a = wang_hash(state) * (pi * 2);
+  float a = wang_hash(state) * (i_pi * 2);
   float r = sqrt(1 - z * z);
   return vec3(r * cos(a), r * sin(a), z);
 }
@@ -96,18 +96,17 @@ float scene(vec3 p) {
                        vec3(15, 0, 0)) -
                   .1;
 
-  float red = min(min(softmin(i_ball, i_stick, .025), i_buttons), i_bbase);
+  float red = min(min(smin(i_ball, i_stick, .025), i_buttons), i_bbase);
   float black =
-      min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .1), i_base2,
-                  .1),
+      min(smin(smin(smin(i_ring1, i_ring2, .05), i_base1, .1), i_base2, .1),
           i_cable);
   float box = -fBox(p, vec3(20));
   float light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
   sdf = min(min(min(red, black), ground), light);
 
-  material = sdf == red      ? Mred
-             : sdf == ground ? Mground
-             : sdf == black  ? Mblack
+  material = sdf == red      ? i_Mred
+             : sdf == ground ? i_Mground
+             : sdf == black  ? i_Mblack
                              : material;
 
   return sdf;
@@ -144,7 +143,7 @@ void main() {
   vec3 n;
   vec3 ro;
   vec3 d;
-  float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * pi / 180.0f);
+  float i_cameraDistance = 1.0f / tan(i_FOVDegrees * 0.5f * i_pi / 180.0f);
   for (int j = 0; j < i_SAMPLES; j++) {
     d = normalize(vec3(uv, i_cameraDistance));
     ro = vec3(uv, -5);

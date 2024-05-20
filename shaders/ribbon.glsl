@@ -15,16 +15,12 @@ float ribbon(vec3 p) {
 }
 float scene(vec3 p) { return min(tunnel(p), ribbon(p)); }
 
-// vec3 getNormal(vec3 p) {
-//   vec3 i_eps = vec3(.1, 0, 0);
-//   return normalize(
-//       vec3(scene(p + i_eps.xyy), scene(p + i_eps.yxy), scene(p + i_eps.yyx)));
-// }
-
 vec3 getNormal(vec3 p) {
-  mat3 k = mat3(p, p, p) - mat3(.0001);
-  return normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
+  vec3 i_eps = vec3(.1, 0, 0);
+  return normalize(
+      vec3(scene(p + i_eps.xyy), scene(p + i_eps.yxy), scene(p + i_eps.yyx)));
 }
+
 
 void main() {
   vec2 v = (gl_FragCoord.xy / vec2(i_X, i_Y) * 2 - 1) * vec2(1, i_Y / i_X);

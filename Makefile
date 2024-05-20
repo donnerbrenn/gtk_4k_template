@@ -1,37 +1,37 @@
 #setup
-SHADER			=		chamber.frag
-WIDTH			=		2560
-HEIGHT			=		1440
-HIDECURSOR		=		true
-BENCHMARK		=		true
-DEBUG			=		false
-SCISSORS		=		true
+SHADER = cp2.glsl
+WIDTH = 2560
+HEIGHT = 1440
+HIDECURSOR = true
+BENCHMARK = false
+DEBUG = false
+SCISSORS = false
 
-SHADERDIR		=		pathtracer
-GLVERSION		=		'\#version 400'
-I_X				=		'float i_X=$(WIDTH).;'
-I_Y				=		'float i_Y=$(HEIGHT).;'
+SHADERDIR = pathtracer
+GLVERSION = '\#version 400'
+I_X = 'float i_X=$(WIDTH).;'
+I_Y = 'float i_Y=$(HEIGHT).;'
 
-VNDH_FLAGS	:= -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
+VNDH_FLAGS := -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
 AVNDH_FLAGS :=-l -v --vndh vondehi 
 
-OBJDIR 			:=		obj
-BINDIR			:=		bin
-RTDIR 			:=		rt
-SRCDIR			:=		src
-GENDIR			:=		gen
-TEMPLATES		:=		template
+OBJDIR := obj
+BINDIR := bin
+RTDIR := rt
+SRCDIR := src
+GENDIR := gen
+TEMPLATES := template
 
 NASM 			?=		nasm
 OBJCOPY 		?=		objcopy
 PYTHON 			?= 		python3
-CC				=		gcc
+CC			=		gcc
 MINIFY			= 		mono ./tools/shader_minifier.exe -v #--preserve-externals
 USELTO			=		true
 ALIGNSTACK		=		true
-SECTIONORDER	=		td
+SECTIONORDER		=		td
 
-VSHADER			=		vshader.vert
+VSHADER			=		vshader.glsl
 
 ITIMECNT=0
 

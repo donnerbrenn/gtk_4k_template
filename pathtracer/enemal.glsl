@@ -5,8 +5,8 @@ vec3 erot(vec3 p, vec3 ax, float ro) {
 }
 
 float smin(float a, float b, float k) {
-  float h = max(0., k - abs(b - a)) / k;
-  return min(a, b) - h * h * h * k / 6.;
+  float i_h = max(0., k - abs(b - a)) / k;
+  return min(a, b) - pow(i_h, 3) * k / 6.;
 }
 
 float ss(vec2 p) { return sqrt(length(p * p)); }
@@ -17,8 +17,8 @@ float box(vec2 p, vec2 d) {
 }
 
 float linedist(vec2 p, vec2 a, vec2 b) {
-  float k = dot(p - a, b - a) / dot(b - a, b - a);
-  return distance(p, mix(a, b, clamp(k, 0., 1.)));
+  float i_k = dot(p - a, b - a) / dot(b - a, b - a);
+  return distance(p, mix(a, b, clamp(i_k, 0., 1.)));
 }
 
 float pin_sdf(vec2 p) {
@@ -29,29 +29,31 @@ float pin_sdf(vec2 p) {
   angl = asin(sin(angl * 1.3) * .99) / 1.3;
   vec2 p2 = vec2(cos(angl), sin(angl)) * length(p);
   vec2 p3 = vec2(cos(angl2), sin(angl2)) * length(p);
-  float pentagram = linedist(p3, vec2(0.67, 0.22), vec2(0.25, -0.07));
-  pentagram =
-      smin(pentagram, linedist(p3, vec2(0.23, -0.07), vec2(0, 0.60)), .05);
-  float arms = box(p2 - vec2(1.4, 0), vec2(.6, .1));
+  float i_pentagram = linedist(p3, vec2(0.67, 0.22), vec2(0.25, -0.07));
+  float i_pentagram2 =
+      smin(i_pentagram, linedist(p3, vec2(0.23, -0.07), vec2(0, 0.60)), .05);
+  float i_arms = box(p2 - vec2(1.4, 0), vec2(.6, .1));
 
   mat2 rot = mat2(.7, -.7, .7, .7);
-  float cplane1 = p.x;
-  float cplane2 = p.y * .95 - p.x * .32 - .1;
+  float i_cplane1 = p.x;
+  float i_cplane2 = p.y * .95 - p.x * .32 - .1;
 
-  float bars = min(box(p2 - vec2(1.45, 0), vec2(.1, .35)),
-                   box((abs(p2) - vec2(1.45, .35)) * rot, vec2(.13)));
-  arms = smin(arms, max(cplane2, bars), .05);
+  float i_bars = min(box(p2 - vec2(1.45, 0), vec2(.1, .35)),
+                     box((abs(p2) - vec2(1.45, .35)) * rot, vec2(.13)));
+  float i_arms2 = smin(i_arms, max(i_cplane2, i_bars), .05);
 
-  float arrow = box((p2 - vec2(1.9, 0)) * vec2(.6, 1) * rot, vec2(.2, .2));
-  arrow = -smin(-arrow, p2.x - 1.9, .03);
-  arms = smin(arms, max(cplane1, arrow), .05);
+  float i_arrow = box((p2 - vec2(1.9, 0)) * vec2(.6, 1) * rot, vec2(.2, .2));
+  float i_arrow2 = -smin(-i_arrow, p2.x - 1.9, .03);
+  float i_arms3 = smin(i_arms2, max(i_cplane1, i_arrow2), .05);
 
   // bar on bottom of bottom leg
-  arms = smin(arms, box((p2 - vec2(1.95, 0)) * rot, vec2(.12, .12)), .05);
+  float i_arms4 =
+      smin(i_arms3, box((p2 - vec2(1.95, 0)) * rot, vec2(.12, .12)), .05);
 
-  float body = smin(arms - .05, min(max(length(p) - 1., -inner), inner), .1);
-  body = -smin(-body, pentagram, 0.05);
-  return body;
+  float i_body =
+      smin(i_arms4 - .05, min(max(length(p) - 1., -inner), inner), .1);
+  float i_body2 = -smin(-i_body, i_pentagram2, 0.05);
+  return i_body2;
 }
 
 float hash(float a, float b) {
@@ -61,9 +63,9 @@ float hash(float a, float b) {
 }
 
 vec2 hash2(float a, float b) {
-  float s1 = hash(a, b);
-  float s2 = hash(s1, a);
-  return vec2(s1, s2);
+  float i_s1 = hash(a, b);
+  float i_s2 = hash(i_s1, a);
+  return vec2(i_s1, i_s2);
 }
 
 float pin_edge;
@@ -98,13 +100,13 @@ float scene(vec3 p) {
   p3 += p2 / 30.;
   p3 += sin(p.yxz * 10.) / 1000.;
   float ln = dot(p3.yz, p3.yz) / 14.;
-  float bump = smoothstep(1.1, 1.5,
-                          sin(p.y * 60. + sin(p.y * 4.6) * 1.35) +
-                              sin(p.z * 50. + sin(p.z * 5.6) * 1.5));
-  bump += smoothstep(1.1, 1.3,
-                     sin(p.y * 90. + sin(p.y * 5.6) * 1.45) +
-                         sin(p.z * 80. + sin(p.z * 7.6) * 1.55));
-  float pin_inside =
+  float i_bump = smoothstep(1.1, 1.5,
+                            sin(p.y * 60. + sin(p.y * 4.6) * 1.35) +
+                                sin(p.z * 50. + sin(p.z * 5.6) * 1.5)) +
+                 smoothstep(1.1, 1.3,
+                            sin(p.y * 90. + sin(p.y * 5.6) * 1.45) +
+                                sin(p.z * 80. + sin(p.z * 7.6) * 1.55));
+  float i_pin_inside =
       box(vec2(pinsdf + 2.,
                p3.x - sqrt(sqrt(smoothstep(0., -1.7, pinsdf))) * .1),
           vec2(2., .85 - ln * .005)) -
@@ -113,11 +115,11 @@ float scene(vec3 p) {
   pin_edge =
       box(vec2(pinsdf, p3.x),
           vec2(.12 + cos(p3.y / 20.) * 0.05 - ln * .001, 1. - ln * .005)) -
-      .12 + bump / 1500.;
+      .12 + i_bump / 1500.;
   pin_edge =
       mix(pin_edge,
           linedist(vec2(pinsdf, p3.x), vec2(0.5, 1), vec2(0, -1)) - .3, 0.005);
-  return min(fabric, min(pin_edge, pin_inside));
+  return min(fabric, min(pin_edge, i_pin_inside));
 }
 
 vec3 norm(vec3 p) {
@@ -164,14 +166,14 @@ vec3 pixel_color(vec2 uv) {
   vec3 n = norm(p);
   vec3 r = reflect(cam, n);
   float spec = max(0., dot(r, sundir));
-  float fres = 1. - abs(dot(cam, n)) * .9;
+  float i_fres = 1. - abs(dot(cam, n)) * .9;
   float ao = smoothstep(-1., 2., scene(p + n * .5 + sundir * 3.));
-  vec3 col = (spec * .3 * skycol * (ao * .2 + .7) +
-              ((pow(spec, 8.) * .1 * suncol + pow(spec, 20.)) * 4.) * mat +
-              (mat * .8 + .2) *
-                  (pow(spec, 80.) * 3. + step(0.999 - mat * .01, spec) * 10.)) *
-             fres * ao;
-  return (hit ? col : skybox(cam)) * atten;
+  vec3 i_col = (spec * .3 * skycol * (ao * .2 + .7) +
+                ((pow(spec, 8.) * .1 * suncol + pow(spec, 20.)) * 4.) * mat +
+                (mat * .8 + .2) * (pow(spec, 80.) * 3. +
+                                   step(0.999 - mat * .01, spec) * 10.)) *
+               i_fres * ao;
+  return (hit ? i_col : skybox(cam)) * atten;
 }
 
 // blessed be mattz for posting the code to fit garbor functions to arbitrary
@@ -179,11 +181,12 @@ vec3 pixel_color(vec2 uv) {
 // the bloom >:3
 float gabor(vec2 p, float u, float v, float r, float ph, float l, float t,
             float s, float h) {
-  float cr = cos(r);
-  float sr = sin(r);
-  vec2 st = vec2(s, t);
-  p = mat2(cr, -sr, sr, cr) * vec2(p.x - u, -p.y - v);
-  return h * exp(dot(vec2(-0.5), p * p / (st * st))) * cos(p.x * 6.28 / l + ph);
+  float i_cr = cos(r);
+  float i_sr = sin(r);
+  vec2 i_st = vec2(s, t);
+  p = mat2(i_cr, -i_sr, i_sr, i_cr) * vec2(p.x - u, -p.y - v);
+  return h * exp(dot(vec2(-0.5), p * p / (i_st * i_st))) *
+         cos(p.x * 6.28 / l + ph);
 }
 
 void main() {
@@ -192,32 +195,31 @@ void main() {
   float sd = hash(uv.x, uv.y);
   for (int i = 0; i < 100; i++) {
     vec2 h2 = tan(hash2(sd, float(i)));
-    vec2 uv2 = uv + h2 / 1080;
-    fragCol += vec4(pixel_color(uv2), 1);
+    vec2 i_uv2 = uv + h2 / 1080;
+    fragCol += vec4(pixel_color(i_uv2), 1);
   }
 
-  float k = 0.0;
+  float i_k = gabor(uv, 0.07, 0.03, 1.89, 1.08, 3.65, 0.13, 0.12, 1.82) +
+            gabor(uv, -0.52, 0.94, 3.26, 2.84, 3.72, 0.53, 0.53, 0.21) +
+            gabor(uv, 0.05, -0.16, 1.60, 1.52, 3.12, 0.09, 0.09, 1.50) +
+            gabor(uv, 0.45, 0.94, 6.28, 2.33, 4.00, 0.48, 0.48, 0.17) +
+            gabor(uv, 0.30, 0.03, 4.39, 6.27, 0.36, 0.13, 0.13, 0.11) +
+            gabor(uv, 0.07, -0.08, 3.17, 1.22, 0.41, 0.16, 0.05, 0.15) +
+            gabor(uv, 0.94, -0.55, 4.75, 4.04, 1.14, 1.06, 0.14, 0.18) +
+            gabor(uv, -0.88, -0.18, 4.03, 3.94, 1.29, 0.49, 0.49, 0.05) +
+            gabor(uv, 0.16, -0.05, 1.60, 6.28, 0.21, 0.05, 0.05, 0.18) +
+            gabor(uv, -0.42, 0.45, 5.45, 1.03, 0.76, 0.35, 0.35, 0.05);
 
-  k += gabor(uv, 0.07, 0.03, 1.89, 1.08, 3.65, 0.13, 0.12, 1.82);
-  k += gabor(uv, -0.52, 0.94, 3.26, 2.84, 3.72, 0.53, 0.53, 0.21);
-  k += gabor(uv, 0.05, -0.16, 1.60, 1.52, 3.12, 0.09, 0.09, 1.50);
-  k += gabor(uv, 0.45, 0.94, 6.28, 2.33, 4.00, 0.48, 0.48, 0.17);
-  k += gabor(uv, 0.30, 0.03, 4.39, 6.27, 0.36, 0.13, 0.13, 0.11);
-  k += gabor(uv, 0.07, -0.08, 3.17, 1.22, 0.41, 0.16, 0.05, 0.15);
-  k += gabor(uv, 0.94, -0.55, 4.75, 4.04, 1.14, 1.06, 0.14, 0.18);
-  k += gabor(uv, -0.88, -0.18, 4.03, 3.94, 1.29, 0.49, 0.49, 0.05);
-  k += gabor(uv, 0.16, -0.05, 1.60, 6.28, 0.21, 0.05, 0.05, 0.18);
-  k += gabor(uv, -0.42, 0.45, 5.45, 1.03, 0.76, 0.35, 0.35, 0.05);
-
-  fragCol /= fragCol.w;
-  float bloom = k * .9 + .2;
-  vec4 bbright = vec4(0xaf, 0x84, 0x6a, 0) / 128.;
-  vec4 bmid = vec4(0x15, 0x17, 0x19, 0) / 60.;
-  fragCol =
-      mix(fragCol,
-          mix(bmid, bbright, (max(bloom, 0.1) - .1) / .9) * sqrt(bloom), 0.6) +
+  vec4 i_fragCol2 = fragCol / fragCol.w;
+  float bloom = i_k * .9 + .2;
+  vec4 i_bbright = vec4(0xaf, 0x84, 0x6a, 0) / 128.;
+  vec4 i_bmid = vec4(0x15, 0x17, 0x19, 0) / 60.;
+  vec4 i_fragCol1 =
+      mix(i_fragCol2,
+          mix(i_bmid, i_bbright, (max(bloom, 0.1) - .1) / .9) * sqrt(bloom),
+          0.6) +
       sd * sd * .02;
-  fragCol *= (1.0 - dot(uv, uv) * 0.30); // vingetting lol
-  fragCol = (smoothstep(vec4(-.34), vec4(1.), log(fragCol + 1.0)) - .2) /
+  vec4 i_fragCol = i_fragCol1 * (1.0 - dot(uv, uv) * 0.30); // vingetting lol
+  fragCol = (smoothstep(vec4(-.34), vec4(1.), log(i_fragCol + 1.0)) - .2) /
             .8; // colour grading
 }
