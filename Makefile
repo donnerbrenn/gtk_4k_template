@@ -1,11 +1,11 @@
 #setup
-SHADER = cp2.glsl
+SHADER = chamber.glsl
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
 BENCHMARK = false
 DEBUG = false
-SCISSORS = false
+SCISSORS = true
 
 SHADERDIR = pathtracer
 GLVERSION = '\#version 400'

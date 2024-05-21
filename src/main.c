@@ -54,7 +54,7 @@ void on_render() {
   }
 #endif
 #ifdef BENCHMARK
-  printf("RT: %.2f seconds\n", g_timer_elapsed(timer, NULL));
+  printf("Time: %.2f seconds\n", g_timer_elapsed(timer, NULL));
 #endif
 #ifndef VAR_ITIME
   rendered = TRUE;

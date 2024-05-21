@@ -1,9 +1,9 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 100;
-uint i_BOUNCES = 3;
-float i_FOVDegrees = 85;
+uint i_SAMPLES = 150;
+uint i_BOUNCES = 8;
+float i_FOVDegrees = 95;
 
-float i_pi = acos(-1);
+float pi = acos(-1);
 uint state = uint(gl_FragCoord.x * gl_FragCoord.y) * uint(0x27d4eb2d);
 out vec4 Frag;
 
@@ -20,7 +20,7 @@ MA i_Mred = MA(vec3(.55, .01, .01), .125, 4, 0, 0);
 MA i_Mblack = MA(vec3(.02), 1, 32, 0, .925);
 MA i_Mwhite = MA(vec3(.8), .025, 8, 0, .05);
 MA i_Mbrown = MA(vec3(.6, .3, .03), .5, 16, 0, .35);
-MA i_Mspace = MA(vec3(.7, .7, .99), .1, 1, 1, 1);
+MA i_Mspace = MA(vec3(.7, .7, .99), .1, 1, 2, 1);
 MA i_Mgreenlight = MA(vec3(.01, .9, .01), 0, 128, 1, 0);
 MA i_Mgray = MA(vec3(.1), 0, 1, 0, 0);
 MA i_Msilver = MA(vec3(1), 1, 32, 0, 1);
@@ -45,7 +45,7 @@ vec3 rotate(vec3 p, vec3 t) {
     return i_rz * i_ry * i_rx * p;
 }
 
-float dot2(in vec2 v) {
+float dot2(vec2 v) {
     return dot(v, v);
 }
 
@@ -66,35 +66,19 @@ float wang_hash(inout uint seed) {
 
 vec3 rndVector(inout uint state) {
     float z = wang_hash(state) * 2. - 1.;
-    float a = wang_hash(state) * 2. * i_pi;
+    float a = wang_hash(state) * 2. * pi;
     return vec3(sqrt(1. - z * z) * cos(a), sqrt(1. - z * z) * sin(a), z);
 }
 
-float fPlane(vec3 p, vec3 n, float distanceFromOrigin) {
-    return dot(p, n) + distanceFromOrigin;
+float fPlane(vec3 p, vec3 n, float distance) {
+    return dot(p, n) + distance;
 }
 
-// Repeat in two dimensions
-void pMod2(inout vec2 p, vec2 size) {
-    vec2 c = floor((p + size * .5) / size);
-    p = mod(p + size * .5, size) - size * .5;
-}
-
-// Repeat only a few times: from indices <start> to <stop> (similar to above,
-// but more flexible)
-float pModInterval1(inout float p, float size, float start, float stop) {
+void pModInterval1(inout float p, float size, float start, float stop) {
     float halfsize = size * .5;
     float c = floor((p + halfsize) / size);
     p = mod(p + halfsize, size) - halfsize;
-    if (c > stop) { // yes, this might not be the best thing numerically.
-        p += size * (c - stop);
-        c = stop;
-    }
-    if (c < start) {
-        p += size * (c - start);
-        c = start;
-    }
-    return c;
+    p += c > stop ? size * (c - stop) : c < start ? size * (c - start) : 0;
 }
 
 float fTorus(vec3 p, vec2 t) {
@@ -117,7 +101,7 @@ float fTable(vec3 p, vec3 o, vec3 s, float L) {
 }
 
 float fCapsule(vec3 p, float h, float r) {
-    p.y -= clamp(p.y, .0, h);
+    p.y -= clamp(p.y, 0, h);
     return length(p) - r;
 }
 
@@ -138,7 +122,7 @@ float scene(vec3 p) {
     pModInterval1(pz.z, .09, -3, 3);
     float i_backrest = fCapsule(pz, .75, .02);
     vec3 i_pchair1 = rotate(p, vec3(0, -.25, 0));
-    vec3 i_pchair2 = rotate(i_pchair1, vec3(i_pi / 2, 0, 0));
+    vec3 i_pchair2 = rotate(i_pchair1, vec3(pi / 2, 0, 0));
     float i_chairtop = fCapsule(i_pchair2 + vec3(0, .3, -.45), .6, .04);
 
     float i_bed1 = fBox(p + vec3(.3, 1.5, 2.2), vec3(1.2, .25, .5)) - .1;
@@ -184,7 +168,7 @@ float scene(vec3 p) {
 
     float i_stand = fCappedCone(p + vec3(0, -.42, -2.55), .05, .1, .1);
     float i_cube =
-        fBox(rotate(p + vec3(0, -.54, -2.55), vec3(i_pi * .25, i_pi * .25, 0)),
+        fBox(rotate(p + vec3(0, -.54, -2.55), vec3(pi * .25, pi * .25, 0)),
             vec3(.05));
 
     float i_mouse = fBox(rotate(p + vec3(-.9, .725, -1.85), vec3(0, -.13, 0)),
@@ -247,7 +231,7 @@ bool march(inout vec3 p, vec3 dir) {
 vec3 calcLight(vec3 d, vec3 n, vec3 color) {
     float light = max(dot(n, normalize(d)), .0);
     return (color * material.abd * attentuation * light +
-        pow(light, material.shp) * material.spc);
+        pow(light, material.shp) * material.spc) * 1.5;
 }
 
 void main() {
@@ -257,7 +241,7 @@ void main() {
     vec3 n;
     vec3 ro;
     vec3 d;
-    float i_cameraDistance = 1. / tan(i_FOVDegrees * 0.5f * i_pi / 180.);
+    float i_cameraDistance = 1. / tan(i_FOVDegrees * 0.5f * pi / 180.);
     for (int j = 0; j < i_SAMPLES; j++) {
         d = normalize(vec3(uv, i_cameraDistance));
         ro = vec3(uv, -5);
@@ -267,16 +251,14 @@ void main() {
             vec3 spec = attentuation * material.ems;
             spec += spec * pow(max(dot(d, n), 0), material.shp) * material.spc *
                     material.ems;
-            Frag.rgb += spec;
             vec3 i_l1 = calcLight(i_lp1, n, vec3(1));
-            Frag.rgb += i_l1 + material.ems * material.abd;
             vec3 i_reflection = reflect(d, n);
             vec3 i_rnd = normalize(n + rndVector(state));
             d = normalize(mix(i_rnd, i_reflection, material.mtl));
             attentuation *= material.abd;
-            Frag.a++;
+            Frag += vec4(material.ems * material.abd + spec + i_l1, 1);
         }
-        Frag.rgb += Frag.a == 0 ? vec3(0) : attentuation;
+        Frag.rgb += attentuation;
     }
-    Frag.rgb = sqrt(Frag.rgb / Frag.a);
+    Frag = vec4(sqrt(Frag.rgb / Frag.a), 1);
 }
