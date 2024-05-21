@@ -3,9 +3,9 @@ SHADER = chamber.glsl
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
-BENCHMARK = false
+BENCHMARK = false 
 DEBUG = false
-SCISSORS = true
+SCISSORS =  true 
 
 SHADERDIR = pathtracer
 GLVERSION = '\#version 400'
@@ -38,21 +38,19 @@ ITIMECNT=0
 
 #dlfixup, dnload or default
 SMOLLOADER		=		dnload
-
 COPTFLAGS		= 		-Oz -march=nocona -I gen/
 COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
-						-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
-						-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
-						-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
-						-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
-						-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
+					-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
+					-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
+					-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
+					-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
+					-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
 COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` #-mincoming-stack-boundary=3
 COPTFLAGS		+=		-DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT)
 LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
-
 SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
-	 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
-						-funsafe-dynamic
+ 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
+					-funsafe-dynamic
 
 ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR

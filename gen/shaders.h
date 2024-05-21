@@ -115,7 +115,7 @@ const char *shader_frag =
  "vec3 h(vec3 m)"
  "{"
    "float v=max(dot(m,normalize(vec3(0,20,-50))),0.);"
-   "return(vec3(1)*s.abd*r*v+pow(v,s.shp)*s.spc)*1.5;"
+   "return vec3(1)*s.abd*r*v+pow(v,s.shp)*s.spc;"
  "}"
  "void main()"
  "{"

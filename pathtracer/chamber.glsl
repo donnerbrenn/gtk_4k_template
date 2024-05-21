@@ -39,10 +39,15 @@ vec3 xor(vec2 uv, vec3 abd) {
 vec3 rotate(vec3 p, vec3 t) {
     vec3 c = cos(t);
     vec3 s = sin(t);
-    mat3 i_rx = mat3(1, 0, 0, 0, c.x, -s.x, 0, s.x, c.x);
-    mat3 i_ry = mat3(c.y, 0, s.y, 0, 1, 0, -s.y, 0, c.y);
-    mat3 i_rz = mat3(c.z, -s.z, 0, s.z, c.z, 0, 0, 0, 1);
-    return i_rz * i_ry * i_rx * p;
+    mat3 i_rx =
+        mat3(1, 0, 0, 0, c.x, -s.x, 0, s.x, c.x);
+    mat3 i_ry = mat3(c.y, 0, s.y, 0,
+            1, 0, -s.y, 0,
+            c.y);
+    mat3 i_rz
+        = mat3(c.z, -s.z, 0, s.z, c.z, 0, 0, 0, 1);
+    return i_rz * i_ry * i_rx *
+        p;
 }
 
 float dot2(vec2 v) {
@@ -231,7 +236,7 @@ bool march(inout vec3 p, vec3 dir) {
 vec3 calcLight(vec3 d, vec3 n, vec3 color) {
     float light = max(dot(n, normalize(d)), .0);
     return (color * material.abd * attentuation * light +
-        pow(light, material.shp) * material.spc) * 1.5;
+        pow(light, material.shp) * material.spc);
 }
 
 void main() {
