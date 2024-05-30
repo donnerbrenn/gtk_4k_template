@@ -34,13 +34,13 @@ void on_render() {
 #ifndef VAR_ITIME
   static gboolean rendered = FALSE;
   if (rendered)
-    return TRUE;
+  // return TRUE;
 #endif
 #ifdef VAR_ITIME
-  // glUniform1f(, itime);
-  glProgramUniform1f(sprogram_id, 0, g_timer_elapsed(timer, NULL));
-  gtk_gl_area_queue_render(glarea);
+    // glUniform1f(, itime);
+    glProgramUniform1f(sprogram_id, 0, g_timer_elapsed(timer, NULL));
 #endif
+  gtk_gl_area_queue_render((GtkGLArea *)glarea);
 
 #ifdef SCISSORS
 #define lines 160
@@ -67,7 +67,7 @@ void on_realize() {
 #ifdef VAR_ITIME
   timer = g_timer_new();
 #endif
-  gtk_gl_area_make_current(glarea);
+  gtk_gl_area_make_current((GtkGLArea *)glarea);
   glGenVertexArrays(1, &vao);
   glGenProgramPipelines(1, &pipelineId);
 #ifndef DEBUG
@@ -87,7 +87,7 @@ void on_realize() {
 #endif
 #else
 
-  GLboolean isLinked;
+  GLint isLinked;
   GLint maxLength = 0;
   printf("Compiling vertex shader\n");
 
