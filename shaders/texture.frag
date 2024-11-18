@@ -1,10 +1,9 @@
 
 out vec3 color;
-float approx = .001;
-float renderDist = 10;
-float maxIter = 500;
-uniform float iTime;
-vec3 ro = vec3(0);
+uniform float u_time;
+float i_approx = .001;
+float i_renderDist = 10;
+vec3 i_ro = vec3(0);
 
 vec3 rotate(vec3 p, vec3 t) {
     vec3 c = cos(t);
@@ -36,8 +35,8 @@ vec2 hash22(vec2 p) {
 }
 
 float map(vec3 p) {
-    p.z += iTime;
-    p = rotate(p, vec3(0, 0, sin(iTime * 1 + p.z)) * .25);
+    p.z += u_time;
+    p = rotate(p, vec3(0, 0, sin(u_time * 1 + p.z)) * .25);
     p.xz = mod(p.xz, 2) - 1;
     float i_plane = sdPlane(p, vec4(0, 3.14 / 4, 0, .5));
     float i_beams = sdRoundbox(p, vec3(.1, 8, .3), .1);
@@ -49,13 +48,12 @@ vec3 normal(vec3 p) {
     return normalize(map(p) - vec3(map(k[0]), map(k[1]), map(k[2])));
 }
 
-float lightRender(vec3 n, vec3 l, vec3 v, float strength)
-{
+float lightRender(vec3 n, vec3 l, vec3 v, float strength) {
     return ((dot(n, normalize(l)) * .5 + .5) + pow(max(dot(v, reflect(normalize(l), n)), 0), 10)) * strength;
 }
 
 vec3 triplanarMap(vec3 p, vec3 n) {
-    p = rotate(p, vec3(0, 0, sin(iTime + p.z)) * .25);
+    p = rotate(p, vec3(0, 0, sin(u_time + p.z)) * .25);
     mat3 i_triMapSamples = mat3(
             step(vec3(mod(p.yz, .2), .2), vec3(.1)),
             step(vec3(mod(p.xz, .2), .2), vec3(.1)),
@@ -67,19 +65,17 @@ vec3 triplanarMap(vec3 p, vec3 n) {
 void main() {
     vec2 i_uv = (gl_FragCoord.xy / vec2(i_X, i_Y) * 2 - 1) * vec2(1, i_Y / i_X);
     vec3 rd = normalize(vec3(i_uv, 1));
-    vec3 p = ro;
-    float iterations;
+    vec3 p = i_ro;
     float d = 1;
-    while (distance(p, ro) < renderDist && d > approx && iterations < maxIter)
-    {
+    while (p.z < i_renderDist && d > i_approx) {
         d = map(p);
         p += d * rd;
-        iterations++;
     }
-    if (d < approx)
-    {
+    if (d < i_approx) {
         vec3 i_n = normal(p);
-        color = triplanarMap(p + vec3(0, 0, iTime), i_n) * lightRender(i_n, vec3(10), rd, .5) * pow((1. - distance(ro, p) / renderDist), 2);
+        vec3 i_texture = triplanarMap(p + vec3(0, 0, u_time), i_n);
+        float i_light = lightRender(i_n, vec3(10), rd, .5);
+        float i_gradient = pow((1. - distance(i_ro, p) / i_renderDist), 2);
+        color = sqrt(i_texture * i_light * i_gradient);
     }
-    color = sqrt(color);
 }

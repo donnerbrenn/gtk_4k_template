@@ -79,8 +79,7 @@ float scene(vec3 p) {
     p.y = p.y / 1.5 + 1.2;
     p.yz = asin(sin(p.yz / 20.) * .6) * 20.;
     // weird space folding for the fabric texture.
-    mat2 rot = mat2(cos(2.6), -sin(2.6), sin(2.6),
-            cos(2.6)); // erot is powerful, but slower here
+    mat2 rot = mat2(cos(2.6), -sin(2.6), sin(2.6), cos(2.6)); // erot is powerful, but slower here
     for (int i = 0; i < 8; i++) {
         p.yz -= float(i);
         p.yz *= rot;
@@ -104,25 +103,11 @@ float scene(vec3 p) {
     p3 += p2 / 30.;
     p3 += sin(p.yxz * 10.) / 1000.;
     float ln = dot(p3.yz, p3.yz) / 14.;
-    float i_bump = smoothstep(1.1, 1.5,
-            sin(p.y * 60. + sin(p.y * 4.6) * 1.35) +
-                sin(p.z * 50. + sin(p.z * 5.6) * 1.5)) +
-            smoothstep(1.1, 1.3,
-                sin(p.y * 90. + sin(p.y * 5.6) * 1.45) +
-                    sin(p.z * 80. + sin(p.z * 7.6) * 1.55));
-    float i_pin_inside =
-        box(vec2(pinsdf + 2.,
-                p3.x - sqrt(sqrt(smoothstep(0., -1.7, pinsdf))) * .1),
-            vec2(2., .85 - ln * .005)) -
-            .2;
+    float i_bump = smoothstep(1.1, 1.5, sin(p.y * 60. + sin(p.y * 4.6) * 1.35) + sin(p.z * 50. + sin(p.z * 5.6) * 1.5)) + smoothstep(1.1, 1.3, sin(p.y * 90. + sin(p.y * 5.6) * 1.45) + sin(p.z * 80. + sin(p.z * 7.6) * 1.55));
+    float i_pin_inside = box(vec2(pinsdf + 2., p3.x - sqrt(sqrt(smoothstep(0., -1.7, pinsdf))) * .1), vec2(2., .85 - ln * .005)) - .2;
 
-    pin_edge =
-        box(vec2(pinsdf, p3.x),
-            vec2(.12 + cos(p3.y / 20.) * 0.05 - ln * .001, 1. - ln * .005)) -
-            .12 + i_bump / 1500.;
-    pin_edge =
-        mix(pin_edge,
-            linedist(vec2(pinsdf, p3.x), vec2(0.5, 1), vec2(0, -1)) - .3, 0.005);
+    pin_edge = box(vec2(pinsdf, p3.x), vec2(.12 + cos(p3.y / 20.) * 0.05 - ln * .001, 1. - ln * .005)) - .12 + i_bump / 1500.;
+    pin_edge = mix(pin_edge, linedist(vec2(pinsdf, p3.x), vec2(0.5, 1), vec2(0, -1)) - .3, 0.005);
     return min(fabric, min(pin_edge, i_pin_inside));
 }
 
@@ -131,12 +116,11 @@ vec3 norm(vec3 p) {
     return normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
 }
 
-const vec3 suncol = vec3(1.5, 1.0, 0.7);
-const vec3 skycol = vec3(0.4, 0.75, 1.0);
-const vec3 sundir = normalize(vec3(-1, 0., 1.2));
+const vec3 i_suncol = vec3(1.5, 1.0, 0.7);
+const vec3 i_skycol = vec3(0.4, 0.75, 1.0);
+const vec3 i_sundir = normalize(vec3(-1, 0., 1.2));
 vec3 skybox(vec3 angle) {
-    return mix(vec3(1), skycol, angle.x * angle.x) +
-        pow(max(dot(angle, sundir), 0.0), 350.0) * suncol * 15.0;
+    return mix(vec3(1), i_skycol, angle.x * angle.x) + pow(max(dot(angle, i_sundir), 0.0), 350.0) * i_suncol * 15.0;
 }
 
 vec3 pixel_color(vec2 uv) {
@@ -169,32 +153,25 @@ vec3 pixel_color(vec2 uv) {
     float mat = dist == fabric ? 1. : 0.;
     vec3 n = norm(p);
     vec3 r = reflect(cam, n);
-    float spec = max(0., dot(r, sundir));
+    float spec = max(0., dot(r, i_sundir));
     float i_fres = 1. - abs(dot(cam, n)) * .9;
-    float ao = smoothstep(-1., 2., scene(p + n * .5 + sundir * 3.));
-    vec3 i_col = (spec * .3 * skycol * (ao * .2 + .7) +
-            ((pow(spec, 8.) * .1 * suncol + pow(spec, 20.)) * 4.) * mat +
-            (mat * .8 + .2) * (pow(spec, 80.) * 3. +
-                    step(0.999 - mat * .01, spec) * 10.)) *
-            i_fres * ao;
+    float ao = smoothstep(-1., 2., scene(p + n * .5 + i_sundir * 3.));
+    vec3 i_col = (spec * .3 * i_skycol * (ao * .2 + .7) + ((pow(spec, 8.) * .1 * i_suncol + pow(spec, 20.)) * 4.) * mat + (mat * .8 + .2) * (pow(spec, 80.) * 3. + step(0.999 - mat * .01, spec) * 10.)) * i_fres * ao;
     return (hit ? i_col : skybox(cam)) * atten;
 }
 
 // blessed be mattz for posting the code to fit garbor functions to arbitrary
 // images! from https://www.shadertoy.com/view/4ljSRR this is used to hardcode
 // the bloom >:3
-float gabor(vec2 p, float u, float v, float r, float ph, float l, float t,
-    float s, float h) {
-    float i_cr = cos(r);
-    float i_sr = sin(r);
-    vec2 i_st = vec2(s, t);
-    p = mat2(i_cr, -i_sr, i_sr, i_cr) * vec2(p.x - u, -p.y - v);
-    return h * exp(dot(vec2(-0.5), p * p / (i_st * i_st))) *
-        cos(p.x * 6.28 / l + ph);
+float gabor(vec2 p, float u, float v, float r, float ph, float l, float t, float s, float h) {
+    float cr = cos(r);
+    float sr = sin(r);
+    vec2 st = vec2(s, t);
+    p = mat2(cr, -sr, sr, cr) * vec2(p.x - u, -p.y - v);
+    return h * exp(dot(vec2(-0.5), p * p / (st * st))) * cos(p.x * 6.28 / l + ph);
 }
 
 void main() {
-    fragCol = vec4(0);
     vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
     float sd = hash(uv.x, uv.y);
     for (int i = 0; i < 100; i++) {
@@ -203,27 +180,23 @@ void main() {
         fragCol += vec4(pixel_color(i_uv2), 1);
     }
 
-    float i_k = gabor(uv, 0.07, 0.03, 1.89, 1.08, 3.65, 0.13, 0.12, 1.82) +
-            gabor(uv, -0.52, 0.94, 3.26, 2.84, 3.72, 0.53, 0.53, 0.21) +
-            gabor(uv, 0.05, -0.16, 1.60, 1.52, 3.12, 0.09, 0.09, 1.50) +
-            gabor(uv, 0.45, 0.94, 6.28, 2.33, 4.00, 0.48, 0.48, 0.17) +
-            gabor(uv, 0.30, 0.03, 4.39, 6.27, 0.36, 0.13, 0.13, 0.11) +
-            gabor(uv, 0.07, -0.08, 3.17, 1.22, 0.41, 0.16, 0.05, 0.15) +
-            gabor(uv, 0.94, -0.55, 4.75, 4.04, 1.14, 1.06, 0.14, 0.18) +
-            gabor(uv, -0.88, -0.18, 4.03, 3.94, 1.29, 0.49, 0.49, 0.05) +
-            gabor(uv, 0.16, -0.05, 1.60, 6.28, 0.21, 0.05, 0.05, 0.18) +
-            gabor(uv, -0.42, 0.45, 5.45, 1.03, 0.76, 0.35, 0.35, 0.05);
+    float i_k0 = gabor(uv, 0.07, 0.03, 1.89, 1.08, 3.65, 0.13, 0.12, 1.82);
+    float i_k1 = gabor(uv, -0.52, 0.94, 3.26, 2.84, 3.72, 0.53, 0.53, 0.21);
+    float i_k2 = gabor(uv, 0.05, -0.16, 1.60, 1.52, 3.12, 0.09, 0.09, 1.50);
+    float i_k3 = gabor(uv, 0.45, 0.94, 6.28, 2.33, 4.00, 0.48, 0.48, 0.17);
+    float i_k4 = gabor(uv, 0.30, 0.03, 4.39, 6.27, 0.36, 0.13, 0.13, 0.11);
+    float i_k5 = gabor(uv, 0.07, -0.08, 3.17, 1.22, 0.41, 0.16, 0.05, 0.15);
+    float i_k6 = gabor(uv, 0.94, -0.55, 4.75, 4.04, 1.14, 1.06, 0.14, 0.18);
+    float i_k7 = gabor(uv, -0.88, -0.18, 4.03, 3.94, 1.29, 0.49, 0.49, 0.05);
+    float i_k8 = gabor(uv, 0.16, -0.05, 1.60, 6.28, 0.21, 0.05, 0.05, 0.18);
+    float i_k9 = gabor(uv, -0.42, 0.45, 5.45, 1.03, 0.76, 0.35, 0.35, 0.05);
+    float i_k = i_k0 + i_k1 + i_k2 + i_k3 + i_k4 + i_k4 + i_k6 + i_k7 + i_k8 + i_k9;
 
     vec4 i_fragCol2 = fragCol / fragCol.w;
     float bloom = i_k * .9 + .2;
     vec4 i_bbright = vec4(0xaf, 0x84, 0x6a, 0) / 128.;
     vec4 i_bmid = vec4(0x15, 0x17, 0x19, 0) / 60.;
-    vec4 i_fragCol1 =
-        mix(i_fragCol2,
-            mix(i_bmid, i_bbright, (max(bloom, 0.1) - .1) / .9) * sqrt(bloom),
-            0.6) +
-            sd * sd * .02;
+    vec4 i_fragCol1 = mix(i_fragCol2, mix(i_bmid, i_bbright, (max(bloom, 0.1) - .1) / .9) * sqrt(bloom), 0.6) + sd * sd * .02;
     vec4 i_fragCol = i_fragCol1 * (1.0 - dot(uv, uv) * 0.30); // vingetting lol
-    fragCol = (smoothstep(vec4(-.34), vec4(1.), log(i_fragCol + 1.0)) - .2) /
-            .8; // colour grading
+    fragCol = (smoothstep(vec4(-.34), vec4(1.), log(i_fragCol + 1.0)) - .2) / .8; // colour grading
 }

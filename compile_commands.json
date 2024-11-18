@@ -54,6 +54,8 @@
    "-DWIDTH=2560",
    "-DHEIGHT=1440",
    "-DHIDECURSOR",
+   "-DBENCHMARK",
+   "-DSCISSORS",
    "-flto",
    "-c",
    "src/main.c",

@@ -1,11 +1,12 @@
 #setup
-SHADER = chamber.glsl
+SHADER = chamber.frag
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
-BENCHMARK = false 
+BENCHMARK = true
 DEBUG = false
-SCISSORS =  true 
+SCISSORS = true
+RENDERER = SDL
 
 SHADERDIR = pathtracer
 GLVERSION = '\#version 400'
@@ -22,36 +23,44 @@ SRCDIR := src
 GENDIR := gen
 TEMPLATES := template
 
-NASM 			?=		nasm
-OBJCOPY 		?=		objcopy
-PYTHON 			?= 		python3
-CC			=		gcc
-MINIFY			= 		mono ./tools/shader_minifier.exe -v #--preserve-externals
-USELTO			=		true
-ALIGNSTACK		=		true
-SECTIONORDER		=		td
+NASM ?= nasm
+OBJCOPY ?= objcopy
+PYTHON ?= python3
+CC = cc
+MINIFY = mono ./tools/shader_minifier.exe -v
+USELTO = true
+ALIGNSTACK = true
+SECTIONORDER = td
 
-VSHADER			=		vshader.glsl
+VSHADER = vshader.vert
 
-ITIMECNT=0
+ITIMECNT = 0
 
 
 #dlfixup, dnload or default
-SMOLLOADER		=		dnload
-COPTFLAGS		= 		-Oz -march=nocona -I gen/
-COPTFLAGS		+=		-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
-					-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
-					-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
-					-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
-					-fwhole-program -fno-exceptions -fvisibility=hidden -nostartfiles -nostdlib\
-					-mno-fancy-math-387 -mno-ieee-fp -fno-builtin
-COPTFLAGS 		+=		`pkg-config --cflags-only-I gtk+-3.0` #-mincoming-stack-boundary=3
-COPTFLAGS		+=		-DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT)
-LIBS			=		-lGL `pkg-config --libs-only-l gtk+-3.0`
-SMOLFLAGS 		=		--smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
- 					--det -fno-start-arg -fno-ifunc-support --section-order=$(SECTIONORDER)\
-					-funsafe-dynamic
+SMOLLOADER = dnload
+COPTFLAGS = -Os -march=nocona 
+COPTFLAGS +=	-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
+		-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
+		-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
+		-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
+		-mno-fancy-math-387 -mno-ieee-fp -fno-builtin -fwhole-program -fno-exceptions \
+		-fvisibility=hidden -nostartfiles -nostdlib
+COPTFLAGS += `pkg-config --cflags-only-I gtk+-3.0` 
+COPTFLAGS += -DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT)
+LIBS = -lGL `pkg-config --libs-only-l gtk+-3.0`
+ifeq ($(RENDERER),SDL)
+	LIBS += -lSDL2
+else
+	LIBS += `pkg-config --libs-only-l gtk+-3.0`
+endif
 
+SMOLFLAGS =	--keeptmp --smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
+		--det -funsafe-dynamic -fno-ifunc-support --section-order=$(SECTIONORDER)
+SRCFILE =main.c
+ifeq ($(RENDERER),SDL)
+	SRCFILE = main_sdl.c
+endif
 ifeq ($(HIDECURSOR),true)
 	COPTFLAGS+=-DHIDECURSOR
 endif
@@ -63,7 +72,6 @@ endif
 ifeq ($(SCISSORS),true)
 	COPTFLAGS+=-DSCISSORS
 endif
-
 
 ifeq ($(USELTO),true)
 	COPTFLAGS+=-flto
@@ -78,8 +86,8 @@ ifeq ($(BENCHMARK),true)
 	LIBS+=-lc
 endif
 
-CFLAGS 			=		-std=gnu99 -nodefaultlibs $(COPTFLAGS)
-CFLAGS 			+=		#-Wall -Wextra #-Wpedantic
+CFLAGS = -std=gnu99 -nodefaultlibs $(COPTFLAGS)
+CFLAGS += #-Wall -Wextra #-Wpedantic
 
 ifeq ($(ALIGNSTACK),true)
 	SMOLFLAGS+=-falign-stack
@@ -104,8 +112,8 @@ ifeq ($(DEBUG),true)
 	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
 	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@	
 else
-	$(MINIFY) $(GENDIR)/shader.frag --format indented --move-declarations -o $(GENDIR)/min_shader.frag
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --move-declarations -o $@
+	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --aggressive-inlining --move-declarations -o $@
 	
 endif
 	
@@ -124,9 +132,9 @@ clean:
 
 .SECONDARY:
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)/ $(GENDIR)/shaders.h
+$(OBJDIR)/%.o: $(SRCDIR)/$(SRCFILE) $(OBJDIR)/ $(GENDIR)/shaders.h
 	$(CC) $(CFLAGS) -c "$<" -o "$@"
-	$(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
+	# $(OBJCOPY) $@ --set-section-alignment *=1 -g -x -X -S --strip-unneeded
 	size $@
 
 $(BINDIR)/%.elf: $(SRCDIR)/%.c $(BINDIR)/ $(GENDIR)/shaders.h
@@ -135,18 +143,11 @@ $(BINDIR)/%.elf: $(SRCDIR)/%.c $(BINDIR)/ $(GENDIR)/shaders.h
 	sstrip -z $@
 	size $@
 
-
-
 $(BINDIR)/main.smol: $(OBJDIR)/main.o $(BINDIR)/
 	$(PYTHON) ./smol/smold.py $(SMOLFLAGS) $(LIBS) $< $@
 
 $(GENDIR)/%.lzma: $(BINDIR)/main.smol
 	./tools/autovndh.py $(AVNDH_FLAGS) --nostub  $< > $@
-
-heatmap: $(GENDIR)/%.lzma
-	../LZMA-Vizualizer/LzmaSpec $<
-	@stat --printf="$@: %s bytes\n" $<
-	rm $<
 
 $(BINDIR)/main.sh: tools/shelldropper.sh $(GENDIR)/main.lzma
 	cat $^ > $@
@@ -156,22 +157,16 @@ $(BINDIR)/main.okp: $(BINDIR)/main.smol
 	cp $< cleanOKP/uncompressed
 	make -C cleanOKP all
 	mv cleanOKP/smol.okp $@
-	wc -c $@
 
 vndh: $(BINDIR)/main.vndh
-	wc -c $<
 
 okp: $(BINDIR)/main.okp
-	wc -c $<
 
 sh: $(BINDIR)/main.sh
-	wc -c $<
 
 smol: bin/main.smol
-	wc -c $<
 
 elf: $(BINDIR)/main.elf
-	wc -c $<
 
 delokp:
 	-rm cleanOKP/onekpaq_context.cache

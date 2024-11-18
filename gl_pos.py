@@ -5,6 +5,5 @@ def indextouv(index: int):
     y: int = index // 2 * 2 - 1
     print(index, ":", x, y)
 
-
 for i in range(0, 4):
     indextouv(i)

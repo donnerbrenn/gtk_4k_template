@@ -1,4 +1,4 @@
-uniform float iTime;
+uniform float u_time;
 out vec3 F;
 
 float tixy(float t, int i, int x, int y)
@@ -12,8 +12,8 @@ void main()
     vec2 uv = gl_FragCoord.xy / vec2(i_X, i_Y) * vec2(i_X / i_Y, 1);
     vec2 index = floor(uv * i_size);
     vec2 i_offset = fract(uv * i_size) * 2. - 1.;
-    float r = clamp(tixy(iTime, int(index.y * i_size + index.x), int(index.x), int(index.y)), -.9, .9);
+    float r = clamp(tixy(u_time, int(index.y * i_size + index.x), int(index.x), int(index.y)), -.9, .9);
+    // float r = sin(int(index.x) * int(index.y) * int(index.y * i_size + index.x) + u_time);
     F.x = float((length(i_offset) - abs(r)) < 0);
     F = r > 0 ? F : F.xxx;
 }
-

@@ -1,31 +1,18 @@
-out vec4 o_fragment;
-vec2 u_resolution = vec2(i_X, i_Y);
-uniform float iTime;
-vec2 uv = ((gl_FragCoord.xy / u_resolution) * 2 - 1) *
-        vec2(1, u_resolution.y / u_resolution.x);
-float threshold = .1;
-float farplane = 100;
-float PI = acos(-1);
-vec3 color;
-
-float vmax(vec2 v) {
-    return max(v.x, v.y);
-}
-
-float sphere(vec3 p, float r) {
-    return length(p) - r;
-}
-
-float pipe(vec2 p, float r) {
-    return length(p) - r;
-}
+out vec4 frag;
+vec2 resolution = vec2(i_X, i_Y);
+vec2 uv = ((gl_FragCoord.xy / resolution) * 2 - 1) *
+        vec2(1, resolution.y / resolution.x);
+uniform float u_time;
+float i_threshold = .01;
+float i_farplane = 100;
+float i_PI = acos(-1);
 
 vec3 erot(vec3 p, vec3 ax, float ro) {
     return mix(dot(ax, p) * ax, p, cos(ro)) + sin(ro) * cross(ax, p);
 }
 
 void moda(inout vec2 p, float rep) {
-    float per = (2 * PI) / rep;
+    float per = (2 * i_PI) / rep;
     float a = atan(p.y, p.x);
     a = mod(a, per) - per * 0.5;
     p = vec2(cos(a), sin(a)) * length(p);
@@ -51,21 +38,21 @@ int even(int x) {
 float scene(vec3 p) {
     vec3 pp = p;
     float i_row = pMod1(pp.y, 12);
-    pp = erot(pp, normalize(vec3(0, 1, 0)), iTime * even(int(i_row)));
+    pp = erot(pp, normalize(vec3(0, 1, 0)), u_time * even(int(i_row)));
     moda(pp.xz, 7);
     pp.x -= 12;
-    float balls = sphere(pp, 5);
+    float balls = length(pp) - 5;
     pp = p;
-    pp = erot(pp, vec3(0, 1, 0), iTime * .3 + pp.y * .03);
+    pp = erot(pp, vec3(0, 1, 0), u_time * .3 + pp.y * .03);
     moda(pp.xz, 5);
     pp.x -= 25;
-    float bars = pipe(pp.xz, 2.5);
+    float bars = length(pp.xz) - 2.5;
     pp = p;
     pp.y = mod(pp.y, 82) - 41;
     float top = cylinder(pp, 28, 1);
     top = max(top, -cylinder(pp, 22, 2));
     float result = min(min(balls, bars), top);
-    color = result == balls ? vec3(1, 0, 0) : result == top ? vec3(1) : vec3(0, 0, 1);
+    frag.rgb = result == balls ? vec3(1, 0, 0) : result == top ? vec3(1) : vec3(0, 0, 1);
     if (abs(p.y) < 42)
         return result;
 }
@@ -79,16 +66,16 @@ void main() {
     float d = 1;
     vec3 p = vec3(0, 0, -120);
     vec3 i_rd = normalize(vec3(uv, 1));
-    while (d > threshold && p.z < farplane) {
+    while (d > i_threshold && p.z < i_farplane) {
         d = scene(p);
         p += i_rd * d;
     }
-    if (d < threshold) {
-        float light = max(0, dot(normalize(vec3(1, 1, -1)), normal(p)));
+    if (d < i_threshold) {
+        float light = dot(normalize(vec3(1, 1, -1)), reflect(i_rd, normal(p))) * .5 + .5;
         float i_light = light + pow(light, 16) + .3;
-        o_fragment = (vec4(color, 1) * i_light) * .5;
+        frag = vec4(frag.rgb * i_light * .5, 1);
     } else {
         uv.y = uv.y * .5 + .5;
-        o_fragment = vec4(0, uv.y / 2, 0, 1);
+        frag = vec4(0, uv.y / 2, 0, 1);
     }
 }

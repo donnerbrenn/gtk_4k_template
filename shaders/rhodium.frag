@@ -11,7 +11,7 @@
 //  Youtube: https://www.youtube.com/watch?v=YK7fbtQw3ZU
 //  ***********************************************************
 float bounce;
-uniform float iTime;
+uniform float u_time;
 out vec3 fragColor;
 
 // signed box
@@ -39,15 +39,15 @@ float noise(vec3 p) {
 
 float map(vec3 p) {
     p.z -= 1.0;
-    p *= 0.9;
-    pR(p.yz, bounce * 1. + 0.4 * p.x);
-    return sdBox(p + vec3(0, sin(1.6 * iTime), 0), vec3(20.0, 0.05, 1.2)) -
+    p *= .9;
+    pR(p.yz, bounce * 1. + .4 * p.x);
+    return sdBox(p + vec3(0, sin(1.6 * u_time), 0), vec3(20., .05, 1.2)) -
         .4 * noise(8. * p + 3. * bounce);
 }
 
 //	normal calculation
 vec3 calcNormal(vec3 pos) {
-    float eps = 0.0001;
+    float eps = .0001;
     float d = map(pos);
     return normalize(vec3(map(pos + vec3(eps, 0, 0)) - d,
             map(pos + vec3(0, eps, 0)) - d,
@@ -66,7 +66,6 @@ float castRayx(vec3 ro, vec3 rd) {
         h = function_sign * map(ro + rd * t);
         t += h;
     }
-
     return t;
 }
 
@@ -82,7 +81,6 @@ float refr(vec3 pos, vec3 lig, vec3 dir, vec3 nor, float angle, out float t2,
         h = map(pos + dir2 * t2);
         t2 -= h;
     }
-
     nor2 = calcNormal(pos + dir2 * t2);
     return (.5 * clamp(dot(-lig, nor2), 0., 1.) +
         pow(max(dot(reflect(dir2, nor2), lig), 0.), 8.));
@@ -100,19 +98,18 @@ float softshadow(vec3 ro, vec3 rd) {
         sh = min(sh, 4. * h / t);
         t += h;
     }
-
     return sh;
 }
 
 //	main function
 void main() {
-    bounce = abs(fract(0.05 * iTime) - .5) * 20.; // triangle function
+    bounce = abs(fract(0.05 * u_time) - .5) * 20.; // triangle function
     vec2 uv = UV / vec2(i_X, i_Y);
     vec2 p = uv * 2. - 1.;
 
     // 	bouncy cam every 10 seconds
-    float wobble = (fract(.1 * (iTime - 1.)) >= 0.9)
-        ? fract(-iTime) * 0.1 * sin(30. * iTime) : 0.;
+    float wobble = (fract(.1 * (u_time - 1.)) >= 0.9)
+        ? fract(-u_time) * 0.1 * sin(30. * u_time) : 0.;
 
     //  camera
     vec3 dir = normalize(vec3(2. * gl_FragCoord.xy - vec2(i_X, i_Y), i_Y));
@@ -145,7 +142,7 @@ void main() {
     float T = 1.;
 
     //	animation of glow intensity
-    float intensity = 0.1 * -sin(.209 * iTime + 1.) + 0.05;
+    float intensity = 0.1 * -sin(.209 * u_time + 1.) + 0.05;
     for (int i = 0; i < 128; i++) {
         float density = 0.;
         float nebula = noise(org + bounce);
@@ -156,16 +153,13 @@ void main() {
             if (T <= 0.)
                 break;
         }
-
         org += dir * 0.078;
     }
-
     vec3 basecol = vec3(1. / 1., 1. / 4., 1. / 16.);
     T = clamp(T, 0., 1.5);
     color += basecol * exp(4. * (0.5 - T) - 0.8);
     color2 *= depth;
-    color2 += (1. - depth) * noise(6. * dir + 0.3 * iTime) * .1; // subtle mist
+    color2 += (1. - depth) * noise(6. * dir + 0.3 * u_time) * .1; // subtle mist
     //	scene depth included in alpha channel
     fragColor = vec3(color + 0.8 * color2) * 1.3;
 }
-

@@ -221,7 +221,7 @@ def main(opts):
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(
+    program2 = argparse.ArgumentParser(
         description="""\
 Computes the smallest possible compressed size of a binary through
 brute-forcing, and then automatically vondehi-packs the result using the
@@ -229,10 +229,10 @@ correct flags.
 """
     )
 
-    p.add_argument(
+    program2.add_argument(
         "input_file", type=str, metavar="input", help="The executable file to compress"
     )
-    p.add_argument(
+    program2.add_argument(
         "output_file",
         type=argparse.FileType("wb"),
         metavar="output",
@@ -241,17 +241,17 @@ correct flags.
         help="Output file (defaults to stdout)",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--nostub",
         "-n",
         action="store_true",
         help="Don't prepend a vondehi stub, only compress the input data.",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--verbose", "-v", action="count", help="Increase verbosity level (0..2)"
     )
-    p.add_argument(
+    program2.add_argument(
         "--gzip",
         "-g",
         nargs="?",
@@ -261,7 +261,7 @@ correct flags.
         help="Enable gzip compression, and"
         + " optionally specify which gzip binary to use.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--xz",
         "-x",
         nargs="?",
@@ -271,7 +271,7 @@ correct flags.
         help="Enable xz (LZMA2) compression, and "
         + "optionally specify which xz binary to use.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--lzma",
         "-l",
         const=shutil.which("lzma"),
@@ -282,7 +282,7 @@ correct flags.
         + "(using xz), and optionally specify which lzma binary to "
         + "use.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--zopfli",
         "-z",
         const=shutil.which("zopfli"),
@@ -293,7 +293,7 @@ correct flags.
         + "compression, and optionally specify which zopfli binary to"
         + " use.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--zstd",
         "-Z",
         const=shutil.which("zstd"),
@@ -305,17 +305,17 @@ correct flags.
         + " use.",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--nasm", type=str, default=shutil.which("nasm"), help="nasm binary to use"
     )
-    p.add_argument(
+    program2.add_argument(
         "--vndh",
         type=str,
         default="ext/vondehi",
         help="Directory of the vondehi source code",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--jobs",
         "-j",
         type=int,
@@ -323,14 +323,14 @@ correct flags.
         help="Number of jobs that run in parallel for the bruteforcing",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--nicestart",
         "-ns",
         type=int,
         default=4,
         help="Number of jobs that run in parallel for the bruteforcing",
     )
-    p.add_argument(
+    program2.add_argument(
         "--niceend",
         "-ne",
         type=int,
@@ -338,18 +338,18 @@ correct flags.
         help="Number of jobs that run in parallel for the bruteforcing",
     )
 
-    p.add_argument("--vndh_tag", type=str, help="Vanity tag to pass to vondehi")
-    p.add_argument(
+    program2.add_argument("--vndh_tag", type=str, help="Vanity tag to pass to vondehi")
+    program2.add_argument(
         "--vndh_vfork", action="store_true", help="Tell vondehi to use vfork(2)"
     )
-    p.add_argument(
+    program2.add_argument(
         "--vndh_unibin",
         action="store_true",
         help="Disable "
         + "compatibility with distributions that keep /bin and "
         + "/usr/bin separate.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--vndh_cheat",
         action="store_true",
         help="Assume file "
@@ -357,7 +357,7 @@ correct flags.
         + "variables are passed correctly by chance to the payload."
         + " You cannot use this if you're running on Wayland.",
     )
-    p.add_argument(
+    program2.add_argument(
         "--vndh_no_argv",
         action="store_true",
         help="Don't properly"
@@ -366,10 +366,10 @@ correct flags.
         + "not enabled.",
     )
 
-    p.add_argument(
+    program2.add_argument(
         "--rawout",
         type=argparse.FileType("wb"),
         help="File to write the raw compressed data to (if --vndh is enabled).",
     )
 
-    main(p.parse_args(sys.argv[1:]))
+    main(program2.parse_args(sys.argv[1:]))

@@ -10,7 +10,7 @@ vec3 lc[3];
 out vec3 color;
 
 vec3 i_black = vec3(-.015);
-vec3 i_red = vec3(.4, 0, 0);
+vec3 i_red = vec3(.2, 0, 0);
 vec3 i_ground = vec3(.03);
 
 float iter = 0;

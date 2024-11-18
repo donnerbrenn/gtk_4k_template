@@ -1,5 +1,5 @@
 float i_THRESHOLD = .003;
-uint i_SAMPLES = 300;
+uint i_SAMPLES = 50;
 uint i_BOUNCES = 4;
 float i_FOVDegrees = 90;
 
@@ -15,9 +15,9 @@ struct MA {
     float mtl; // Metalness
 } material;
 
-MA i_Mground = MA(vec3(.1), .5, 64, 0, .25);
-MA i_Mred = MA(vec3(.6, .002, .002), .6, 64, 0, 0);
-MA i_Mblack = MA(vec3(.02), .5, 64, 0, .8);
+MA i_Mground = MA(vec3(.1), .5, 8, 0, .25);
+MA i_Mred = MA(vec3(.6, .002, .002), .6, 32, 0, 0);
+MA i_Mblack = MA(vec3(.02), .5, 32, 0, .8);
 
 vec3 attentuation;
 
@@ -100,9 +100,8 @@ float scene(vec3 p) {
     float black =
         min(smin(smin(smin(i_ring1, i_ring2, .05), i_base1, .1), i_base2, .1),
             i_cable);
-    float box = -fBox(p, vec3(20));
-    float light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
-    sdf = min(min(min(red, black), ground), light);
+    float i_light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
+    sdf = min(min(min(red, black), ground), i_light);
 
     material = sdf == red ? i_Mred : sdf == ground ? i_Mground : sdf == black ? i_Mblack : material;
 
@@ -125,8 +124,8 @@ bool march(inout vec3 p, vec3 dir) {
     return dst < i_THRESHOLD;
 }
 
-vec3 calcLight(vec3 d, vec3 n, vec3 color, float power) {
-    float light = max(dot(n, normalize(d)), 0);
+vec3 calcLight(vec3 rd, vec3 d, vec3 n, vec3 color, float power) {
+    float light = max(dot(reflect(rd, n), normalize(d)), 0);
     vec3 i_diffuse = material.abd * attentuation * light;
     return (color * i_diffuse + pow(light, material.shp) * material.spc) * power;
 }
@@ -151,10 +150,10 @@ void main() {
             spec += spec * pow(max(dot(d, n), 0), material.shp) * material.spc *
                     material.ems;
             Frag.rgb += spec * 3;
-            vec3 i_l1 = calcLight(i_lp1, n, vec3(.25, .25, .9), .25);
-            vec3 i_l2 = calcLight(i_lp2, n, vec3(1), 1);
-            // vec3 i_l3 = calcLight(i_lp3, n, vec3(.5, 1, .125), .8);
-            Frag.rgb += i_l1 + i_l2;
+            vec3 i_l1 = calcLight(d, i_lp1, n, vec3(.25, .25, .9), .25);
+            vec3 i_l2 = calcLight(d, i_lp2, n, vec3(.25, .25, .9), .25);
+            // vec3 i_l3 = calcLight(d, i_lp3, n, vec3(.5, 1, .125), .8);
+            Frag.rgb += i_l2 + i_l1;
             vec3 i_reflection = reflect(d, n);
             vec3 i_rnd = normalize(n + rndVector(state));
             d = normalize(mix(i_rnd, i_reflection, material.mtl));

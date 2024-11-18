@@ -11,7 +11,6 @@ def addsize(list):
         item.insert(0, size)
     return list
 
-
 def addrelativesize(list):
     biggest = list[-1][0]
     for item in list:
@@ -19,10 +18,8 @@ def addrelativesize(list):
         item.append(abs((float(item[0]) / biggest) * 100.0 - 100))
     return list
 
-
 def display(header, list):
     print(tabulate(list, headers=header, tablefmt="simple_outline", floatfmt=".3f"))
-
 
 def check(list):
     for item in list:
@@ -38,7 +35,6 @@ def check(list):
         exit(-1)
     return list
 
-
 def analyze(list):
     check(list)
     list = [[item] for item in list]
@@ -46,6 +42,5 @@ def analyze(list):
     list.sort()
     list = addrelativesize(list)
     display(["Bytes", "KB", "Filename", "%Size", "%Saved"], list)
-
 
 analyze(sys.argv[1:])
