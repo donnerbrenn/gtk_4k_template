@@ -1,5 +1,5 @@
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 25;
+uint i_SAMPLES = 350;
 uint i_BOUNCES = 8;
 float i_FOVDegrees = 95;
 
@@ -27,6 +27,9 @@ MA i_Msilver = MA(vec3(1), 1, 32, 0, 1);
 
 vec3 attentuation;
 
+float noise(vec2 uv) {
+    return sin(uv.x * 10.0 + uv.y * 10.0); // Einfaches Beispiel
+}
 float softmin(float f1, float f2, float val) {
     float i_e = pow(max(val - abs(f1 - f2), 0), 2) * .25;
     return min(f1, f2) - i_e / val;

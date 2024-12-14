@@ -121,7 +121,7 @@ const char *shader_frag =
    "vec2 y=(gl_FragCoord.xy/vec2(2560,1440)*2-1)/vec2(1,2560./1440.);"
    "v.rgbw=vec4(0);"
    "vec3 x,d,z;"
-   "for(int l=0;l<25;l++)"
+   "for(int l=0;l<350;l++)"
      "{"
        "z=normalize(vec3(y,1./tan(95*.5f*acos(-1)/180)));"
        "d=vec3(y,-5);"

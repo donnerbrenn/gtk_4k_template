@@ -49,7 +49,7 @@ void on_render() {
     glScissor(0, i, WIDTH, lines);
 #endif
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glFinish();
+    /*glFinish();*/
 #ifdef SCISSORS
   }
 #endif
