@@ -30,9 +30,9 @@ vec3 rotate(vec3 p, vec3 t) {
     return i_rz * i_ry * i_rx * p;
 }
 
-float smin(float f1, float f2, float val) {
-    float i_e = pow(max(val - abs(f1 - f2), 0), 2) * .25;
-    return min(f1, f2) - i_e / val;
+float softmin(float f1, float f2, float val) {
+    float diff = abs(f1 - f2);
+    return min(f1, f2) - max(val - diff, 0.0) * (val - diff) * 0.25 / val;
 }
 
 float fCappedCone(vec3 p, float h, float r1, float r2, float r3) {
@@ -96,15 +96,17 @@ float scene(vec3 p) {
             vec3(15, 0, 0)) -
             .1;
 
-    float red = min(min(smin(i_ball, i_stick, .025), i_buttons), i_bbase);
+    float red = min(min(softmin(i_ball, i_stick, .025), i_buttons), i_bbase);
     float black =
-        min(smin(smin(smin(i_ring1, i_ring2, .05), i_base1, .1), i_base2, .1),
+        min(softmin(softmin(softmin(i_ring1, i_ring2, .05), i_base1, .1), i_base2, .1),
             i_cable);
     float i_light = fBox(p + vec3(0, -8, 0), vec3(4, .1, 4));
     sdf = min(min(min(red, black), ground), i_light);
 
-    material = sdf == red ? i_Mred : sdf == ground ? i_Mground : sdf == black ? i_Mblack : material;
-
+    if (sdf == red) material = i_Mred;
+    else if (sdf == ground) material = i_Mground;
+    else if (sdf == black) material = i_Mblack;
+    else material = i_Mblack;
     return sdf;
 }
 

@@ -43,13 +43,13 @@ void on_render() {
   gtk_gl_area_queue_render((GtkGLArea *)glarea);
 
 #ifdef SCISSORS
-#define lines 160
-  glEnable(GL_SCISSOR_TEST);
+#define lines 1440/8
+glEnable(GL_SCISSOR_TEST);
   for (int i = 0; i < HEIGHT; i += lines) {
     glScissor(0, i, WIDTH, lines);
 #endif
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    /*glFinish();*/
+    glFinish();
 #ifdef SCISSORS
   }
 #endif

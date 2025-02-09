@@ -3,8 +3,8 @@
 float i_X=2560.;
 float i_Y=1440.;
 float i_THRESHOLD = .001;
-uint i_SAMPLES = 350;
-uint i_BOUNCES = 8;
+uint i_SAMPLES = 100;
+uint i_BOUNCES = 3;
 float i_FOVDegrees = 95;
 
 float pi = acos(-1);
@@ -31,12 +31,9 @@ MA i_Msilver = MA(vec3(1), 1, 32, 0, 1);
 
 vec3 attentuation;
 
-float noise(vec2 uv) {
-    return sin(uv.x * 10.0 + uv.y * 10.0); // Einfaches Beispiel
-}
 float softmin(float f1, float f2, float val) {
-    float i_e = pow(max(val - abs(f1 - f2), 0), 2) * .25;
-    return min(f1, f2) - i_e / val;
+    float diff = abs(f1 - f2);
+    return min(f1, f2) - max(val - diff, 0.0) * (val - diff) * 0.25 / val;
 }
 
 vec3 rotate(vec3 p, vec3 t) {
@@ -48,14 +45,26 @@ vec3 rotate(vec3 p, vec3 t) {
     return i_rz * i_ry * i_rx * p;
 }
 
+// float fCappedCone(vec3 p, float h, float r1, float r2) {
+//     vec2 q = vec2(length(p.xz), p.y);
+//     vec2 k2 = vec2(r2 - r1, h + h);
+//     vec2 d = vec2(q.x - min(q.x, mix(r1, r2, step(0., q.y))), abs(q.y) - h);
+//     vec2 e = q - vec2(r2, h) + k2 * clamp(dot(vec2(r2, h) - q, k2) / dot(k2, k2), 0., 1.);
+//     return (e.x < 0. && d.y < 0. ? -1. : 1.) * sqrt(min(dot(d, d), dot(e, e)));
+// }
+// float fCappedCone(vec3 p, float h, float r1, float r2) {
+//     vec2 q = vec2(length(p.xz), p.y);
+//     vec2 k = vec2(r2 - r1, h * 2);
+//     vec2 c = vec2(r2, h);
+//     vec2 s = q - c;
+//     q -= c - k * clamp(dot(-s, k) / dot(k, k), 0, 1);
+//     return (dot(s, q) < 0 ? -1 : 1) * min(length(vec2(max(q.x - (q.y < 0. ? r1 : r2), 0), abs(q.y) - h)), length(q));
+// }
 float fCappedCone(vec3 p, float h, float r1, float r2) {
-    vec2 q = vec2(length(p.xz), p.y);
-    vec2 k2 = vec2(r2 - r1, 2 * h);
-    vec2 ca = vec2(q.x - min(q.x, (q.y < .0) ? r1 : r2), abs(q.y) - h);
-    vec2 cb = q - vec2(r2, h) + k2 * clamp(dot(vec2(r2, h) - q, k2) / dot(k2, k2), .0, 1.);
-    return ((cb.x < .0 && ca.y < .0) ? -1. : 1.) * sqrt(min(dot(ca, ca), dot(cb, cb)));
+    vec2 q = vec2(length(p.xz), p.y), k = vec2(r2 - r1, 2 * h), c = vec2(r2, h), s = q - c;
+    q -= c - k * clamp(dot(-s, k) / dot(k, k), 0., 1.);
+    return (dot(s, q) < 0. ? -1 : 1) * sqrt(min(dot(vec2(q.x - (q.y < 0. ? r1 : r2 > 0 ? r2 : r1), abs(q.y) - h), vec2(q.x - (q.y < 0. ? r1 : r2 > 0 ? r2 : r1), abs(q.y) - h)), dot(q, q)));
 }
-
 float wang_hash(inout uint seed) {
     seed ^= 61u ^ (seed >> 16) * 9u ^ (seed >> 4) * 0x27d4eb2du ^ (seed >> 15);
     return float(seed) * (1. / 4294967296.);
@@ -72,10 +81,10 @@ float fPlane(vec3 p, vec3 n, float distance) {
 }
 
 void pModInterval1(inout float p, float size, float start, float stop) {
-    float i_halfsize = size * .5;
-    float c = floor((p + i_halfsize) / size);
-    p = mod(p + i_halfsize, size) - i_halfsize;
-    p += c > stop ? size * (c - stop) : c < start ? size * (c - start) : 0;
+    float i_halfSize = size * .5;
+    float c = floor((p + i_halfSize) / size);
+    p = mod(p + i_halfSize, size) - i_halfSize;
+    p += size * (clamp(c, start, stop) - c);
 }
 
 float fTorus(vec3 p, vec2 t) {
@@ -98,13 +107,11 @@ float fTable(vec3 p, vec3 o, vec3 s, float L) {
 }
 
 float fCapsule(vec3 p, float h, float r) {
-    p.y -= clamp(p.y, 0, h);
-    return length(p) - r;
+    return length(p - clamp(p, vec3(0), vec3(0, h, 0))) - r;
 }
 
 float scene(vec3 p) {
     p = rotate(p, vec3(-.7, 1, 0)) + vec3(.8, -1.3, 0);
-
     float i_ground = fPlane(p, vec3(0, 1, 0), 2);
     float i_wall1 = fBox(p + vec3(0, .6, 0), vec3(2, 1.5, 3));
     float i_wall2 = fBox(p + vec3(-.2, .3, .2), vec3(2, 1.5, 3));
@@ -128,7 +135,7 @@ float scene(vec3 p) {
     float i_blanket2 = fBox(p + vec3(-.2, 1.2 + (sin(p.x * 30) * cos(p.z * 24)) * .01, 2.2), vec3(.58, i_height, .37));
     float i_blanket3 = fBox(p + vec3(-.2, 1.2 + (cos(p.x * 22.3) * cos(p.z * 14.3)) * .02, 2.2), vec3(.58, i_height, .37));
     float i_blanket4 = fBox(p + vec3(-.2, 1.2 + (sin(p.x + p.y) * sin(p.z * 2.5)) * .02, 2.2), vec3(.58, i_height, .37));
-    float i_blanket = softmin(softmin(softmin(i_blanket1, i_blanket2, .5), i_blanket3, .5), i_blanket4, .5);
+    float i_blanket = softmin(mix(softmin(i_blanket1, i_blanket2, .75), i_blanket3, .5), i_blanket4, .75);
     float i_pillow1 = fBox(p + vec3(1.1, 1., 2.2), vec3(.2, .0125, .5)) - .1;
     float i_pillow2 = fBox(p + vec3(1.1, 1., 2.2), vec3(.018, .001, .048));
     float i_pillow = softmin(i_pillow1, i_pillow2, .75);
@@ -172,8 +179,14 @@ float scene(vec3 p) {
     float Osilver = i_cube;
 
     float sdf = min(min(min(min(min(min(min(min(Owhite, Ored), Oblack), Obrown), i_ground), i_carpet), Ogray), Olights), Osilver);
-
-    material = sdf == Oblack ? i_Mblack : sdf == Owhite ? i_Mwhite : sdf == Ored ? i_Mred : sdf == Obrown ? i_Mbrown : sdf == Ogray ? i_Mgray : sdf == Olights ? i_Mgreenlight : sdf == Osilver ? i_Msilver : i_Mground;
+    if (sdf == Oblack) material = i_Mblack;
+    else if (sdf == Owhite) material = i_Mwhite;
+    else if (sdf == Ored) material = i_Mred;
+    else if (sdf == Obrown) material = i_Mbrown;
+    else if (sdf == Ogray) material = i_Mgray;
+    else if (sdf == Olights) material = i_Mgreenlight;
+    else if (sdf == Osilver) material = i_Msilver;
+    else material = i_Mground;
     return sdf;
 }
 
@@ -195,9 +208,8 @@ bool march(inout vec3 p, vec3 dir) {
 
 vec3 calcLight(vec3 rd, vec3 ld, vec3 n, vec3 color) {
     float light = max(dot(rd, reflect(normalize(ld), n)), .0);
-    return (color * material.A * attentuation * light + pow(light, material.H) * material.P);
+    return color * material.A * attentuation * light + pow(light, material.H) * material.P;
 }
-
 void main() {
     vec2 uv = (gl_FragCoord.xy / vec2(i_X, i_Y) * 2 - 1) / vec2(1, i_X / i_Y);
     Frag.rgbw = vec4(0);

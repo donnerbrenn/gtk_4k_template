@@ -3,10 +3,10 @@ SHADER = chamber.frag
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
-BENCHMARK = false
+BENCHMARK = true
 DEBUG = false
 SCISSORS = true
-RENDERER = SDL
+RENDERER = GTK
 
 SHADERDIR = pathtracer
 GLVERSION = '\#version 400'

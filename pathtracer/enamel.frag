@@ -34,8 +34,7 @@ float pin_sdf(vec2 p) {
     vec2 p2 = vec2(cos(angl), sin(angl)) * length(p);
     vec2 p3 = vec2(cos(angl2), sin(angl2)) * length(p);
     float i_pentagram = linedist(p3, vec2(0.67, 0.22), vec2(0.25, -0.07));
-    float i_pentagram2 =
-        smin(i_pentagram, linedist(p3, vec2(0.23, -0.07), vec2(0, 0.60)), .05);
+    float i_pentagram2 = smin(i_pentagram, linedist(p3, vec2(0.23, -0.07), vec2(0, 0.60)), .05);
     float i_arms = box(p2 - vec2(1.4, 0), vec2(.6, .1));
 
     mat2 rot = mat2(.7, -.7, .7, .7);
@@ -86,10 +85,10 @@ float scene(vec3 p) {
         p.y = sqrt(p.y * p.y + float(i / 2 + 1)) - .5;
     }
 
-    vec3 edg = normalize(vec3(-1, 1., 1.));
+    vec3 i_edg = normalize(vec3(-1, 1., 1.));
     p2.yz += asin(sin(p.yz) * .9);
     p2.yz = asin(sin(p2.yz * vec2(5., 8.)) * .85) / vec2(5., 8.);
-    fabric = dot(p, edg);
+    fabric = dot(p, i_edg);
 
     p2.x = fabric / 1.;
     p2 += .005 * dot(sin(p3.yz * 8.4), cos(p3.xy * 6.));
@@ -119,6 +118,7 @@ vec3 norm(vec3 p) {
 const vec3 i_suncol = vec3(1.5, 1.0, 0.7);
 const vec3 i_skycol = vec3(0.4, 0.75, 1.0);
 const vec3 i_sundir = normalize(vec3(-1, 0., 1.2));
+
 vec3 skybox(vec3 angle) {
     return mix(vec3(1), i_skycol, angle.x * angle.x) + pow(max(dot(angle, i_sundir), 0.0), 350.0) * i_suncol * 15.0;
 }
@@ -129,9 +129,9 @@ vec3 pixel_color(vec2 uv) {
     vec2 h2 = tan(hash2(uv.x, uv.y));
     vec3 cam = normalize(vec3(2.5, uv + h2 * .02));
     vec3 init = vec3(-120, -h2);
-    float yrot = -.6;
-    cam = erot(cam, vec3(0, 1, 0), yrot);
-    init = erot(init, vec3(0, 1, 0), yrot);
+    float i_yrot = -.6;
+    cam = erot(cam, vec3(0, 1, 0), i_yrot);
+    init = erot(init, vec3(0, 1, 0), i_yrot);
     vec3 p = init;
     bool hit = false;
     float atten = 1.;
@@ -166,9 +166,9 @@ vec3 pixel_color(vec2 uv) {
 float gabor(vec2 p, float u, float v, float r, float ph, float l, float t, float s, float h) {
     float cr = cos(r);
     float sr = sin(r);
-    vec2 st = vec2(s, t);
+    vec2 i_st = vec2(s, t);
     p = mat2(cr, -sr, sr, cr) * vec2(p.x - u, -p.y - v);
-    return h * exp(dot(vec2(-0.5), p * p / (st * st))) * cos(p.x * 6.28 / l + ph);
+    return h * exp(dot(vec2(-0.5), p * p / (i_st * i_st))) * cos(p.x * 6.28 / l + ph);
 }
 
 void main() {
