@@ -1,20 +1,19 @@
-#setup
-SHADER = chamber.frag
+SHADER = competition.frag
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
-BENCHMARK = true
+BENCHMARK = false
 DEBUG = false
-SCISSORS = true
+SCISSORS = false
 RENDERER = GTK
 
-SHADERDIR = pathtracer
+SHADERDIR = shaders
 GLVERSION = '\#version 400'
 I_X = 'float i_X=$(WIDTH).;'
 I_Y = 'float i_Y=$(HEIGHT).;'
 
 VNDH_FLAGS := -DNO_CHEATING #-DNO_UBUNTU_COMPAT -DNO_FILE_MANAGER_COMPAT
-AVNDH_FLAGS :=-l -v --vndh vondehi 
+AVNDH_FLAGS :=-l -v --vndh vondehi
 
 OBJDIR := obj
 BINDIR := bin
@@ -39,14 +38,14 @@ ITIMECNT = 0
 
 #dlfixup, dnload or default
 SMOLLOADER = dnload
-COPTFLAGS = -Os -march=nocona 
+COPTFLAGS = -Os -march=nocona
 COPTFLAGS +=	-fno-plt -fno-stack-protector -fno-stack-check -fno-unwind-tables \
 		-fno-asynchronous-unwind-tables -fomit-frame-pointer -ffast-math -no-pie \
 		-fno-pic -fno-PIE -ffunction-sections -fdata-sections -fmerge-all-constants \
 		-funsafe-math-optimizations -malign-data=cacheline -fsingle-precision-constant \
 		-mno-fancy-math-387 -mno-ieee-fp -fno-builtin -fwhole-program -fno-exceptions \
 		-fvisibility=hidden -nostartfiles -nostdlib
-COPTFLAGS += `pkg-config --cflags-only-I gtk+-3.0` 
+COPTFLAGS += `pkg-config --cflags-only-I gtk+-3.0`
 COPTFLAGS += -DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT)
 LIBS = -lGL `pkg-config --libs-only-l gtk+-3.0`
 ifeq ($(RENDERER),SDL)
@@ -57,7 +56,7 @@ endif
 
 SMOLFLAGS =	--keeptmp --smolrt "$(PWD)/smol/rt" --smolld "$(PWD)/smol/ld" \
 		--det -funsafe-dynamic -fno-ifunc-support --section-order=$(SECTIONORDER)
-SRCFILE =main.c
+SRCFILE =main_fix.c
 ifeq ($(RENDERER),SDL)
 	SRCFILE = main_sdl.c
 endif
@@ -110,17 +109,17 @@ $(GENDIR)/shaders.h: $(GENDIR)/ $(TEMPLATES)/$(VSHADER) $(SHADERDIR)/$(SHADER)
 	cat  /tmp/shader.frag $(SHADERDIR)/$(SHADER) > $(GENDIR)/shader.frag
 ifeq ($(DEBUG),true)
 	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
-	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@	
+	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --no-renaming --no-sequence --no-inlining -o $@
 else
 	$(MINIFY) $(GENDIR)/shader.frag --no-renaming --format indented --no-sequence --no-inlining -o $(GENDIR)/min_shader.frag
 	$(MINIFY) $(GENDIR)/vshader.vert $(GENDIR)/shader.frag -v --aggressive-inlining --move-declarations -o $@
-	
+
 endif
-	
+
 	./tools/replace.py $@
 
 $(BINDIR)/%.vndh: $(GENDIR)/main.lzma
-	nasm -fbin $(VNDH_FLAGS) -o $(GENDIR)/vondehi vondehi/vondehi.asm
+	$(NASM) -fbin $(VNDH_FLAGS) -o $(GENDIR)/vondehi vondehi/vondehi.asm
 	cat $(GENDIR)/vondehi $(GENDIR)/main.lzma > $@
 	chmod +x $@
 

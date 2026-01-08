@@ -15,6 +15,7 @@ float map(vec3 p) {
 }
 
 void main() {
+    color = vec4(0);
     vec2 i_uv = (gl_FragCoord.xy - vec2(i_X) * vec2(0.5, .28)) / i_X;
     float i_approx = .001;
     vec3 i_ro = vec3(0, 0, -6);
@@ -23,7 +24,8 @@ void main() {
     float i_dist = map(p);
     bool i_hit = i_dist < i_approx;
     while (!i_hit && distance(i_ro, p) < 30) {
-        if (i_hit) break;
+        if (i_hit)
+            break;
         p += i_dist * i_rd;
     }
     if (i_hit) {

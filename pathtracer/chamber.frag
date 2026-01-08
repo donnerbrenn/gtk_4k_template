@@ -1,6 +1,6 @@
 float i_THRESHOLD = .001;
 uint i_SAMPLES = 100;
-uint i_BOUNCES = 3;
+uint i_BOUNCES = 8;
 float i_FOVDegrees = 95;
 
 float pi = acos(-1);
@@ -15,17 +15,40 @@ struct MA {
     float M; // Metalness
 } material;
 
-MA i_Mground = MA(vec3(.01), .9, 128, 0, .5);
+MA i_MWalls = MA(vec3(.01), .9, 128, 0, .5);
 MA i_Mred = MA(vec3(.55, .01, .01), .125, 4, 0, 0);
 MA i_Mblack = MA(vec3(.02), 1, 128, 0, .925);
 MA i_Mwhite = MA(vec3(.8), .025, 8, 0, .05);
-MA i_Mbrown = MA(vec3(.6, .3, .03), .5, 64, 0, .35);
+MA i_Mbrown = MA(vec3(.6, .3, .03), .9, 64, 0, .35);
+MA i_Mfloor = MA(vec3(.1, .045, .015), .5, 128, 0, .5);
 MA i_Mspace = MA(vec3(.7, .7, .99), .1, 1, 2, 1);
 MA i_Mgreenlight = MA(vec3(.01, .9, .01), 0, 128, 1, 0);
-MA i_Mgray = MA(vec3(.1), 0, 1, 0, 0);
+MA i_Mgray = MA(vec3(.1), 0, 0, 0, 0);
 MA i_Msilver = MA(vec3(1), 1, 32, 0, 1);
 
-vec3 attentuation;
+vec3 attentuation = vec3(0);
+
+float hash(float n) {
+    return fract(sin(n) * 1e4);
+}
+
+float noise(vec2 p) {
+    return mix(
+        mix(hash(dot(floor(p), vec2(1, 57))),
+            hash(dot(floor(p) + vec2(1, 0), vec2(1, 57))), fract(p.x)),
+        mix(hash(dot(floor(p) + vec2(0, 1), vec2(1, 57))),
+            hash(dot(floor(p) + vec2(1, 1), vec2(1, 57))), fract(p.x)),
+        fract(p.y));
+}
+
+// Holzmaserungs-Intensität als float zurückgeben
+float woodPattern(vec3 p) {
+    float ringCoord = p.x + noise(p.yz * 4.0) * 0.5; // Ringe + Verzerrung
+    float rings = sin(ringCoord * 12.0); // Frequenz der Ringe
+    float grain = noise(p.xy * 30.0) * 0.2; // feine Struktur
+    float intensity = abs(rings) + grain;
+    return clamp(intensity, 0.0, 1.0);
+}
 
 float softmin(float f1, float f2, float val) {
     float diff = abs(f1 - f2);
@@ -41,21 +64,6 @@ vec3 rotate(vec3 p, vec3 t) {
     return i_rz * i_ry * i_rx * p;
 }
 
-// float fCappedCone(vec3 p, float h, float r1, float r2) {
-//     vec2 q = vec2(length(p.xz), p.y);
-//     vec2 k2 = vec2(r2 - r1, h + h);
-//     vec2 d = vec2(q.x - min(q.x, mix(r1, r2, step(0., q.y))), abs(q.y) - h);
-//     vec2 e = q - vec2(r2, h) + k2 * clamp(dot(vec2(r2, h) - q, k2) / dot(k2, k2), 0., 1.);
-//     return (e.x < 0. && d.y < 0. ? -1. : 1.) * sqrt(min(dot(d, d), dot(e, e)));
-// }
-// float fCappedCone(vec3 p, float h, float r1, float r2) {
-//     vec2 q = vec2(length(p.xz), p.y);
-//     vec2 k = vec2(r2 - r1, h * 2);
-//     vec2 c = vec2(r2, h);
-//     vec2 s = q - c;
-//     q -= c - k * clamp(dot(-s, k) / dot(k, k), 0, 1);
-//     return (dot(s, q) < 0 ? -1 : 1) * min(length(vec2(max(q.x - (q.y < 0. ? r1 : r2), 0), abs(q.y) - h)), length(q));
-// }
 float fCappedCone(vec3 p, float h, float r1, float r2) {
     vec2 q = vec2(length(p.xz), p.y), k = vec2(r2 - r1, 2 * h), c = vec2(r2, h), s = q - c;
     q -= c - k * clamp(dot(-s, k) / dot(k, k), 0., 1.);
@@ -109,8 +117,8 @@ float fCapsule(vec3 p, float h, float r) {
 float scene(vec3 p) {
     p = rotate(p, vec3(-.7, 1, 0)) + vec3(.8, -1.3, 0);
     float i_ground = fPlane(p, vec3(0, 1, 0), 2);
-    float i_wall1 = fBox(p + vec3(0, .6, 0), vec3(2, 1.5, 3));
-    float i_wall2 = fBox(p + vec3(-.2, .3, .2), vec3(2, 1.5, 3));
+    float i_wall1 = fBox(p + vec3(0, .6, 0), vec3(2, 1.3, 3));
+    float i_wall2 = fBox(p + vec3(-.2, .3, .2), vec3(2, 2, 3));
     float i_room = max(i_wall1, -i_wall2) - .05;
     float i_table = fTable(p, vec3(-.03, .8, -2.1), vec3(1.85, .05, .75), .1);
     float i_board = fBox(p + vec3(0, -.35, -2.6), vec3(1, .02, .25));
@@ -130,7 +138,7 @@ float scene(vec3 p) {
     float i_blanket1 = fBox(p + vec3(-.2, 1.2, 2.2), vec3(.8, i_height, .5));
     float i_blanket2 = fBox(p + vec3(-.2, 1.2 + (sin(p.x * 30) * cos(p.z * 24)) * .01, 2.2), vec3(.58, i_height, .37));
     float i_blanket3 = fBox(p + vec3(-.2, 1.2 + (cos(p.x * 22.3) * cos(p.z * 14.3)) * .02, 2.2), vec3(.58, i_height, .37));
-    float i_blanket4 = fBox(p + vec3(-.2, 1.2 + (sin(p.x + p.y) * sin(p.z * 2.5)) * .02, 2.2), vec3(.58, i_height, .37));
+    float i_blanket4 = fBox(p + vec3(-.2, 1.2 + (sin(p.x + p.y) * sin(p.z * 2.5)) * .02 * woodPattern(p), 2.2), vec3(.58, i_height, .37));
     float i_blanket = softmin(mix(softmin(i_blanket1, i_blanket2, .75), i_blanket3, .5), i_blanket4, .75);
     float i_pillow1 = fBox(p + vec3(1.1, 1., 2.2), vec3(.2, .0125, .5)) - .1;
     float i_pillow2 = fBox(p + vec3(1.1, 1., 2.2), vec3(.018, .001, .048));
@@ -173,8 +181,11 @@ float scene(vec3 p) {
     float Ogray = min(min(min(i_bed, i_mousepad), i_carpet), i_bin);
     float Obrown = min(min(min(min(i_table, i_chair), i_board), i_backrest), i_chairtop);
     float Osilver = i_cube;
+    vec3 p2 = p + vec3(0, 1.85, 0);
+    pModInterval1(p2.z, .245, -12, 12);
+    float Oplank = fBox(p2, vec3(2.05, .05, .1)) - .02;
 
-    float sdf = min(min(min(min(min(min(min(min(Owhite, Ored), Oblack), Obrown), i_ground), i_carpet), Ogray), Olights), Osilver);
+    float sdf = min(min(min(min(min(min(min(min(min(Owhite, Ored), Oblack), Obrown), i_ground), i_carpet), Ogray), Olights), Osilver), Oplank);
     if (sdf == Oblack) material = i_Mblack;
     else if (sdf == Owhite) material = i_Mwhite;
     else if (sdf == Ored) material = i_Mred;
@@ -182,7 +193,15 @@ float scene(vec3 p) {
     else if (sdf == Ogray) material = i_Mgray;
     else if (sdf == Olights) material = i_Mgreenlight;
     else if (sdf == Osilver) material = i_Msilver;
-    else material = i_Mground;
+    else if (sdf == Oplank) material = i_Mfloor;
+    else material = i_MWalls;
+    if (sdf == Oplank) {
+        material.A *= woodPattern(p.xzy * 40);
+    }
+
+    if (sdf == Obrown) {
+        material.A *= (woodPattern(p.xzy * 60) + 1) * .5;
+    }
     return sdf;
 }
 
@@ -208,7 +227,7 @@ vec3 calcLight(vec3 rd, vec3 ld, vec3 n, vec3 color) {
 }
 void main() {
     vec2 uv = (gl_FragCoord.xy / vec2(i_X, i_Y) * 2 - 1) / vec2(1, i_X / i_Y);
-    Frag.rgbw = vec4(0);
+    Frag.rgba = vec4(0);
     vec3 i_lp1 = vec3(2, -2, 2);
     vec3 n;
     vec3 ro;

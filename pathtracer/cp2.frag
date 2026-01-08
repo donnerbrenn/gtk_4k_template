@@ -133,9 +133,10 @@ vec3 calcLight(vec3 rd, vec3 d, vec3 n, vec3 color, float power) {
 }
 
 void main() {
+    Frag = vec4(0);
     vec3 i_lp1 = vec3(50, -30, -30);
     vec3 i_lp2 = vec3(0, 20, -50);
-    // vec3 i_lp3 = vec3(50, 20, -50);
+    vec3 i_lp3 = vec3(50, 20, -50);
     vec2 uv = ((gl_FragCoord.xy / vec2(i_X, i_Y)) * 2 - 1) / vec2(1, i_X / i_Y);
     Frag.rgb = vec3(0);
     vec3 n;
@@ -154,8 +155,8 @@ void main() {
             Frag.rgb += spec * 3;
             vec3 i_l1 = calcLight(d, i_lp1, n, vec3(.25, .25, .9), .25);
             vec3 i_l2 = calcLight(d, i_lp2, n, vec3(.25, .25, .9), .25);
-            // vec3 i_l3 = calcLight(d, i_lp3, n, vec3(.5, 1, .125), .8);
-            Frag.rgb += i_l2 + i_l1;
+            vec3 i_l3 = calcLight(d, i_lp3, n, vec3(.5, 1, .125), .1);
+            Frag.rgb += i_l2 + i_l1 + i_l3;
             vec3 i_reflection = reflect(d, n);
             vec3 i_rnd = normalize(n + rndVector(state));
             d = normalize(mix(i_rnd, i_reflection, material.mtl));

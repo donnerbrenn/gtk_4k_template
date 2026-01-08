@@ -11,9 +11,13 @@ import sys
 import traceback
 from tqdm import tqdm
 import multiprocessing
-import multiprocessing.dummy as multi
 
 verbose = 0
+
+
+def run_one_wrapped(args):
+    binf, opt, input_file, isgz = args
+    return (run_one(binf, opt, input_file), isgz)
 
 
 def is_exec(p):
@@ -50,11 +54,13 @@ def run_one(binf, opt, input_file):
 def run_compr(compr, mpool, inp):
     binf, opt, isgz = compr
     jobcnt = len(opt)
+
     return list(
         tqdm(
             filter(
                 lambda x: x[0] is not None,
-                mpool.imap(lambda o: (run_one(binf, o, inp), isgz), opt),
+                mpool.imap_unordered(
+                    run_one_wrapped, [(binf, o, inp, isgz) for o in opt], chunksize=16),
             ),
             unit=" samples",
             maxinterval=1,
@@ -140,7 +146,8 @@ opt_lzma = list(
 )
 opt_zopfli = [["--gzip", "--i1024", "-c"]]
 opt_zstd = [
-    ["-z", "--ultra", "-22", "--no-check", "--no-dictID", "-c", "-k", "--format=zstd"]
+    ["-z", "--ultra", "-22", "--no-check",
+        "--no-dictID", "-c", "-k", "--format=zstd"]
 ]
 
 
@@ -180,10 +187,11 @@ def main(opts):
         eprint("No compression methods specified.")
         return
 
-    mpool = multi.Pool(processes=int(opts.jobs))
-    allofthem = list(
-        sum(map(lambda x: run_compr(x, mpool, opts.input_file), comprs), [])
-    )
+    # mpool = multiprocessing.Pool(processes=int(opts.jobs))
+    ctx = multiprocessing.get_context("fork")
+    mpool = ctx.Pool(processes=int(opts.jobs))
+    allofthem = list(sum(map(lambda x: run_compr(x, mpool, opts.input_file), comprs), [])
+                     )
 
     if len(allofthem) == 0:
         eprint("No useable results available. See error log.")
@@ -338,7 +346,8 @@ correct flags.
         help="Number of jobs that run in parallel for the bruteforcing",
     )
 
-    program2.add_argument("--vndh_tag", type=str, help="Vanity tag to pass to vondehi")
+    program2.add_argument("--vndh_tag", type=str,
+                          help="Vanity tag to pass to vondehi")
     program2.add_argument(
         "--vndh_vfork", action="store_true", help="Tell vondehi to use vfork(2)"
     )

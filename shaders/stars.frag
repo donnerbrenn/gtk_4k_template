@@ -11,6 +11,7 @@ mat2 rotate(float a) {
 }
 
 void main() {
+    color = vec3(0);
     vec2 i_fcoord = gl_FragCoord.xy;
     vec2 i_canvas = vec2(i_X, i_Y);
     vec2 i_aspect = vec2(i_X / i_Y, 1);

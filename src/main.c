@@ -22,13 +22,11 @@ static GLuint vprogram_id;
 #if defined BENCHMARK || defined VAR_ITIME || defined DEBUG
 static GTimer *timer;
 #endif
-
 static void on_render();
 static void on_realize();
 static void check_escape(GtkWidget *widget, GdkEventKey *event);
-__attribute__((used, __section__(".text._start"))) static void
+__attribute__((noreturn, used, __section__(".text._start"))) static void
 _start();
-
 
 void on_render() {
 #ifndef VAR_ITIME
@@ -43,8 +41,8 @@ void on_render() {
   gtk_gl_area_queue_render((GtkGLArea *)glarea);
 
 #ifdef SCISSORS
-#define lines 1440/8
-glEnable(GL_SCISSOR_TEST);
+#define lines 1440 / 8
+  glEnable(GL_SCISSOR_TEST);
   for (int i = 0; i < HEIGHT; i += lines) {
     glScissor(0, i, WIDTH, lines);
 #endif
@@ -72,7 +70,9 @@ void on_realize() {
   glGenProgramPipelines(1, &pipelineId);
 #ifndef DEBUG
 #ifdef VAR_ITIME
-  glUseProgramStages( pipelineId, GL_VERTEX_SHADER_BIT, glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vshader_vert));
+  glUseProgramStages(
+      pipelineId, GL_VERTEX_SHADER_BIT,
+      glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vshader_vert));
   sprogram_id = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
   glUseProgramStages(pipelineId, GL_FRAGMENT_SHADER_BIT, sprogram_id);
 #else
@@ -84,7 +84,6 @@ void on_realize() {
       glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag));
 #endif
 #else
-
   GLint isLinked;
   GLint maxLength = 0;
   printf("Compiling vertex shader\n");
@@ -128,7 +127,10 @@ void on_realize() {
   gtk_main();
 }
 
-void check_escape(GtkWidget *widget __attribute__((unused)), GdkEventKey *event) { event->keyval == GDK_KEY_Escape ? SYS_exit_group(DONT_CARE(int)) : NULL; }
+void check_escape(GtkWidget *widget __attribute__((unused)),
+                  GdkEventKey *event) {
+  event->keyval == GDK_KEY_Escape ? SYS_exit_group(DONT_CARE(int)) : NULL;
+}
 
 void _start() {
   /*SYS_write(1, "hello world!\n", 13);*/
@@ -143,7 +145,8 @@ void _start() {
   glarea = gtk_gl_area_new();
   gtk_container_add((GtkContainer *)win, glarea);
   g_signal_connect_object(glarea, "render", (GCallback)on_render, NULL, 0);
-  g_signal_connect_object(win, "key_press_event", (GCallback)check_escape, NULL, 0);
+  g_signal_connect_object(win, "key_press_event", (GCallback)check_escape, NULL,
+                          0);
   gtk_widget_show_all(win);
   gtk_window_fullscreen((GtkWindow *)win);
 #ifdef HIDECURSOR

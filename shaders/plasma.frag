@@ -1,7 +1,7 @@
 float it = 0.;
 out vec4 Frag;
 vec2 iResolution = vec2(i_X, i_Y);
-uniform float iTime;
+uniform float u_time;
 
 mat2 rot(float a) {
     float s = sin(a), c = cos(a);
@@ -16,7 +16,7 @@ float hash(vec2 p) {
 
 float de(vec3 p) {
     p.yz *= rot(-.5);
-    p.xz *= rot(iTime * .2);
+    p.xz *= rot(u_time * .2);
     float d = 100.;
     p *= .2;
     for (float i = 0.; i < 12.; i++) {
@@ -33,7 +33,7 @@ float de(vec3 p) {
 }
 
 vec3 march(vec3 from, vec3 dir) {
-    float d, td = hash(gl_FragCoord.xy + iTime) * .2;
+    float d, td = hash(gl_FragCoord.xy + u_time) * .2;
     vec3 p, col = vec3(0.);
     for (int i = 0; i < 200; i++) {
         p = from + dir * td;
@@ -42,13 +42,13 @@ vec3 march(vec3 from, vec3 dir) {
         if (td > 10.)
             break;
         vec3 c = vec3(1., -.5, 0.);
-        c.rb *= rot(-it * .15 + iTime * .1);
+        c.rb *= rot(-it * .15 + u_time * .1);
         c = normalize(1. + c);
         c *= exp(-.15 * td);
         c *= exp(-.5 * length(p));
         c /= 1. + d * 1500.;
         c *= .3 +
-                abs(pow(abs(fract(length(p) * .15 - iTime * .2 + it * .02) - .5) * 2.,
+                abs(pow(abs(fract(length(p) * .15 - u_time * .2 + it * .02) - .5) * 2.,
                         30.)) *
                     4.;
         col += c;
@@ -59,9 +59,8 @@ vec3 march(vec3 from, vec3 dir) {
 
 void main() {
     vec2 uv = (gl_FragCoord.xy - iResolution.xy * .5) / iResolution.y;
-    vec3 from = vec3(0., 0., -3. - cos(iTime * .5));
+    vec3 from = vec3(0., 0., -3. - cos(u_time * .5));
     vec3 dir = normalize(vec3(uv, 1.2));
     vec3 col = march(from, dir);
     Frag = vec4(col, 1.0);
 }
-

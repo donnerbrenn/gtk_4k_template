@@ -102,7 +102,7 @@ MA map(vec3 p) {
 }
 
 MA march(vec3 ro, vec3 rd, float len) {
-    MA result;
+    MA result = MA(1., vec3(0), false);
     while (iter < 800 && length(ro - p) < len && !result.hit) {
         p += result.d * rd;
         result = map(p);

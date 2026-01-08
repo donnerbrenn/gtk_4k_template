@@ -42,7 +42,7 @@ float softshadow(in vec3 ro, in vec3 rd, float mint, float maxt, float k) {
     float ph = 1e20;
     for (float t = mint; t < maxt; ) {
         float h = map(ro + rd * t);
-        if (h < 1e-4) return 0;
+        if (h < 1e-4) return .0;
         float y = h * h / (2 * ph);
         float i_d = sqrt(h * h - y * y);
         res = min(res, k * i_d / max(0, t - y));
@@ -53,6 +53,7 @@ float softshadow(in vec3 ro, in vec3 rd, float mint, float maxt, float k) {
 }
 
 void main() {
+    // Frag = vec3(0);
     vec2 i_uv = (gl_FragCoord.xy / vec2(i_X, i_Y) * 2 - 1) * vec2(1, i_Y / i_X);
     vec3 i_rd = normalize(vec3(i_uv, 1));
     vec3 ro = vec3(0, 0, -3.5);
@@ -76,6 +77,9 @@ void main() {
         float i_light = ambient * .25 + i_specular;
         vec3 i_Frag = vec3(.1, .4, .1) + i_light;
         Frag = mix(vec3(0), i_Frag, softshadow(ro + t * i_rd, normalize(i_l1), 1e-2, 10, 20) * .25 + .75);
+        Frag = Frag * mix(Frag, vec3(1), 1 - exp(-.1 * pow(t, 128))) - t * .05;
     }
-    Frag = Frag * mix(Frag, vec3(1), 1 - exp(-.1 * pow(t, 128))) - t * .05;
+    else {
+        Frag = vec3(0);
+    }
 }

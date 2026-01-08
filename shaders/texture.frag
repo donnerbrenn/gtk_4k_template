@@ -78,4 +78,7 @@ void main() {
         float i_gradient = pow((1. - distance(i_ro, p) / i_renderDist), 2);
         color = sqrt(i_texture * i_light * i_gradient);
     }
+    else {
+        color = vec3(0);
+    }
 }

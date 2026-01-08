@@ -22,6 +22,7 @@ float scene(vec3 p) {
 }
 
 void main() {
+    Frag=vec4(0);
     // Frag=vec4(0);
     for (int j = 0; j < 100; j++) {
         vec2 uv = (gl_FragCoord.xy - vec2(i_X * .5, i_Y * .5)) / 1000 + vec2(tex(vec3(j))) / 2000;
