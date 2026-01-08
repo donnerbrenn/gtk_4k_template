@@ -1,4 +1,4 @@
-SHADER = nucleus.frag
+SHADER = storage.frag
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true

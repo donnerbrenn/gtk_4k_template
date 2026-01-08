@@ -2,84 +2,51 @@
 
 float i_X=2560.;
 float i_Y=1440.;
-out vec4 frag;
-vec2 resolution = vec2(i_X, i_Y);
-vec2 uv = ((gl_FragCoord.xy / resolution) * 2 - 1) *
-        vec2(1, resolution.y / resolution.x);
-uniform float u_time;
-float i_threshold = .01;
-float i_farplane = 100;
-float i_PI = acos(-1);
+out vec4 Frag;
+float ref;
 
-vec3 erot(vec3 p, vec3 ax, float ro) {
-    return mix(dot(ax, p) * ax, p, cos(ro)) + sin(ro) * cross(ax, p);
+float box(vec3 p, vec3 d) {
+    vec3 q = abs(p) - d;
+    return length(max(q, 0.)) + min(0., max(q.x, max(q.y, q.z)));
 }
 
-void moda(inout vec2 p, float rep) {
-    float per = (2 * i_PI) / rep;
-    float a = atan(p.y, p.x);
-    a = mod(a, per) - per * 0.5;
-    p = vec2(cos(a), sin(a)) * length(p);
-}
-
-float cylinder(vec3 p, float r, float height) {
-    float i_d = length(p.xz) - r;
-    float i_d2 = max(i_d, abs(p.y) - height);
-    return i_d2;
-}
-
-float pMod1(inout float p, float size) {
-    float halfsize = size * 0.5;
-    float i_c = floor((p + halfsize) / size);
-    p = mod(p + halfsize, size) - halfsize;
-    return i_c;
-}
-
-int even(int x) {
-    return -(x % 2 * 2 - 1);
+float tex(vec3 p) {
+    //marbly texture, also used for RNG
+    return sin(dot(sin(p * 32.), vec3(2, 3, 1))) * cos(dot(cos(p * 43.), vec3(3, 1, 2)))
+        + sin(dot(sin(p * 52.), vec3(2, 3, 1))) * cos(dot(cos(p * 73.), vec3(3, 1, 2)));
 }
 
 float scene(vec3 p) {
-    vec3 pp = p;
-    float i_row = pMod1(pp.y, 12);
-    pp = erot(pp, normalize(vec3(0, 1, 0)), u_time * even(int(i_row)));
-    moda(pp.xz, 7);
-    pp.x -= 12;
-    float balls = length(pp) - 5;
-    pp = p;
-    pp = erot(pp, vec3(0, 1, 0), u_time * .3 + pp.y * .03);
-    moda(pp.xz, 5);
-    pp.x -= 25;
-    float bars = length(pp.xz) - 2.5;
-    pp = p;
-    pp.y = mod(pp.y, 82) - 41;
-    float top = cylinder(pp, 28, 1);
-    top = max(top, -cylinder(pp, 22, 2));
-    float result = min(min(balls, bars), top);
-    frag.rgb = result == balls ? vec3(1, 0, 0) : result == top ? vec3(1) : vec3(0, 0, 1);
-    if (abs(p.y) < 42)
-        return result;
-}
-
-vec3 normal(vec3 p) {
-    mat3 k = mat3(p, p, p) - mat3(.0125);
-    return normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
+    float i_tx = tex(p * 100) / 5000 * (exp(tex(p) + tex(p * 2) + tex(p / 5)) * .3 + .6); //add very tiny bumps to the SDF itself, which will cause glossy reflections!
+    float bx = -box(p, vec3(7.9));
+    p = asin(sin(p));
+    float sbx = box(p, vec3(.7, .6, .6)) - .02;
+    ref = sbx > bx ? sin(length(p) * 20) : 1;
+    return min(bx, sbx) - i_tx;
 }
 
 void main() {
-    float d = 1;
-    vec3 p = vec3(0, 0, -120);
-    vec3 i_rd = normalize(vec3(uv, 1));
-    while (d > i_threshold && p.z < i_farplane) {
-        d = scene(p);
-        p += i_rd * d;
+    Frag=vec4(0);
+    // Frag=vec4(0);
+    for (int j = 0; j < 100; j++) {
+        vec2 uv = (gl_FragCoord.xy - vec2(i_X * .5, i_Y * .5)) / 1000 + vec2(tex(vec3(j))) / 2000;
+
+        vec3 cam = normalize(vec3(.5 - dot(uv, uv) * .6, uv)) + vec3(0, tex(vec3(j)), tex(vec3(j + 1))) * .01;
+        vec3 p = vec3(-6.5, 2, -5.2) - vec3(0, tex(vec3(j)), tex(vec3(j + 1))) * .03;
+        float atten = 1;
+        float dist;
+        for (int i = 0; i < 150; i++) {
+            dist = scene(p);
+            if (dist * dist < 1e-6 && ref > -.5) { //reflect within the raymarching loop!
+                mat3 k = mat3(p, p, p) - mat3(0.01);
+                vec3 n = normalize(scene(p) - vec3(scene(k[0]), scene(k[1]), scene(k[2])));
+                atten *= 1 - abs(dot(cam, n)) * .98;
+                cam = reflect(cam, n);
+                dist = 1;
+            }
+            p += cam * dist;
+        }
+        Frag += vec4(dist * dist < 1e-6 ? (sin(vec3(0, 5, 4) - p * .2) * .2 + 1.2) * atten : vec3(0.01), 1);
     }
-    if (d < i_threshold) {
-        float light = dot(normalize(vec3(1, 1, -1)), reflect(i_rd, normal(p))) * .5 + .5;
-        float i_light = light + pow(light, 16) + .3;
-        frag = vec4(frag.rgb * i_light * .5, 1);
-    } else {
-        uv.y = uv.y * .5 + .5;
-        frag = vec4(0, uv.y / 2, 0, 1);
-    }
+    Frag = sqrt(Frag / Frag.w);
 }

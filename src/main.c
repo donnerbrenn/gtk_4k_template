@@ -20,14 +20,14 @@ GTimer *bench_timer = NULL;
 
 static gboolean on_render(GtkGLArea *area) {
 
-#ifdef BENCHMARK
-  g_timer_start(bench_timer);
-#endif /* ifdef BENCHMARK */
   if (!frame) {
     frame++;
     return TRUE;
   }
 
+#ifdef BENCHMARK
+  g_timer_start(bench_timer);
+#endif /* ifdef BENCHMARK */
 #ifdef VAR_ITIME
   static GTimer *timer = NULL;
   if (!timer)
@@ -40,7 +40,7 @@ static gboolean on_render(GtkGLArea *area) {
 
 #ifdef BENCHMARK
   glFinish();
-  printf("%.2fs\n", g_timer_elapsed(bench_timer, NULL));
+  printf("%.4fs\n", g_timer_elapsed(bench_timer, NULL));
 #endif
 #ifdef VAR_ITIME
   gtk_gl_area_queue_render(area);
