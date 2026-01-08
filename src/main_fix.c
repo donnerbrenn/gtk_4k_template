@@ -13,6 +13,10 @@ static GLuint sprogram_id;
 
 void _start();
 
+#ifdef BENCHMARK
+GTimer *bench_timer = NULL;
+#endif
+
 static gboolean on_render(GtkGLArea *area) {
   static int frame = 0;
 
@@ -31,19 +35,6 @@ static gboolean on_render(GtkGLArea *area) {
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-#ifdef BENCHMARK
-  static GTimer *bench_timer = NULL;
-  if (!bench_timer) {
-    bench_timer = g_timer_new();
-  } else {
-    static int printed = 0;
-    if (!printed) {
-      printf("%.2fs\n", g_timer_elapsed(bench_timer, NULL));
-      printed = 1;
-    }
-  }
-#endif
-
 #ifdef VAR_ITIME
   gtk_gl_area_queue_render(area);
 #endif
@@ -58,6 +49,9 @@ static void check_escape(GtkWidget *w, GdkEventKey *e) {
 
 __attribute__((noreturn, used, __section__(".text._start"))) void _start() {
   gtk_init(0, NULL);
+#ifdef BENCHMARK
+  bench_timer = g_timer_new();
+#endif /* ifdef BENCHMARK */
   GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   GtkWidget *glarea = gtk_gl_area_new();
   gtk_container_add((GtkContainer *)win, glarea);
