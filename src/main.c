@@ -20,6 +20,9 @@ GTimer *bench_timer = NULL;
 
 static gboolean on_render(GtkGLArea *area) {
 
+#ifdef BENCHMARK
+  g_timer_start(bench_timer);
+#endif /* ifdef BENCHMARK */
   if (!frame) {
     frame++;
     return TRUE;

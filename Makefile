@@ -1,4 +1,4 @@
-SHADER = chamber.frag
+SHADER = nucleus.frag
 WIDTH = 2560
 HEIGHT = 1440
 HIDECURSOR = true
@@ -7,7 +7,7 @@ DEBUG = false
 SCISSORS = false
 RENDERER = GTK
 
-SHADERDIR = pathtracer
+SHADERDIR = shaders
 GLVERSION = '\#version 400'
 I_X = 'float i_X=$(WIDTH).;'
 I_Y = 'float i_Y=$(HEIGHT).;'
